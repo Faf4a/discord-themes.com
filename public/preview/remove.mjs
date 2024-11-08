@@ -1,0 +1,61 @@
+import { readFileSync, writeFileSync } from "fs";
+import postcss from "postcss";
+import mime from "mime";
+
+const encodeToBase64 = (arrayBuffer, mimeType) => {
+    const buffer = Buffer.from(arrayBuffer);
+    return `url("data:${mimeType};base64,${buffer.toString("base64")}")`;
+};
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+let cssContent = readFileSync("./styles.css", "utf-8");
+
+// Process CSS to remove unused classes and replace asset paths
+const processCSS = async () => {
+    const root = postcss.parse(cssContent);
+
+    const assetPromises = [];
+
+    root.walkRules((rule) => {
+        rule.walkDecls((decl) => {
+            const urlMatch = decl.value.match(/url\(["']?([^"')]+)["']?\)/);
+            if (urlMatch) {
+                const assetUrl = urlMatch[1];
+                if (assetUrl.endsWith(".woff2")) {
+                    decl.value = 'url("/fonts/gg sans Normal.ttf")';
+                    console.log(`Replaced .woff2 URL with /fonts/gg sans Normal.ttf`);
+                } else if (assetUrl.startsWith("/assets/")) {
+                    const fullUrl = `https://discord.com${assetUrl}`;
+
+                    const promise = (async () => {
+                        await delay(2500);
+                        try {
+                            const response = await fetch(fullUrl);
+                            if (!response.ok) {
+                                return;
+                            }
+                            const arrayBuffer = await response.arrayBuffer();
+                            const mimeType = response.headers.get("content-type") || mime.getType(assetUrl);
+                            decl.value = encodeToBase64(arrayBuffer, mimeType);
+                            console.log(`Replaced URL with base64 data URI.`);
+                        } catch (error) {
+                            console.error(`Error fetching asset`, error);
+                        }
+                    })();
+
+                    assetPromises.push(promise);
+                } else {
+                    console.log(`Skipping non-/assets/ URL: ${assetUrl}`);
+                }
+            }
+        });
+    });
+
+    await Promise.all(assetPromises);
+
+    writeFileSync("./new-styles.css", root.toString());
+    console.log("CSS processing complete: Unused classes removed and asset URLs converted.");
+};
+
+processCSS().catch((err) => console.error("Error processing CSS:", err));

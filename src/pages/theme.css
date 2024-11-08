@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans Bold Italic.ttf") format("truetype");
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans ExtraBold.ttf") format("truetype");
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans ExtraBold Italic.ttf") format("truetype");
+    font-weight: 800;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans Normal Italic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans Normal.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans SemiBold Italic.ttf") format("truetype");
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "gg sans";
+    src: url("/fonts/gg sans SemiBold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+:root {
+    --background: 220 7% 18%;
+    --foreground: 220 13% 91%;
+
+    --card: 223 7% 21%;
+    --card-foreground: 220 13% 91%;
+
+    --popover: 220 6% 16%;
+    --popover-foreground: 220 13% 91%;
+
+    --primary: 235 85% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 7% 23%;
+    --secondary-foreground: 220 13% 91%;
+
+    --muted: 220 7% 23%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 220 7% 23%;
+    --accent-foreground: 220 13% 91%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 5% 15%;
+    --input: 220 7% 23%;
+    --ring: 235 85% 65%;
+
+    --radius: 0.25rem;
+
+    --context-menu-bg: 220 6% 16%;
+    --context-menu-hover: 220 7% 23%;
+    --context-menu-border: 210 5% 15%;
+}
+
+* {
+    font-family: "gg sans", sans-serif;
+}
+
+body {
+    @apply bg-background text-foreground antialiased;
+}
+
+/* Discord-style Context Menu */
+[data-radix-popper-content-wrapper] {
+    position: fixed !important;
+}
+
+.no-select {
+    user-select: none;
+    cursor: pointer;
+}
+
+.not-allowed {
+    cursor: not-allowed;
+    background-color: var(--muted);
+}
+
+.description h1 {
+  @apply text-4xl font-bold text-foreground mb-4 mt-3;
+}
+
+.description h2 {
+  @apply text-3xl font-semibold text-foreground mb-3 mt-3;
+}
+
+.description h3 {
+  @apply text-2xl font-medium text-foreground mb-2 mt-2;
+}
+
+.description h4 {
+  @apply text-xl font-medium text-foreground mb-2 mt-2;
+}
+
+.description h5 {
+  @apply text-lg font-medium text-foreground mb-1 mt-1;
+}
+
+.link a, .description a {
+  @apply text-primary;
+}
+
+.link a:hover, .description a:hover {
+  @apply underline text-primary text-opacity-75;
+}
+
+.description hr {
+  @apply border-t border-muted my-4;
+}
+
+.description .table-container {
+  @apply overflow-x-auto;
+}
+
+.description table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.description th {
+  @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.description td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-muted;
+}
+
+.description tr:nth-child(even) {
+  @apply bg-gray-50;
+}
+
+.description tr:hover {
+  @apply bg-gray-100;
+}
+
+.description thead {
+  @apply bg-gray-50;
+}
+
+.description tbody tr {
+  @apply bg-white;
+}
+
+.description tbody tr:hover {
+  @apply bg-gray-100;
+}
+
+.description ul {
+  @apply list-disc list-inside;
+}
+
+.description li {
+  @apply mb-2 text-foreground break-words;
+}
+
+.description li::marker {
+  @apply text-primary;
+}
+
+.description li:hover {
+  @apply divide-gray-200;
+}
