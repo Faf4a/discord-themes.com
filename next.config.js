@@ -15,23 +15,17 @@ module.exports = {
         ];
     },
     images: {
-        domains: ["localhost:3500", "cdn.discordapp.com", "cdn.discord-themes.com"],
+        domains: ["localhost:4321", "cdn.discordapp.com", "cdn.discord-themes.com"],
         remotePatterns: [
             {
-                protocol: "http",
-                hostname: "localhost",
-                port: "3000",
-                pathname: "*"
-            },
-            {
                 protocol: "https",
-                hostname: "themes-delta.vercel.app",
+                hostname: "cdn.discordapp.com",
                 port: "",
                 pathname: "*"
             },
             {
                 protocol: "https",
-                hostname: "themes.faf4a.xyz",
+                hostname: "cdn.discord-themes.com",
                 port: "",
                 pathname: "*"
             }
