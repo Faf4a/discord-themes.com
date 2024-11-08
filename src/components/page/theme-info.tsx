@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Head from "next/head";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Image from "next/image";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -128,7 +129,9 @@ export default function Component({ id }: { id?: string }) {
                 <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="container mx-auto px-4 py-4">
                         <div className="flex items-center justify-between">
-                            <h1 className="text-xl font-semibold"><a href="/">Theme Library</a></h1>
+                            <h1 className="text-xl font-semibold">
+                                <a href="/">Theme Library</a>
+                            </h1>
                         </div>
                     </div>
                 </header>
@@ -149,14 +152,20 @@ export default function Component({ id }: { id?: string }) {
                                 </>
                             ) : (
                                 <div className="rounded-lg border-b border-border/40 bg-card p-6">
-                                    <h2 className="text-2xl font-bold mb-4">{theme.name}</h2>
-                                    <p className="description text-muted-foreground mb-4">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.description}</ReactMarkdown>
-                                    </p>
-                                    <div className="bg-muted rounded-lg">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={theme.thumbnail_url} alt={theme.name} className="rounded-lg" loading="lazy" />
-                                    </div>
+                                  <h2 className="text-2xl font-bold mb-4">{theme.name}</h2>
+                                  <p className="description text-muted-foreground mb-4">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.description}</ReactMarkdown>
+                                  </p>
+                                  <div className="bg-muted rounded-lg flex justify-center items-center">
+                                    <Image
+                                      src={theme.thumbnail_url}
+                                      alt={theme.name}
+                                      width={1920}
+                                      height={1080}
+                                      className="rounded-lg object-contain"
+                                      loading="lazy"
+                                    />
+                                  </div>
                                 </div>
                             )}
                         </div>

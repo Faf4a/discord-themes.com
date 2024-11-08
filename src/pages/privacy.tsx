@@ -32,12 +32,12 @@ export default function PrivacyPolicy() {
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <p className="text-sm text-muted-foreground cursor-help">
+                                            <p suppressHydrationWarning className="text-sm text-muted-foreground cursor-help">
                                                 Last updated: {lastUpdated.toLocaleDateString()}
                                             </p>
                                         </TooltipTrigger>
                                         <TooltipContent side="top" align="start">
-                                            <p>
+                                            <p suppressHydrationWarning>
                                                 {lastUpdated.toLocaleString("en-US", {
                                                     weekday: "long",
                                                     year: "numeric",

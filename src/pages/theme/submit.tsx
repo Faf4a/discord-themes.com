@@ -7,6 +7,7 @@ import { Label } from "@components/ui/label";
 import { Button } from "@components/ui/button";
 import { Users, Upload, ImageIcon } from "lucide-react";
 import MarkdownInput from "@components/ui/markdown-input";
+import Image from "next/image";
 
 export default function SubmitPage() {
     const router = useRouter();
@@ -68,7 +69,7 @@ export default function SubmitPage() {
             deleteCookie("_dtoken");
             router.push("/");
         }
-    }, [isAuthed]);
+    }, [router, isAuthed]);
 
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -206,7 +207,7 @@ export default function SubmitPage() {
                                                     </div>
                                                     {formData.file && (
                                                         <div className="mt-4">
-                                                            <img src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
+                                                            <Image fill={true} src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
                                                         </div>
                                                     )}
                                                     <div className="flex items-center space-x-2">

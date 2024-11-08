@@ -14,15 +14,8 @@ module.exports = {
             }
         ];
     },
-  typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
-    ignoreBuildErrors: true,
-  },
     images: {
-        domains: ["localhost:3000", "themes-delta.vercel.app", "themes.faf4a.xyz"],
+        domains: ["localhost:3500", "cdn.discordapp.com", "cdn.discord-themes.com"],
         remotePatterns: [
             {
                 protocol: "http",

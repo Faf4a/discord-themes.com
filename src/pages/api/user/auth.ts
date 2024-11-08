@@ -36,7 +36,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             client_secret: process.env.AUTH_DISCORD_SECRET,
             code: code as string,
             grant_type: "authorization_code",
-            redirect_uri: process.env.NODE_ENV === "production" ? "https://discord-themes.com/api/user/auth?callback=/auth/callback" : "http://localhost:4321/api/user/auth?callback=/auth/callback",
+            redirect_uri: process.env.NODE_ENV === "production" ? "https://discord-themes.com/api/user/auth?callback=/auth/callback" : "https://symmetrical-telegram-r4g9p6r6w7hpg6q-4321.app.github.dev/api/user/auth?callback=/auth/callback",
             scope: "identify"
         }).toString()
     });

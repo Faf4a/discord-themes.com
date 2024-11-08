@@ -1,5 +1,6 @@
 import React from "react";
 import { type Theme } from "@types";
+import Image from "next/image";
 
 export function ThemePage({ theme }: { theme: Theme }) {
     return (
@@ -9,7 +10,7 @@ export function ThemePage({ theme }: { theme: Theme }) {
                 <p className="text-sm text-gray-600 mb-4 description">{theme.description}</p>
                 <div className="border border-gray-300 bg-gray-100 rounded-lg h-64 flex items-center justify-center mb-6">
                     {/*eslint-disable-next-line @next/next/no-img-element*/}
-                    <img src={theme.thumbnail_url} alt={`${theme.name} thumbnail`} className="object-cover w-full h-full rounded-lg" />
+                    <Image fill={true} src={theme.thumbnail_url} alt={`${theme.name} thumbnail`} className="object-cover w-full h-full rounded-lg" />
                 </div>
             </div>
 

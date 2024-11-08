@@ -9,21 +9,28 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { token, userId } = req.body;
 
-    console.log(token, userId);
-
     if (!token) {
         return res.status(400).json({ message: "Cannot get themes without unique token" });
     }
 
-    const authRequest = await fetch(SERVER + "/api/user/isAuthed", {
+    const authResponse = await fetch(SERVER + "/api/user/isAuthed", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            token: token
-        })
-    }).then((res) => res.json());
+        body: JSON.stringify({ token })
+    });
 
-    if (!authRequest.authenticated) return res.status(401).json({ message: "User is not authorized" });
+    console.log(authResponse);
+
+    let authRequest;
+    try {
+        authRequest = await authResponse.json();
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to parse authentication response" });
+    }
+
+    if (!authRequest.authenticated) {
+        return res.status(401).json({ message: "User is not authorized" });
+    }
 
     if (!userId) {
         return res.status(400).json({ message: "Cannot get themes without user id" });

@@ -9,6 +9,7 @@ import { type Theme } from "@types";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Image from "next/image";
 
 interface ThemeCardProps {
     theme: Theme;
@@ -49,7 +50,7 @@ export function ThemeCard({ theme, className, disableDownloads }: ThemeCardProps
                 <a className="flex flex-col h-full">
                     <CardHeader className="p-0 relative">
                         <div className="aspect-[16/9] overflow-hidden bg-muted relative">
-                            <img loading="lazy" src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                            <Image fill={true} loading="lazy" src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         </div>
                         <div className="absolute bottom-2 left-2 z-2 flex flex-wrap gap-1.5">
                             {theme.tags?.slice(0, 3).map((tag) => (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ThemeCard } from "@components/theme/card";
-import { Skeleton } from "@components/ui/skeleton";
+import Image from "next/image";
 import { SearchX } from "lucide-react";
 import { type Theme } from "@types";
 import { Button } from "@components/ui/button";
@@ -65,26 +65,16 @@ export default function AuthCallback() {
 
     const Layout = ({ children }: { children: React.ReactNode }) => (
         <div className="min-h-screen flex flex-col items-center pt-4 bg-background">
-            <div className="flex flex-col-reverse md:flex-row w-full max-w-6xl gap-4 h-full pt-16 md:pt-0">
-                {children}
-            </div>
+            <div className="flex flex-col-reverse md:flex-row w-full max-w-6xl gap-4 h-full pt-16 md:pt-0">{children}</div>
         </div>
     );
-    
+
     const UserInfoCard = () => (
         <div className="w-full md:w-1/3 bg-card rounded-lg h-full mt-4 md:mt-0 md:sticky md:top-4">
             <div className="w-full h-24" style={{ backgroundColor: userThemes.user.preferredColor }} />
             <div className="p-6 -mt-12 text-card-foreground">
                 <div className="flex flex-col items-center">
-                    <img
-                        className="w-24 h-24 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background"
-                        src={
-                            userThemes.user.avatar
-                                ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png`
-                                : "https://cdn.discordapp.com/embed/avatars/5.png"
-                        }
-                        alt="Avatar"
-                    />
+                    <Image height={128} width={128} className="w-24 h-24 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/5.png"} alt="Avatar" />
                     <h1 className="text-xl font-semibold mt-3">{userThemes.user.global_name}</h1>
                     <p className="text-xs text-muted-foreground">{userThemes.user.id}</p>
                     <div className="w-full mt-4 space-y-2">
@@ -102,18 +92,13 @@ export default function AuthCallback() {
                         </div>
                     </div>
                 </div>
-                {!userThemes.user.global_name && (
-                    <div className="mt-4 text-center text-sm text-muted-foreground">
-                        The user has not migrated yet, therefore some data may be missing.
-                    </div>
-                )}
+                {!userThemes.user.global_name && <div className="mt-4 text-center text-sm text-muted-foreground">The user has not migrated yet, therefore some data may be missing.</div>}
                 <Button className="w-full mt-4" size="lg" variant="outline" onClick={() => (window.location.href = "/")}>
                     Head Back
                 </Button>
             </div>
         </div>
     );
-    
 
     if (loading) {
         return (
