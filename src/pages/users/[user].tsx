@@ -5,6 +5,8 @@ import Image from "next/image";
 import { SearchX } from "lucide-react";
 import { type Theme } from "@types";
 import { Button } from "@components/ui/button";
+import { AccountBar } from "@components/account-bar";
+import { useAuth } from "@context/auth";
 
 interface ThemesResponse {
     themes: Theme[];
@@ -23,12 +25,18 @@ export default function AuthCallback() {
     const [userThemes, setUserThemes] = useState<ThemesResponse>({ themes: [], user: { id: "", global_name: "", preferredColor: "", avatar: "" } });
     const [invalid, setInvalid] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [likedThemes, setLikedThemes] = useState([]);
+    const [likedThemes, setLikedThemes] = useState<Theme[]>([]);
+    const [userLikedThemes, setUserLikedThemes] = useState<Theme[]>([]);
+    const [activeTab, setActiveTab] = useState<"authored" | "liked">("authored");
+    const { authorizedUser, isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
+        if (!isAuthenticated && !isLoading) router.push("/auth/login");
+
         function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
+            if (typeof document === "undefined") return undefined;
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop()?.split(";").shift();
         }
 
@@ -66,20 +74,40 @@ export default function AuthCallback() {
                     body: JSON.stringify({ token: userToken })
                 }).then((res) => res.json());
 
+                const themes = await fetch("/api/themes").then((res) => res.json());
+
+                const likedThemeIds = response.likes.filter((like: { themeId: number; hasLiked: boolean }) => like.hasLiked).map((like: { themeId: number }) => like.themeId);
+
+                const likedThemes = themes.filter((theme: Theme) => likedThemeIds.includes(theme.id));
+
+                setUserLikedThemes(likedThemes);
                 setLikedThemes(response);
             }
 
             getThemes();
-            getLikedThemes();
+            if (user === "@me") getLikedThemes();
         } else {
             setLoading(true);
         }
-    }, [user]);
+    }, [user, authorizedUser, isAuthenticated, isLoading]);
 
     const Layout = ({ children }: { children: React.ReactNode }) => (
-        <div className="min-h-screen flex flex-col items-center pt-4 bg-background">
-            <div className="flex flex-col-reverse md:flex-row w-full max-w-6xl gap-4 h-full pt-16 md:pt-0">{children}</div>
-        </div>
+        <>
+            <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="container mx-auto px-4 py-3">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-xl font-semibold text-foreground flex-shrink-0">
+                            <a href="/">Theme Library</a>
+                        </h1>
+
+                        <AccountBar className="ml-auto" />
+                    </div>
+                </div>
+            </header>
+            <div className="min-h-screen flex flex-col items-center pt-4 bg-background">
+                <div className="flex flex-col-reverse md:flex-row w-full max-w-6xl gap-4 h-full pt-16 md:pt-0">{children}</div>
+            </div>
+        </>
     );
 
     const UserInfoCard = () => (
@@ -146,16 +174,39 @@ export default function AuthCallback() {
         <Layout>
             <div className="w-full md:w-2/3 rounded-lg bg-card h-full pb-8">
                 <div className="p-6">
-                    {userThemes.themes.length > 0 ? (
+                    {user === "@me" && (
+                        <div className="flex justify-center mb-4">
+                            <Button variant={activeTab === "authored" ? "default" : "outline"} onClick={() => setActiveTab("authored")}>
+                                Authored Themes
+                            </Button>
+                            <Button variant={activeTab === "liked" ? "default" : "outline"} onClick={() => setActiveTab("liked")} className="ml-2">
+                                Liked Themes
+                            </Button>
+                        </div>
+                    )}
+                    {activeTab === "authored" ? (
+                        userThemes.themes.length > 0 ? (
+                            <>
+                                {userThemes.themes.map((theme) => (
+                                    <ThemeCard className="mb-2" likedThemes={likedThemes} disableDownloads key={theme.id} theme={theme} />
+                                ))}
+                            </>
+                        ) : (
+                            <div className="flex flex-col items-center text-card-foreground h-full justify-center">
+                                <SearchX className="w-16 h-16 mb-4 text-muted-foreground" />
+                                <p className="text-lg text-muted-foreground">This user doesn't have any themes yet</p>
+                            </div>
+                        )
+                    ) : userLikedThemes.length > 0 ? (
                         <>
-                            {userThemes.themes.map((theme) => (
+                            {userLikedThemes.map((theme) => (
                                 <ThemeCard className="mb-2" likedThemes={likedThemes} disableDownloads key={theme.id} theme={theme} />
                             ))}
                         </>
                     ) : (
-                        <div className="flex flex-col items-center text-card-foreground h-full justify-center">
+                        <div className="flex flex-col items-center text-card-foreground h-full justify-center mt-2">
                             <SearchX className="w-16 h-16 mb-4 text-muted-foreground" />
-                            <p className="text-lg text-muted-foreground">This user doesn't have any themes yet</p>
+                            <p className="text-lg text-muted-foreground">Nothing to see here</p>
                         </div>
                     )}
                 </div>

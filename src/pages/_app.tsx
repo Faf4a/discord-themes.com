@@ -1,11 +1,12 @@
 import React from "react";
+import { AuthProvider } from "@context/auth";
 import ThemeProvider from "@components/theme-provider";
 import Head from "next/head";
 import "./theme.css";
 
 function App({ Component, pageProps }) {
     return (
-        <>
+        <AuthProvider>
             <ThemeProvider attribute="class" defaultTheme="dark">
                 <Head>
                     <meta name="viewport" content="initial-scale=1, width=device-width" />
@@ -40,7 +41,7 @@ function App({ Component, pageProps }) {
                     </footer>
                 </div>
             </ThemeProvider>
-        </>
+        </AuthProvider>
     );
 }
 

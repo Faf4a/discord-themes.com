@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { APIUser as User } from "discord-api-types/v10";
+import type { APIUser as User, APIConnection as Connection} from "discord-api-types/v10";
 import clientPromise from "@utils/db";
 import { randomBytes, createHash } from "crypto";
 
@@ -11,6 +11,7 @@ interface UserEntry {
         preferredColor: string;
         key: string;
         keyVersion?: number;
+        githubAccount?: string;
     };
     createdAt: Date;
 }
@@ -19,6 +20,22 @@ declare module "discord-api-types/v10" {
     interface APIUser {
         banner_color?: string | null;
     }
+}
+
+async function fetchGitHubAccount(token: string): Promise<string | null> {
+    const response = await fetch("https://discord.com/api/users/@me/connections", {
+        headers: {
+            Authorization: `${token}`
+        }
+    });
+
+    if (!response.ok) {
+        return null;
+    }
+
+    const connections: Connection[] = await response.json();
+    const githubConnection = connections.find(connection => connection.type === "github");
+    return githubConnection ? githubConnection.name : null;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
@@ -48,8 +65,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             client_secret: process.env.AUTH_DISCORD_SECRET,
             code: code as string,
             grant_type: "authorization_code",
-            redirect_uri: process.env.NODE_ENV === "production" ? "https://discord-themes.com/api/user/auth?callback=/auth/callback" : "http://localhost:4321/api/user/auth?callback=/auth/callback",
-            scope: "identify"
+            redirect_uri: process.env.NODE_ENV === "production" ? "https://discord-themes.com/api/user/auth?callback=/auth/callback" : "https://literate-engine-rv7579wprjq2px77-4321.app.github.dev/api/user/auth?callback=/auth/callback",
+            scope: "identify,connections"
         }).toString()
     });
 
@@ -67,6 +84,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const user: User = await response.json();
+
+    const githubAccount = await fetchGitHubAccount(`${oauthResponse.token_type} ${oauthResponse.access_token}`);
+
+    console.log("[server/auth] user", user.id, "authenticated");
+    console.log("[server/auth] user", user.id, "has github account", githubAccount);
 
     const client = await clientPromise;
     const db = client.db("themesDatabase");
@@ -95,7 +117,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 global_name: user.global_name,
                 preferredColor: user.banner_color,
                 key: uniqueKey,
-                keyVersion: 2
+                keyVersion: 2,
+                githubAccount: githubAccount || undefined
             },
             createdAt: new Date()
         });
@@ -128,6 +151,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         if (userEntry.global_name !== user.global_name) {
             updates["global_name"] = user.global_name;
         }
+        if (githubAccount && userEntry.githubAccount !== githubAccount) {
+            updates["githubAccount"] = githubAccount;
+        }
     
         if (Object.keys(updates).length > 0) {
             console.log("[server/auth] non-migrated user", user.id, "updated", updates);
@@ -147,6 +173,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         res.status(500).json({ status: 500, message: "Failed to generate a user token, if you think that this is a bug feel free to open an issue at https://github.com/faf4a/themesApi" });
     } else {
         if (callback) res.redirect((callback as string) + `?token=${authKey}`);
-        else res.status(200).json({ status: 200, token: authKey, user: { id: user.id, avatar: user.avatar, preferredColor: user.banner_color } });
+        else res.status(200).json({ status: 200, token: authKey, user: { id: user.id, avatar: user.avatar, preferredColor: user.banner_color, githubAccount } });
     }
 }

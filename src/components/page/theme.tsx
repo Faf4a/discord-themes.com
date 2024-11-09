@@ -6,9 +6,10 @@ import { ThemeGrid } from "@components/theme/grid";
 import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { Filter, Plus, Search, SearchX, X } from "lucide-react";
+import { Plus, Search, SearchX, X } from "lucide-react";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
+import { useAuth } from "@context/auth";
 
 const THEMES_CACHE_KEY = "themes_cache";
 
@@ -69,8 +70,10 @@ function App() {
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
     const [likedThemes, setLikedThemes] = useState([]);
+    const { authorizedUser, isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
+        if (isLoading) return;
         function getCookie(name: string): string | undefined {
             const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
@@ -79,14 +82,8 @@ function App() {
 
         const token = getCookie("_dtoken");
 
-        async function fetchData() {
-            const response = await fetch("/api/user/isAuthed", {
-                method: "POST",
-                body: JSON.stringify({ token: token as string }),
-                headers: { "Content-Type": "application/json" }
-            }).then((res) => res.json());
-            setUser(response);
-        }
+
+        
 
         async function getLikedThemes() {
             const response = await fetch("/api/likes/get", {
@@ -98,13 +95,13 @@ function App() {
             setLikedThemes(response);
         }
 
-        if (token) {
-            fetchData();
+        if (token && isAuthenticated) {
+            setUser(authorizedUser);
             getLikedThemes();
         } else {
             setUser(false);
         }
-    }, []);
+    }, [isLoading, authorizedUser, isAuthenticated]);
 
     const allFilters = [
         ...themes.reduce((acc, theme) => {
@@ -187,7 +184,7 @@ function App() {
                 ) : error ? (
                     <div className="text-red-500">Error: {error.message}</div>
                 ) : filteredThemes.length ? (
-                    <ThemeGrid likedThemes={likedThemes} themes={filteredThemes} />
+                    <ThemeGrid likedThemes={likedThemes as any as []} themes={filteredThemes} />
                 ) : (
                     <div>
                         <NoResults /> <SkeletonGrid />

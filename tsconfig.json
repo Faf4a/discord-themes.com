@@ -38,7 +38,10 @@
       ],
       "@hooks/*": [
         "src/hooks/*"
-      ]
+      ],
+      "@context/auth": [
+        "src/context/auth.tsx"
+      ],
     },
     "target": "ES2017"
   },

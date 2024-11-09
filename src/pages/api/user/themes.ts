@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "@utils/db";
-import { SERVER } from "@constants";
+import { isAuthed } from "@utils/auth";
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST") {
@@ -13,20 +13,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         return res.status(400).json({ message: "Cannot get themes without unique token" });
     }
 
-    const authResponse = await fetch(SERVER + "/api/user/isAuthed", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token })
-    });
+    const auth = await isAuthed(token);
 
-    let authRequest;
-    try {
-        authRequest = await authResponse.json();
-    } catch (error) {
-        return res.status(500).json({ message: "Failed to parse authentication response" });
-    }
-
-    if (!authRequest.authenticated) {
+    if (!auth) {
         return res.status(401).json({ message: "User is not authorized" });
     }
 
@@ -41,7 +30,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     let requestedUser;
 
     if (userId === "@me") {
-        const userEntry = await users.findOne({ "user.key": token });
+        const userEntry = await users.findOne({ "user.key": auth.key });
         if (!userEntry) return res.status(404).json({ status: 400, message: "No user found with those credentials" });
         delete userEntry.user.key;
         delete userEntry._id;

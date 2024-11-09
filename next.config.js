@@ -15,7 +15,7 @@ module.exports = {
         ];
     },
     images: {
-        domains: ["localhost:4321", "cdn.discordapp.com", "cdn.discord-themes.com"],
+        domains: ["literate-engine-rv7579wprjq2px77-4321.app.github.dev", "cdn.discordapp.com", "cdn.discord-themes.com"],
         remotePatterns: [
             {
                 protocol: "https",
