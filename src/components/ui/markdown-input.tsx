@@ -84,7 +84,6 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
 
     const handleBlur = () => {
         onBlur && onBlur(content);
-        console.log(JSON.stringify(content));
         if (!content) {
             setIsFocused(false);
         }

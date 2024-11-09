@@ -68,6 +68,7 @@ function App() {
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
+    const [likedThemes, setLikedThemes] = useState([]);
 
     useEffect(() => {
         function getCookie(name: string): string | undefined {
@@ -87,8 +88,19 @@ function App() {
             setUser(response);
         }
 
+        async function getLikedThemes() {
+            const response = await fetch("/api/likes/get", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: token as string })
+            }).then((res) => res.json());
+
+            setLikedThemes(response);
+        }
+
         if (token) {
             fetchData();
+            getLikedThemes();
         } else {
             setUser(false);
         }
@@ -175,7 +187,7 @@ function App() {
                 ) : error ? (
                     <div className="text-red-500">Error: {error.message}</div>
                 ) : filteredThemes.length ? (
-                    <ThemeGrid themes={filteredThemes} />
+                    <ThemeGrid likedThemes={likedThemes} themes={filteredThemes} />
                 ) : (
                     <div>
                         <NoResults /> <SkeletonGrid />

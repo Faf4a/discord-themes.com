@@ -29,7 +29,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     try {
         const themeExists = await db.collection("themes").findOne({ id: themeId });
         if (!themeExists) {
-            return res.status(401).json({ status: 401, message: "Theme does not exist. Please ensure the theme name is correct and try again." });
+            return res.status(404).json({ status: 404, message: "Theme does not exist. Please ensure the theme name is correct and try again." });
         }
 
         const themeLike = await likesCollection.findOne({ themeId });
@@ -52,6 +52,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         res.setHeader("Content-Type", "application/json");
         res.status(200).json({ status: 200, message: "Successfully liked theme" });
     } catch (error) {
-        res.status(500).json({ status: 500, message: `Failed to register likes of theme '${themeId}' with reason: ${error}` });
+        res.status(500).json({ status: 500, message: `Failed to register likes of theme '${themeId}' with reason: ${error.message}` });
     }
 }

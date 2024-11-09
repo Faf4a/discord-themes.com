@@ -29,7 +29,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     try {
         const themeExists = await db.collection("themes").findOne({ id: themeId });
         if (!themeExists) {
-            return res.status(401).json({ status: 401, message: "Theme does not exist. Please ensure the theme id is correct and try again" });
+            return res.status(404).json({ status: 404, message: "Theme does not exist. Please ensure the theme id is correct and try again" });
         }
 
         const themeLike = await likesCollection.findOne({ themeId });

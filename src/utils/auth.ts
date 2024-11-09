@@ -4,8 +4,6 @@ export const isAuthed = async (token: string) => {
     if (!token) return false;
     const user = await getUser(token);
 
-    console.log(user);
-
     if (!user) {
         return false;
     } else {

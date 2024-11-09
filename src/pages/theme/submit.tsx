@@ -207,7 +207,7 @@ export default function SubmitPage() {
                                                     </div>
                                                     {formData.file && (
                                                         <div className="mt-4">
-                                                            <Image fill={true} src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
+                                                            <Image width={854} height={480} src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
                                                         </div>
                                                     )}
                                                     <div className="flex items-center space-x-2">

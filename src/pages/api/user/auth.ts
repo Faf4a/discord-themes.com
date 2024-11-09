@@ -1,7 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { APIUser as User } from "discord-api-types/v10";
 import clientPromise from "@utils/db";
-import { randomBytes } from "crypto";
+import { randomBytes, createHash } from "crypto";
+
+interface UserEntry {
+    user: {
+        id: string;
+        avatar: string;
+        global_name: string;
+        preferredColor: string;
+        key: string;
+        keyVersion?: number;
+    };
+    createdAt: Date;
+}
 
 declare module "discord-api-types/v10" {
     interface APIUser {
@@ -60,44 +72,72 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const db = client.db("themesDatabase");
     const users = db.collection("users");
 
-    // this will totally never break lol
+    const generateKey = () => {
+        const randomData = randomBytes(32);
+        const salt = randomBytes(16);
+        const timestamp = new Date().getTime().toString();
+        
+        return createHash('sha256')
+            .update(Buffer.concat([randomData, salt]))
+            .update(timestamp)
+            .digest('hex');
+    };
+    
     const userEntry = (await users.findOne({ "user.id": user.id }))?.user;
-
-    // shouldnt be null but yeah
-    let authKey: string | null;
-
+    let authKey: string;
+    
     if (!userEntry) {
-        const uniqueKey = randomBytes(16).toString("hex");
+        const uniqueKey = generateKey();
         await users.insertOne({
             user: {
                 id: user.id,
                 avatar: user.avatar,
                 global_name: user.global_name,
                 preferredColor: user.banner_color,
-                key: uniqueKey
+                key: uniqueKey,
+                keyVersion: 2
             },
             createdAt: new Date()
         });
         authKey = uniqueKey;
     } else {
-        authKey = userEntry.key;
-
-        const updates: any = {};
-
+        if (!userEntry.keyVersion || userEntry.keyVersion < 2) {
+            const newKey = generateKey();
+            await users.updateOne(
+                { "user.id": user.id },
+                { 
+                    $set: {
+                        "user.key": newKey,
+                        "user.keyVersion": 2
+                    }
+                }
+            );
+            authKey = newKey;
+        } else {
+            authKey = userEntry.key;
+        }
+    
+        const updates: Partial<UserEntry['user']> = {};
+    
         if (userEntry.avatar !== user.avatar) {
-            updates["user.avatar"] = user.avatar;
+            updates["avatar"] = user.avatar;
         }
-
         if (userEntry.preferredColor !== user.banner_color) {
-            updates["user.preferredColor"] = user.banner_color;
+            updates["preferredColor"] = user.banner_color;
         }
-
-        if (userEntry.global_name !== user.banner_color) {
-            updates["user.global_name"] = user.global_name;
+        if (userEntry.global_name !== user.global_name) {
+            updates["global_name"] = user.global_name;
         }
-
+    
         if (Object.keys(updates).length > 0) {
-            await users.updateOne({ "user.id": user.id }, { $set: updates });
+            console.log("[server/auth] non-migrated user", user.id, "updated", updates);
+            await users.updateOne(
+                { "user.id": user.id }, 
+                { $set: Object.entries(updates).reduce((acc, [key, value]) => ({
+                    ...acc,
+                    [`user.${key}`]: value
+                }), {}) }
+            );
         }
     }
 

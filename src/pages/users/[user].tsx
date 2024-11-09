@@ -23,6 +23,7 @@ export default function AuthCallback() {
     const [userThemes, setUserThemes] = useState<ThemesResponse>({ themes: [], user: { id: "", global_name: "", preferredColor: "", avatar: "" } });
     const [invalid, setInvalid] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [likedThemes, setLikedThemes] = useState([]);
 
     useEffect(() => {
         function getCookie(name: string): string | undefined {
@@ -57,7 +58,19 @@ export default function AuthCallback() {
                         break;
                 }
             }
+
+            async function getLikedThemes() {
+                const response = await fetch("/api/likes/get", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ token: userToken })
+                }).then((res) => res.json());
+
+                setLikedThemes(response);
+            }
+
             getThemes();
+            getLikedThemes();
         } else {
             setLoading(true);
         }
@@ -136,7 +149,7 @@ export default function AuthCallback() {
                     {userThemes.themes.length > 0 ? (
                         <>
                             {userThemes.themes.map((theme) => (
-                                <ThemeCard className="mb-2" disableDownloads key={theme.id} theme={theme} />
+                                <ThemeCard className="mb-2" likedThemes={likedThemes} disableDownloads key={theme.id} theme={theme} />
                             ))}
                         </>
                     ) : (

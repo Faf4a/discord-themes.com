@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover"
 import { Card, CardContent, CardFooter, CardHeader } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type Theme } from "@types";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -13,14 +13,22 @@ import Image from "next/image";
 
 interface ThemeCardProps {
     theme: Theme;
+    likedThemes: any;
     className?: string;
     disableDownloads?: boolean;
 }
 
-export function ThemeCard({ theme, className, disableDownloads }: ThemeCardProps) {
+export function ThemeCard({ theme, likedThemes, className, disableDownloads = false }: ThemeCardProps) {
     const [isLiked, setLiked] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isDownloaded, setIsDownloaded] = useState(false);
+
+    useEffect(() => {
+        if (likedThemes?.likes?.length) {
+            const hasLiked = likedThemes.likes.some((liked) => liked.themeId === theme.id);
+            setLiked(hasLiked);
+        }
+    }, [likedThemes, theme]);
 
     const handleDownload = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -50,7 +58,7 @@ export function ThemeCard({ theme, className, disableDownloads }: ThemeCardProps
                 <a className="flex flex-col h-full">
                     <CardHeader className="p-0 relative">
                         <div className="aspect-[16/9] overflow-hidden bg-muted relative">
-                            <Image fill={true} loading="lazy" src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                            <Image width={854} height={480} loading="lazy" src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         </div>
                         <div className="absolute bottom-2 left-2 z-2 flex flex-wrap gap-1.5">
                             {theme.tags?.slice(0, 3).map((tag) => (
@@ -82,22 +90,23 @@ export function ThemeCard({ theme, className, disableDownloads }: ThemeCardProps
                     </CardHeader>
                     <CardContent className="p-4 flex-grow">
                         <h3 className="text-base font-medium tracking-tight text-foreground">{theme.name}</h3>
-                            <ReactMarkdown
-                                className="description text-sm text-muted-foreground mt-1"
-                                remarkPlugins={[remarkGfm]}
-                            >
-                                {theme.description}
-                            </ReactMarkdown>
+                        <ReactMarkdown className="description text-sm text-muted-foreground mt-1" remarkPlugins={[remarkGfm]}>
+                            {theme.description}
+                        </ReactMarkdown>
                     </CardContent>
                     <CardFooter className="p-4 pt-0 mt-auto">
                         <div className="flex justify-between items-center w-full">
-                            <Button variant="ghost" size="sm" className={cn("gap-1.5 text-muted-foreground", isLiked && "text-primary hover:text-primary")}>
-                                <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
-                                <span>{isLiked ? theme.likes + 1 : theme.likes}</span>
-                                <Download className={cn("ml-2 h-4 w-4", isLiked && "fill-current")} />
-                                <span>{theme?.downloads ?? 0}</span>
+                            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
+                                <div className={cn("flex items-center", isLiked && "text-primary")}>
+                                    <Heart className={cn("h-4 w-4 mr-2", isLiked && "fill-current")} />
+                                    <span>{theme.likes}</span>
+                                </div>
+                                <div className="flex items-center ml-2">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    <span>{theme?.downloads ?? 0}</span>
+                                </div>
                             </Button>
-                            {disableDownloads && (
+                            {!disableDownloads && (
                                 <Button disabled={isDownloaded} size="sm" className="bg-primary hover:bg-primary/90" onClick={handleDownload}>
                                     {isDownloaded ? (
                                         <>

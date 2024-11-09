@@ -19,8 +19,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         body: JSON.stringify({ token })
     });
 
-    console.log(authResponse);
-
     let authRequest;
     try {
         authRequest = await authResponse.json();
@@ -47,12 +45,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         if (!userEntry) return res.status(404).json({ status: 400, message: "No user found with those credentials" });
         delete userEntry.user.key;
         delete userEntry._id;
+        userEntry.user.current = true;
         requestedUser = userEntry?.user;
     } else {
         const userEntry = await users.findOne({ "user.id": String(userId) });
         if (!userEntry) return res.status(404).json({ status: 400, message: "No user found with those credentials" });
         delete userEntry.user.key;
         delete userEntry._id;
+        userEntry.user.current = false;
         requestedUser = userEntry?.user;
     }
 
