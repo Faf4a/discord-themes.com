@@ -35,8 +35,8 @@ export function AuthProvider({ children }) {
             return res.json();
         },
         {
-            revalidateOnFocus: true,
-            dedupingInterval: 5000
+            revalidateOnFocus: false,
+            dedupingInterval: Infinity
         }
     );
 

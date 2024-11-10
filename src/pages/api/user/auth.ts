@@ -80,6 +80,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         }
     });
 
+    console.log(response);
+
     if (!response.ok) {
         return res.status(401).json({ status: 401, message: "Invalid or expired Discord token" });
     }
