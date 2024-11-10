@@ -24,11 +24,8 @@
       "@constants": [
         "src/constants.ts"
       ],
-      "@utils/db": [
-        "src/utils/db.ts"
-      ],
-      "@utils/auth": [
-        "src/utils/auth.ts"
+      "@utils/*": [
+        "src/utils/*"
       ],
       "@components/*": [
         "src/components/*"

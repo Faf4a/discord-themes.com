@@ -5,6 +5,7 @@ import Head from "next/head";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Image from "next/image";
+import { useAuth } from "@context/auth";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -18,28 +19,24 @@ const getTheme = async (id: string) => {
 
 export default function Component({ id }: { id?: string }) {
     const [theme, setTheme] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [isDownloaded, setIsDownloaded] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const { authorizedUser, isAuthenticated, isLoading, themes, error } = useAuth();
 
     const previewUrl = `/api/preview?url=/api/${id}`;
 
     useEffect(() => {
-        if (!id) return;
-
-        const fetchTheme = async () => {
-            setLoading(true);
-            try {
-                const fetchedTheme = await getTheme(id);
-                setTheme(fetchedTheme);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTheme();
-    }, [id]);
+        if (!id || isLoading || error) return;
+    
+        const theme = themes.find((x) => x.id == id);
+        
+        if (!theme) {
+            window.location.href = "/";
+        } else {
+            setTheme(theme);
+            setLoading(false);
+        }
+    }, [themes, error, id]);
 
     if (!id) {
         return (
@@ -50,15 +47,11 @@ export default function Component({ id }: { id?: string }) {
     }
 
     const handleAuthorClick = (author) => {
-        if (author.github_name) {
-            window.open(`https://github.com/${author.github_name}`, "_blank");
-        } else {
-            window.open(`https://discord.com/users/${author.discord_snowflake}`, "_blank");
-        }
+        window.open("/users/" + author.discord_snowflake);
     };
 
     const renderAuthor = (author) => {
-        if (loading) {
+        if (isLoading) {
             return (
                 <div key={author.discord_snowflake} className="p-2 rounded-md border bg-background border-input">
                     <Skeleton className="h-4 w-1/2 mb-2" />
@@ -74,16 +67,18 @@ export default function Component({ id }: { id?: string }) {
                     <p>{author.discord_name}</p>
                     <p className="text-xs text-muted-foreground">{author.discord_snowflake}</p>
                     {author.github_name && (
-                        <p className="flex items-center mt-2 hover:text-gray-500 cursor-pointer transition-colors duration-200">
+                        <div className="flex items-center mt-2 hover:text-gray-500 cursor-pointer transition-colors duration-200">
                             <span className="rounded-full bg-input p-1 mr-2">
                                 <Github width={12} height={12} />
                             </span>
-                            {author.github_name}
-                        </p>
+                            <a target="_blank" href={`https://github.com/${author.github_name}`}>
+                                {author.github_name}
+                            </a>
+                        </div>
                     )}
                 </div>
                 <Button variant="outline" onClick={() => handleAuthorClick(author)} className="ml-2 p-1">
-                    <ExternalLink className="h-4 w-6 text-gray-500" />
+                    <ExternalLink className="h-4 w-6" />
                 </Button>
             </div>
         );
@@ -152,20 +147,13 @@ export default function Component({ id }: { id?: string }) {
                                 </>
                             ) : (
                                 <div className="rounded-lg border-b border-border/40 bg-card p-6">
-                                  <h2 className="text-2xl font-bold mb-4">{theme.name}</h2>
-                                  <p className="description text-muted-foreground mb-4">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.description}</ReactMarkdown>
-                                  </p>
-                                  <div className="bg-muted rounded-lg flex justify-center items-center">
-                                    <Image
-                                      src={theme.thumbnail_url}
-                                      alt={theme.name}
-                                      width={1920}
-                                      height={1080}
-                                      className="rounded-lg object-contain"
-                                      loading="lazy"
-                                    />
-                                  </div>
+                                    <h2 className="text-2xl font-bold mb-4">{theme.name}</h2>
+                                    <p className="description text-muted-foreground mb-4">
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.description}</ReactMarkdown>
+                                    </p>
+                                    <div className="bg-muted rounded-lg flex justify-center items-center">
+                                        <Image src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -190,6 +178,25 @@ export default function Component({ id }: { id?: string }) {
                                         <Eye className="mr-2 h-4 w-4" />
                                         {window.innerWidth <= 768 ? "Not available on mobile" : "Preview"}
                                     </Button>
+                                    {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
+                                        <>
+                                        <h2>Author Options</h2>
+                                            <Button variant="outline" className="w-full" onClick={() => window.open(`/theme/edit/${theme.id}`, "_blank")}
+                                                disabled>
+                                                <Code className="mr-2 h-4 w-4" />
+                                                Edit
+                                            </Button>
+                                            <Button 
+                                                variant="outline" 
+                                                className="w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+                                                onClick={() => window.open(`/theme/delete/${theme.id}`, "_blank")}
+                                                disabled
+                                            >
+                                                <Code className="mr-2 h-4 w-4" />
+                                                Delete
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                                 {!loading && (
                                     <div className="mt-4 p-4 text-sm text-muted-foreground">
@@ -208,16 +215,25 @@ export default function Component({ id }: { id?: string }) {
                                     </div>
                                 )}
                             </div>
-                            <div className="rounded-lg border-b border-border/40 bg-card p-4">
-                                {!loading && (
-                                    <>
-                                        <div className="space-y-3">
-                                            <h2>Contributors</h2>
-                                            {Array.isArray(theme.author) ? theme.author.map(renderAuthor) : renderAuthor(theme.author)}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                            {!loading && (
+                                <div className="rounded-lg border-b border-border/40 bg-card p-4">
+                                    <div className="space-y-3">
+                                        <h2>Contributors</h2>
+                                        {Array.isArray(theme.author) ? theme.author.map(renderAuthor) : renderAuthor(theme.author)}
+                                    </div>
+                                </div>
+                            )}
+                            {!loading && theme.guild && (
+                                <div className="rounded-lg border-b border-border/40 bg-card p-4">
+                                    <div className="space-y-3">
+                                        <h2>Support Server</h2>
+                                        <Button variant="outline" onClick={() => window.open(theme.guild, "_blank")} className="w-full">
+                                            <ExternalLink className="mr-2 h-4 w-4" />
+                                            Join {theme.guild.name}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

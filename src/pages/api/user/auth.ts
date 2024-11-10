@@ -87,9 +87,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const githubAccount = await fetchGitHubAccount(`${oauthResponse.token_type} ${oauthResponse.access_token}`);
 
-    console.log("[server/auth] user", user.id, "authenticated");
-    console.log("[server/auth] user", user.id, "has github account", githubAccount);
-
     const client = await clientPromise;
     const db = client.db("themesDatabase");
     const users = db.collection("users");
@@ -156,7 +153,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         }
     
         if (Object.keys(updates).length > 0) {
-            console.log("[server/auth] non-migrated user", user.id, "updated", updates);
             await users.updateOne(
                 { "user.id": user.id }, 
                 { $set: Object.entries(updates).reduce((acc, [key, value]) => ({

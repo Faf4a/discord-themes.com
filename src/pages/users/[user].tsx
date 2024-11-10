@@ -28,7 +28,7 @@ export default function AuthCallback() {
     const [likedThemes, setLikedThemes] = useState<Theme[]>([]);
     const [userLikedThemes, setUserLikedThemes] = useState<Theme[]>([]);
     const [activeTab, setActiveTab] = useState<"authored" | "liked">("authored");
-    const { authorizedUser, isAuthenticated, isLoading } = useAuth();
+    const { authorizedUser, isAuthenticated, isLoading, themes } = useAuth();
 
     useEffect(() => {
         if (!isAuthenticated && !isLoading) router.push("/auth/login");
@@ -74,8 +74,6 @@ export default function AuthCallback() {
                     body: JSON.stringify({ token: userToken })
                 }).then((res) => res.json());
 
-                const themes = await fetch("/api/themes").then((res) => res.json());
-
                 const likedThemeIds = response.likes.filter((like: { themeId: number; hasLiked: boolean }) => like.hasLiked).map((like: { themeId: number }) => like.themeId);
 
                 const likedThemes = themes.filter((theme: Theme) => likedThemeIds.includes(theme.id));
@@ -85,11 +83,11 @@ export default function AuthCallback() {
             }
 
             getThemes();
-            if (user === "@me") getLikedThemes();
+            if (user === "@me" || user == authorizedUser.id) getLikedThemes();
         } else {
             setLoading(true);
         }
-    }, [user, authorizedUser, isAuthenticated, isLoading]);
+    }, [user, authorizedUser, isAuthenticated, isLoading, themes]);
 
     const Layout = ({ children }: { children: React.ReactNode }) => (
         <>
@@ -112,10 +110,10 @@ export default function AuthCallback() {
 
     const UserInfoCard = () => (
         <div className="w-full md:w-1/3 bg-card rounded-lg h-full mt-4 md:mt-0 md:sticky md:top-4">
-            <div className="w-full h-24" style={{ backgroundColor: userThemes.user.preferredColor }} />
+            <div className="w-full h-24" suppressHydrationWarning style={{ backgroundColor: userThemes.user?.preferredColor }} />
             <div className="p-6 -mt-12 text-card-foreground">
                 <div className="flex flex-col items-center">
-                    <Image height={128} width={128} className="w-24 h-24 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/5.png"} alt="Avatar" />
+                    <Image priority height={128} width={128} className="w-24 h-24 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/5.png"} alt="Avatar" />
                     <h1 className="text-xl font-semibold mt-3">{userThemes.user.global_name}</h1>
                     <p className="text-xs text-muted-foreground">{userThemes.user.id}</p>
                     <div className="w-full mt-4 space-y-2">
@@ -174,7 +172,7 @@ export default function AuthCallback() {
         <Layout>
             <div className="w-full md:w-2/3 rounded-lg bg-card h-full pb-8">
                 <div className="p-6">
-                    {user === "@me" && (
+                    {(user === "@me" || user == authorizedUser.id) && (
                         <div className="flex justify-center mb-4">
                             <Button variant={activeTab === "authored" ? "default" : "outline"} onClick={() => setActiveTab("authored")}>
                                 Authored Themes

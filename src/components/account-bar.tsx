@@ -60,6 +60,7 @@ export function AccountBar({ className }: AccountBarProps) {
     const toggleEndlessScroll = () => {
         const newValue = !endlessScroll;
         setEndlessScroll(newValue);
+        console.log("%c[client/settings]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", `Endless Scroll: ${newValue}`);
         localStorage.setItem("endlessScroll", String(newValue));
     };
 
@@ -76,25 +77,16 @@ export function AccountBar({ className }: AccountBarProps) {
                         </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem 
-                            onClick={() => (window.location.href = "/users/@me")}
-                            className="transition-colors cursor-pointer"
-                        >
+                        <DropdownMenuItem onClick={() => (window.location.href = "/users/@me")} className="transition-colors cursor-pointer">
                             My Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                            onSelect={(e) => e.preventDefault()}
-                            className="transition-colors"
-                        >
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="transition-colors">
                             <div className="flex items-center justify-between w-full">
                                 <span>Endless Scroll</span>
                                 <Switch className="cursor-pointer" checked={endlessScroll} onCheckedChange={toggleEndlessScroll} />
                             </div>
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
-                            onClick={handleLogout} 
-                            className="text-red-600 hover:text-red-700 transition-colors cursor-pointer"
-                        >
+                        <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700 transition-colors cursor-pointer">
                             Logout
                         </DropdownMenuItem>
                     </DropdownMenuContent>

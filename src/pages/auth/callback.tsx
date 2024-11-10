@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function AuthCallback() {
+    const [redirected, setRedirected] = useState(false);
     const router = useRouter();
     const { token } = router.query;
 
@@ -15,7 +16,8 @@ export default function AuthCallback() {
             setCookie("_dtoken", token as string, 7);
         }
 
-        router.replace("/");
+        if (!redirected) router.push("/");
+        setRedirected(true);
     }, [token, router]);
 
     return (
