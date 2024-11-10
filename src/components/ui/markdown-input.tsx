@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { useState, useRef, useEffect } from "react";
+import { ChangeEvent, useEffect, useRef, useState  } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Button } from "@components/ui/button";
@@ -8,7 +8,9 @@ import { Bold, Code, Eye, Italic, Link, Strikethrough } from "lucide-react";
 import { cn } from "@lib/utils";
 
 interface MarkdownInputProps {
+    // eslint-disable-next-line no-unused-vars
     onChange?: (value: string) => void;
+    // eslint-disable-next-line no-unused-vars
     onBlur?: (value: string) => void;
     className?: string;
     lines?: number;
@@ -73,7 +75,7 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
             .replace(/\r?\n/g, "<br />");
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setContent(e.target.value);
         onChange && onChange(e.target.value);
     };

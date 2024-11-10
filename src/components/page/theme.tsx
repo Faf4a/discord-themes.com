@@ -70,6 +70,7 @@ function App() {
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
     const [likedThemes, setLikedThemes] = useState([]);
+    const [endlessScroll, setEndlessScroll] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
@@ -81,9 +82,6 @@ function App() {
         }
 
         const token = getCookie("_dtoken");
-
-
-        
 
         async function getLikedThemes() {
             const response = await fetch("/api/likes/get", {
@@ -102,6 +100,11 @@ function App() {
             setUser(false);
         }
     }, [isLoading, authorizedUser, isAuthenticated]);
+
+    useEffect(() => {
+        setEndlessScroll(localStorage.getItem("endlessScroll") === "true");
+    }, []);
+
 
     const allFilters = [
         ...themes.reduce((acc, theme) => {
@@ -184,7 +187,7 @@ function App() {
                 ) : error ? (
                     <div className="text-red-500">Error: {error.message}</div>
                 ) : filteredThemes.length ? (
-                    <ThemeGrid likedThemes={likedThemes as any as []} themes={filteredThemes} />
+                    <ThemeGrid likedThemes={likedThemes as any as []} themes={filteredThemes} endlessScroll={endlessScroll} />
                 ) : (
                     <div>
                         <NoResults /> <SkeletonGrid />

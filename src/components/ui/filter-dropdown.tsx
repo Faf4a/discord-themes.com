@@ -16,6 +16,7 @@ type FilterDropdownProps = {
     options: FilterOption[];
     placeholder?: string;
     emptyMessage?: string;
+    // eslint-disable-next-line no-unused-vars
     onChange?: (selectedOptions: FilterOption[]) => void;
 };
 

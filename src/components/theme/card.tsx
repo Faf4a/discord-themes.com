@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover"
 import { Card, CardContent, CardFooter, CardHeader } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
-import { useState, useEffect } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { type Theme } from "@types";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -30,7 +30,7 @@ export function ThemeCard({ theme, likedThemes, className, disableDownloads = fa
         }
     }, [likedThemes, theme]);
 
-    const handleDownload = async (e: React.MouseEvent) => {
+    const handleDownload = async (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -54,8 +54,8 @@ export function ThemeCard({ theme, likedThemes, className, disableDownloads = fa
 
     return (
         <Card className={cn("group overflow-hidden flex flex-col justify-between h-full transition-all hover:translate-y-[-1px] border-border/40 bg-card", className)} onMouseLeave={handleMouseLeave}>
-            <Link legacyBehavior href={`/theme/${Number(theme.id)}`}>
-                <a className="flex flex-col h-full">
+            <Link href={`/theme/${Number(theme.id)}`}>
+                <div className="flex flex-col h-full">
                     <CardHeader className="p-0 relative">
                         <div className="aspect-[16/9] overflow-hidden bg-muted relative">
                             <Image priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -123,7 +123,7 @@ export function ThemeCard({ theme, likedThemes, className, disableDownloads = fa
                             )}
                         </div>
                     </CardFooter>
-                </a>
+                </div>
             </Link>
         </Card>
     );

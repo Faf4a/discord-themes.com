@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { APIUser as User, APIConnection as Connection} from "discord-api-types/v10";
+import type { APIConnection as Connection, APIUser as User} from "discord-api-types/v10";
 import clientPromise from "@utils/db";
-import { randomBytes, createHash } from "crypto";
+import { createHash, randomBytes } from "crypto";
 
 interface UserEntry {
     user: {
@@ -17,6 +17,7 @@ interface UserEntry {
 }
 
 declare module "discord-api-types/v10" {
+    // eslint-disable-next-line no-unused-vars
     interface APIUser {
         banner_color?: string | null;
     }

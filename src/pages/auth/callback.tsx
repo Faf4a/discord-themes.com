@@ -18,7 +18,7 @@ export default function AuthCallback() {
 
         if (!redirected) router.push("/");
         setRedirected(true);
-    }, [token, router]);
+    }, [redirected, token, router]);
 
     return (
         <div className="flex justify-center items-center min-h-screen">

@@ -4,6 +4,7 @@ const uri = process.env.MONGODB_URI as string;
 const options = {};
 
 declare global {
+    // eslint-disable-next-line no-unused-vars
     var _mongoClientPromise: Promise<MongoClient>;
 }
 

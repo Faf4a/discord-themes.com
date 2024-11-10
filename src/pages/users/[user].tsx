@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ThemeCard } from "@components/theme/card";
 import Image from "next/image";
@@ -40,56 +40,56 @@ export default function AuthCallback() {
             if (parts.length === 2) return parts.pop()?.split(";").shift();
         }
 
+        async function getThemes() {
+            const response = await fetch(`/api/user/themes`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: userToken, userId: user })
+            });
+            const request = await response.json();
+
+            switch (response.status) {
+                case 200:
+                    setUserThemes(request);
+                    setLoading(false);
+                    break;
+                case 404:
+                    setInvalid(true);
+                    setLoading(false);
+                    break;
+                default:
+                    setInvalid(false);
+                    setLoading(false);
+                    break;
+            }
+        }
+
+        async function getLikedThemes() {
+            const response = await fetch("/api/likes/get", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token: userToken })
+            }).then((res) => res.json());
+
+            const likedThemeIds = response.likes.filter((like: { themeId: number; hasLiked: boolean }) => like.hasLiked).map((like: { themeId: number }) => like.themeId);
+
+            const likedThemes = themes.filter((theme: Theme) => likedThemeIds.includes(theme.id));
+
+            setUserLikedThemes(likedThemes);
+            setLikedThemes(response);
+        }
+
         const userToken = getCookie("_dtoken");
 
         if (userToken && user) {
-            async function getThemes() {
-                const response = await fetch(`/api/user/themes`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token: userToken, userId: user })
-                });
-                const request = await response.json();
-
-                switch (response.status) {
-                    case 200:
-                        setUserThemes(request);
-                        setLoading(false);
-                        break;
-                    case 404:
-                        setInvalid(true);
-                        setLoading(false);
-                        break;
-                    default:
-                        setInvalid(false);
-                        setLoading(false);
-                        break;
-                }
-            }
-
-            async function getLikedThemes() {
-                const response = await fetch("/api/likes/get", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token: userToken })
-                }).then((res) => res.json());
-
-                const likedThemeIds = response.likes.filter((like: { themeId: number; hasLiked: boolean }) => like.hasLiked).map((like: { themeId: number }) => like.themeId);
-
-                const likedThemes = themes.filter((theme: Theme) => likedThemeIds.includes(theme.id));
-
-                setUserLikedThemes(likedThemes);
-                setLikedThemes(response);
-            }
-
             getThemes();
             if (user === "@me" || user == authorizedUser.id) getLikedThemes();
         } else {
             setLoading(true);
         }
-    }, [user, authorizedUser, isAuthenticated, isLoading, themes]);
+    }, [user, authorizedUser, isAuthenticated, isLoading, router, themes]);
 
-    const Layout = ({ children }: { children: React.ReactNode }) => (
+    const Layout = ({ children }: { children: ReactNode }) => (
         <>
             <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-3">

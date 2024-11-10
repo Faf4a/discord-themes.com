@@ -5,12 +5,14 @@ import { Switch } from "@components/ui/switch";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useAuth } from "@context/auth";
+import { useRouter } from "next/router";
 
 interface AccountBarProps {
     className?: string;
 }
 
 export function AccountBar({ className }: AccountBarProps) {
+    const router = useRouter();
     const [user, setUser] = useState<UserData | object>({});
     const [isValid, setValid] = useState(null);
     const [endlessScroll, setEndlessScroll] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("endlessScroll") === "true" : false));
@@ -61,6 +63,9 @@ export function AccountBar({ className }: AccountBarProps) {
         const newValue = !endlessScroll;
         setEndlessScroll(newValue);
         console.log("%c[client/settings]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", `Endless Scroll: ${newValue}`);
+        router.replace({ query: { endless: newValue ? "true" : "false" } }, undefined, { shallow: true });
+        // refresh window
+        window.location.reload();
         localStorage.setItem("endlessScroll", String(newValue));
     };
 

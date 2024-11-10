@@ -1,17 +1,18 @@
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Progress } from "@components/ui/progress";
 import { Card } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { Button } from "@components/ui/button";
-import { Users, Upload, ImageIcon } from "lucide-react";
+import { ImageIcon, Upload, Users } from "lucide-react";
 import MarkdownInput from "@components/ui/markdown-input";
 import Image from "next/image";
 
 export default function SubmitPage() {
     const router = useRouter();
     const [isAuthed, setIsAuthed] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [user, setUser] = useState({});
     const [step, setStep] = useState(1);
     const [dragActive, setDragActive] = useState(false);

@@ -1,25 +1,25 @@
-import { useState, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { ThemeCard } from "./card";
 import { type Theme } from "@types";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@components/ui/pagination";
 import { Input } from "@components/ui/input";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = false }: { themes?: Theme[]; likedThemes?: []; disableDownloads?: boolean }) {
+export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = false, endlessScroll = false }: { themes?: Theme[]; likedThemes?: []; disableDownloads?: boolean, endlessScroll?: boolean }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [isEllipsisClicked, setIsEllipsisClicked] = useState(false);
     const [inputPage, setInputPage] = useState("");
     const itemsPerPage = 12;
 
     useEffect(() => {
-        if (currentPage > Math.ceil(themes.length / itemsPerPage)) {
+        if (!endlessScroll && currentPage > Math.ceil(themes.length / itemsPerPage)) {
             setCurrentPage(1);
         }
-    }, [themes, currentPage]);
+    }, [themes, currentPage, endlessScroll]);
 
     const totalPages = Math.ceil(themes.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const startIndex = endlessScroll ? 0 : (currentPage - 1) * itemsPerPage;
+    const endIndex = endlessScroll ? themes.length : startIndex + itemsPerPage;
     const currentThemes = themes.slice(startIndex, endIndex);
 
     const handlePageChange = (page: number) => {
@@ -32,7 +32,7 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
         setIsEllipsisClicked(true);
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         setInputPage(e.target.value);
     };
 
@@ -111,41 +111,58 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentThemes.map((theme) => (
-                    <ThemeCard key={theme.id} theme={theme} likedThemes={likedThemes} disableDownloads={disableDownloads} />
+                    <ThemeCard 
+                        key={theme.id} 
+                        theme={theme} 
+                        likedThemes={likedThemes} 
+                        disableDownloads={disableDownloads}
+                    />
                 ))}
             </div>
-            <Pagination className="w-full">
-                <PaginationContent className="flex flex-wrap gap-2">
-                    <PaginationItem>
-                        <PaginationPrevious onClick={() => handlePageChange(Math.max(1, currentPage - 1))} className={`text-sm ${currentPage === 1 ? "pointer-events-none opacity-50" : ""}`}>
-                            <ChevronLeft className="h-4 w-4" />
-                            <span className="sr-only md:not-sr-only md:ml-2">Previous</span>
-                        </PaginationPrevious>
-                    </PaginationItem>
+            {!endlessScroll && (
+                <Pagination className="w-full">
+                    <PaginationContent className="flex flex-wrap gap-2">
+                        <PaginationItem>
+                            <PaginationPrevious 
+                                onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                                className={`text-sm ${currentPage === 1 ? "pointer-events-none opacity-50" : ""}`}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                                <span className="sr-only md:not-sr-only md:ml-2">Previous</span>
+                            </PaginationPrevious>
+                        </PaginationItem>
 
-                    {/* Mobile current page indicator */}
-                    <PaginationItem className="md:hidden">
-                        <PaginationLink isActive>{currentPage}</PaginationLink>
-                    </PaginationItem>
+                        <PaginationItem className="md:hidden">
+                            <PaginationLink isActive>{currentPage}</PaginationLink>
+                        </PaginationItem>
 
-                    {/* Desktop pagination - hidden on mobile */}
-                    <div className="hidden md:flex items-center">
-                        {renderPaginationItems()}
-                        {isEllipsisClicked && (
-                            <PaginationItem>
-                                <Input type="text" value={inputPage} onChange={handleInputChange} onBlur={handleInputBlur} className="w-12 h-8 text-center" autoFocus />
-                            </PaginationItem>
-                        )}
-                    </div>
+                        <div className="hidden md:flex items-center">
+                            {renderPaginationItems()}
+                            {isEllipsisClicked && (
+                                <PaginationItem>
+                                    <Input 
+                                        type="text" 
+                                        value={inputPage} 
+                                        onChange={handleInputChange} 
+                                        onBlur={handleInputBlur} 
+                                        className="w-12 h-8 text-center" 
+                                    />
+                                </PaginationItem>
+                            )}
+                        </div>
 
-                    <PaginationItem>
-                        <PaginationNext onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} className={`text-sm ${currentPage === totalPages ? "pointer-events-none opacity-50" : ""}`}>
-                            <span className="sr-only md:not-sr-only md:mr-2">Next</span>
-                            <ChevronRight className="h-4 w-4" />
-                        </PaginationNext>
-                    </PaginationItem>
-                </PaginationContent>
-            </Pagination>
+                        <PaginationItem>
+                            <PaginationNext 
+                                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} 
+                                className={`text-sm ${currentPage === totalPages ? "pointer-events-none opacity-50" : ""}`}
+                            >
+                                <span className="sr-only md:not-sr-only md:mr-2">Next</span>
+                                <ChevronRight className="h-4 w-4" />
+                            </PaginationNext>
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            )}
         </div>
     );
 }

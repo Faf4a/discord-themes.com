@@ -9,14 +9,6 @@ import { useAuth } from "@context/auth";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
-const getTheme = async (id: string) => {
-    const response = await fetch(`/api/get/${id}`);
-    if (!response.ok) {
-        window.location.href = "/";
-    }
-    return response.json();
-};
-
 export default function Component({ id }: { id?: string }) {
     const [theme, setTheme] = useState(null);
     const [isDownloaded, setIsDownloaded] = useState(false);
@@ -36,7 +28,7 @@ export default function Component({ id }: { id?: string }) {
             setTheme(theme);
             setLoading(false);
         }
-    }, [themes, error, id]);
+    }, [themes, error, id, isLoading]);
 
     if (!id) {
         return (
