@@ -8,8 +8,8 @@ interface LikeEntry {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST") {
-        return res.status(405).json({ message: "Method not allowed", wants: "POST" });
+    if (req.method !== "GET") {
+        return res.status(405).json({ message: "Method not allowed", wants: "GET" });
     }
     const client = await clientPromise;
     const db = client.db("themesDatabase");
@@ -18,10 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const likes = (await likesCollection.find({}).toArray()) as unknown as LikeEntry[];
 
-        const { token } = req.body;
+        const { authorization } = req.headers;
+        const token = authorization?.replace("Bearer ", "")?.trim() ?? null;
 
         if (token) {
-            const user = await isAuthed(token);
+            const user = await isAuthed(token as string);
             if (user) {
                 const userLikes = likes.map((like: LikeEntry) => ({
                     themeId: like.themeId,

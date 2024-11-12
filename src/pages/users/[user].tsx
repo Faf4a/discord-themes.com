@@ -41,10 +41,11 @@ export default function AuthCallback() {
         }
 
         async function getThemes() {
+            if (!loading) return;
             const response = await fetch(`/api/user/themes`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: userToken, userId: user })
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${userToken}` },
+                body: JSON.stringify({ userId: user })
             });
             const request = await response.json();
 
@@ -66,9 +67,8 @@ export default function AuthCallback() {
 
         async function getLikedThemes() {
             const response = await fetch("/api/likes/get", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: userToken })
+                method: "GET",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${userToken}` }
             }).then((res) => res.json());
 
             const likedThemeIds = response.likes.filter((like: { themeId: number; hasLiked: boolean }) => like.hasLiked).map((like: { themeId: number }) => like.themeId);
@@ -83,11 +83,11 @@ export default function AuthCallback() {
 
         if (userToken && user) {
             getThemes();
-            if (user === "@me" || user == authorizedUser.id) getLikedThemes();
+            if ((user === "@me" || user == authorizedUser?.id) && !loading) getLikedThemes();
         } else {
             setLoading(true);
         }
-    }, [user, authorizedUser, isAuthenticated, isLoading, router, themes]);
+    }, [user, authorizedUser, isAuthenticated, isLoading, loading, router, themes]);
 
     const Layout = ({ children }: { children: ReactNode }) => (
         <>
@@ -97,8 +97,7 @@ export default function AuthCallback() {
                         <h1 className="text-xl font-semibold text-foreground flex-shrink-0">
                             <a href="/">Theme Library</a>
                         </h1>
-
-                        <AccountBar className="ml-auto" />
+                        {!(user === "@me" || user == authorizedUser?.id) && !isLoading && <AccountBar className="ml-auto" />}
                     </div>
                 </div>
             </header>
@@ -172,7 +171,7 @@ export default function AuthCallback() {
         <Layout>
             <div className="w-full md:w-2/3 rounded-lg bg-card h-full pb-8">
                 <div className="p-6">
-                    {(user === "@me" || user == authorizedUser.id) && (
+                    {(user === "@me" || user == authorizedUser?.id) && (
                         <div className="flex justify-center mb-4">
                             <Button variant={activeTab === "authored" ? "default" : "outline"} onClick={() => setActiveTab("authored")}>
                                 Authored Themes

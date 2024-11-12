@@ -38,8 +38,7 @@ export default function SubmitPage() {
         async function fetchData() {
             const response = await fetch("/api/user/isAuthed", {
                 method: "POST",
-                body: JSON.stringify({ token: token as string }),
-                headers: { "Content-Type": "application/json" }
+                headers: { "Content-Type": "application/json" , Authorization: `Bearer ${token}` }
             }).then((res) => res.json());
             setIsAuthed(response?.authenticated ?? false);
             setUser(response.user);

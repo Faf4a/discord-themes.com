@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 const rateLimit = new Map<string, { count: number; lastRequest: number; hits: number }>();
 
-// Regular user limits
 const RATE_LIMIT_WINDOW = 4000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
+
 const HIGHER_RATE_LIMIT_WINDOW = 25000;
 const HIGHER_RATE_LIMIT_MAX_REQUESTS = 5;
 const RATE_LIMIT_THRESHOLD = 3;
 
-// Authenticated user limits (more lenient)
 const AUTH_RATE_LIMIT_WINDOW = 2000;
 const AUTH_RATE_LIMIT_MAX_REQUESTS = 10;
 

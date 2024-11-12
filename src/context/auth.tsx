@@ -28,10 +28,10 @@ export function AuthProvider({ children }) {
             if (!token) return null;
 
             const res = await fetch("/api/user/isAuthed", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token })
+                method: "GET",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             });
+            if (!res.ok) throw new Error("Failed to fetch user");
             return res.json();
         },
         {

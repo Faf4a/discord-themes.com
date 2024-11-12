@@ -85,9 +85,8 @@ function App() {
 
         async function getLikedThemes() {
             const response = await fetch("/api/likes/get", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: token as string })
+                method: "GET",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             }).then((res) => res.json());
 
             setLikedThemes(response);

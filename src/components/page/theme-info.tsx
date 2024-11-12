@@ -13,6 +13,7 @@ export default function Component({ id }: { id?: string }) {
     const [theme, setTheme] = useState(null);
     const [isDownloaded, setIsDownloaded] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [likedThemes, setLikedThemes] = useState();
     const { authorizedUser, isAuthenticated, isLoading, themes, error } = useAuth();
 
     const previewUrl = `/api/preview?url=/api/${id}`;
@@ -29,6 +30,12 @@ export default function Component({ id }: { id?: string }) {
             setLoading(false);
         }
     }, [themes, error, id, isLoading]);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            getLikedThemes();
+        }
+    }, [isAuthenticated]);
 
     if (!id) {
         return (
@@ -86,6 +93,53 @@ export default function Component({ id }: { id?: string }) {
             setIsDownloaded(false);
         }, 5000);
     };
+
+    const handleLike = (themeId) => async () => {
+        if (!isAuthenticated) {
+            return;
+        }
+
+        function getCookie(name: string): string | undefined {
+            const value = "; " + document.cookie;
+            const parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop()?.split(";").shift();
+        }
+
+        const token = getCookie("_dtoken");
+
+        const response = await fetch("/api/likes/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ themeId }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.status === 200) {
+                setTheme((prev) => ({ ...prev, likes: (prev.likes || 0) + 1 }));
+            }
+        }
+    }
+
+    async function getLikedThemes() {
+        function getCookie(name: string): string | undefined {
+            const value = "; " + document.cookie;
+            const parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop()?.split(";").shift();
+        }
+
+        const token = getCookie("_dtoken");
+
+        const response = await fetch("/api/likes/get", {
+            method: "GET",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        }).then((res) => res.json());
+
+        setLikedThemes(response);
+    }
 
     return (
         <>
@@ -170,6 +224,28 @@ export default function Component({ id }: { id?: string }) {
                                         <Eye className="mr-2 h-4 w-4" />
                                         {window.innerWidth <= 768 ? "Not available on mobile" : "Preview"}
                                     </Button>
+                                    {!loading && isAuthenticated && (
+                                        <Button 
+                                            variant="outline" 
+                                            className={`w-full ${
+                                                // @ts-ignore
+                                                likedThemes?.likes?.find(t => t.themeId === theme.id)?.hasLiked 
+                                                ? "text-primary border-primary hover:bg-primary/10" 
+                                                : ""
+                                            }`} 
+                                            onClick={handleLike(theme.id)}
+                                        >
+                                            {
+                                            // @ts-ignore
+                                            likedThemes?.likes?.find(t => t.themeId === theme.id)?.hasLiked ? (
+                                                <Heart className="fill-current mr-2 h-4 w-4" />
+                                            ) : (
+                                                <Heart className="mr-2 h-4 w-4" />
+                                            )}
+                                            {// @ts-ignore
+                                            likedThemes?.likes?.find(t => t.themeId === theme.id)?.hasLiked ? "Liked" : "Like"}
+                                        </Button>
+                                    )}
                                     {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
                                         <>
                                         <h2>Author Options</h2>

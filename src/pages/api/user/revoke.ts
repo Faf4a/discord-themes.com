@@ -6,7 +6,14 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
         return res.status(405).json({ message: "Method not allowed", wants: "DELETE" });
     }
 
-    const { token, userId } = req.body;
+    const { userId } = req.body;
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+        return res.status(400).json({ message: "Cannot check authorization without unique token" });
+    }
+
+    const token = authorization.replace("Bearer ", "").trim();
 
     if (!token) {
         return res.status(400).json({ message: "Cannot revoke authorization without unique token" });
