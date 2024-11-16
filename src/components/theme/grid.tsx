@@ -24,18 +24,18 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
     const endIndex = endlessScroll ? themes.length : startIndex + itemsPerPage;
     const currentThemes = themes.slice(startIndex, endIndex);
 
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
+    const scrollToElement = () => {
+        const element = document.getElementById("scroll-to");
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+        }
     };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         setIsEllipsisClicked(false);
         setInputPage("");
-        scrollToTop();
+        scrollToElement();
     };
 
     const handleEllipsisClick = () => {
@@ -51,7 +51,7 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
         const pageNumber = parseInt(inputPage, 10);
         if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
             setCurrentPage(pageNumber);
-            scrollToTop();
+            scrollToElement();
             setInputError(false);
         } else {
             setInputError(true);

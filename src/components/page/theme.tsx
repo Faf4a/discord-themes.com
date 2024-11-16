@@ -210,10 +210,12 @@ function App() {
             </header>
 
             <div className="container mx-auto px-4 py-6">
+                <h2 className="text-2xl font-semibold mb-3 mt-3">Recently Added</h2>
                 <div className="flex items-center justify-between mb-6">
                     <ThemeCarousel themes={themes} />
                 </div>
-                <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold p-2" id="scroll-to">Themes</h2>
+                <div className="flex items-center justify-between mb-3 mt-3">
                     <div className="flex items-center gap-2">
                         <FilterDropdown options={allFilters} placeholder="Filter results..." emptyMessage="No filters found" onChange={setFilters} />
                         <span className="text-sm text-muted-foreground hidden sm:block">{filteredThemes.length} themes</span>

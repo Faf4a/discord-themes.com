@@ -19,15 +19,15 @@ const ThemeCarousel: FC<ThemeCarouselProps> = ({ themes }) => {
   useEffect(() => {
     const sortedThemes = [...themes]
       .sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime())
-      .slice(0, 5);
+      .slice(0, 10);
     setFilteredThemes(sortedThemes);
   }, [themes]);
 
   return (
-    <Carousel plugins={[Autoplay({ delay: 3000 })]}>
+    <Carousel plugins={[Autoplay({ delay: 3500 })]} opts={{ loop: true }}>
       <CarouselContent>
         {filteredThemes.map((theme) => (
-          <CarouselItem key={theme.id}>
+          <CarouselItem key={theme.id} className="basis-1/3">
             {/* @ts-ignore */}
             <ThemeCard theme={theme} noFooter />
           </CarouselItem>
