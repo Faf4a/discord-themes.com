@@ -10,6 +10,7 @@ import { Plus, Search, SearchX, X } from "lucide-react";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useAuth } from "@context/auth";
+import ThemeCarousel from "@components/theme/carousel";
 
 const THEMES_CACHE_KEY = "themes_cache";
 
@@ -47,13 +48,30 @@ const useThemes = () => {
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
-const SkeletonGrid = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="w-full h-[280px] rounded-lg" />
-        ))}
-    </div>
-);
+const SkeletonGrid = ({ amount = 6 }) => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    const displayAmount = isMobile ? Math.min(2, amount) : amount;
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(displayAmount)].map((_, i) => (
+                <Skeleton key={i} className="w-full h-[280px] rounded-lg" />
+            ))}
+        </div>
+    );
+};
 
 const NoResults = () => (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -75,6 +93,7 @@ function App() {
 
     useEffect(() => {
         if (isLoading) return;
+
         function getCookie(name: string): string | undefined {
             const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
@@ -84,11 +103,22 @@ function App() {
         const token = getCookie("_dtoken");
 
         async function getLikedThemes() {
+            const cachedLikedThemes = localStorage.getItem("likedThemes");
+            const cacheTime = localStorage.getItem("ct");
+            const now = Date.now();
+
+            if (cachedLikedThemes && cacheTime && now - parseInt(cacheTime, 10) < 3600000) {
+                setLikedThemes(JSON.parse(cachedLikedThemes));
+                return;
+            }
+
             const response = await fetch("/api/likes/get", {
                 method: "GET",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             }).then((res) => res.json());
 
+            localStorage.setItem("likedThemes", JSON.stringify(response));
+            localStorage.setItem("ct", now.toString());
             setLikedThemes(response);
         }
 
@@ -104,7 +134,6 @@ function App() {
         setEndlessScroll(localStorage.getItem("endlessScroll") === "true");
     }, []);
 
-
     const allFilters = [
         ...themes.reduce((acc, theme) => {
             theme.tags.forEach((tag) => acc.set(tag, (acc.get(tag) || 0) + 1));
@@ -117,15 +146,32 @@ function App() {
             label: tag.charAt(0).toUpperCase() + tag.slice(1)
         }));
 
-    const filteredThemes = themes.filter((theme) => {
-        const matchesSearch = theme.name.toLowerCase().includes(searchQuery.toLowerCase()) || theme.description.toLowerCase().includes(searchQuery.toLowerCase());
+    type Sort = "likes" | "downloads" | "release_date";
 
-        const matchesFilters =
-            filters.length === 0 ||
-            filters.every((filter) => theme.tags.includes(filter.value));
+    const sort: Sort = "likes";
 
-        return matchesSearch && matchesFilters;
-    });
+    const filteredThemes = themes
+        .filter((t) => {
+            const match = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase());
+            const tags = filters.length === 0 || filters.every((f) => t.tags.includes(f.value));
+            return match && tags;
+        })
+        .sort((a, b) => {
+            const aMatch = a.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const bMatch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
+            if (aMatch !== bMatch) return aMatch ? -1 : 1;
+
+            switch (sort as Sort) {
+                case "likes":
+                    return b.likes - a.likes;
+                case "downloads":
+                    return b.downloads - a.downloads;
+                case "release_date":
+                    return +new Date(b.release_date) - +new Date(a.release_date);
+                default:
+                    return 0;
+            }
+        });
 
     const handleSubmit = () => {
         if (isValid) {
@@ -143,7 +189,6 @@ function App() {
                         <h1 className={cn("text-xl font-semibold text-foreground transition-opacity flex-shrink-0", isSearchExpanded && "hidden md:block")}>
                             <a href="/">Theme Library</a>
                         </h1>
-
                         <div className={cn("flex-1 max-w-xl transition-all duration-200", isSearchExpanded ? "absolute top-0 left-0 right-0 z-50 bg-background p-4 md:relative md:bg-transparent md:p-0" : "hidden md:block")}>
                             <div className="flex items-center gap-2 justify-center sm:justify-start">
                                 {isSearchExpanded && (
@@ -154,7 +199,6 @@ function App() {
                                 <SearchBar onSearch={setSearchQuery} className={cn("w-full", isSearchExpanded && "md:max-w-xl")} />
                             </div>
                         </div>
-
                         <div className="flex items-center gap-4 ml-auto">
                             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSearchExpanded(true)}>
                                 <Search className="h-5 w-5" />
@@ -164,7 +208,11 @@ function App() {
                     </div>
                 </div>
             </header>
+
             <div className="container mx-auto px-4 py-6">
+                <div className="flex items-center justify-between mb-6">
+                    <ThemeCarousel themes={themes} />
+                </div>
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
                         <FilterDropdown options={allFilters} placeholder="Filter results..." emptyMessage="No filters found" onChange={setFilters} />
@@ -182,14 +230,14 @@ function App() {
                     </Button>
                 </div>
                 {loading ? (
-                    <SkeletonGrid />
+                    <SkeletonGrid amount={6} />
                 ) : error ? (
                     <div className="text-red-500">Error: {error.message}</div>
                 ) : filteredThemes.length ? (
                     <ThemeGrid likedThemes={likedThemes as any as []} themes={filteredThemes} endlessScroll={endlessScroll} />
                 ) : (
                     <div>
-                        <NoResults /> <SkeletonGrid />
+                        <NoResults /> <SkeletonGrid amount={6} />
                     </div>
                 )}
             </div>

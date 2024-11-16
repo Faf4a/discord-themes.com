@@ -16,9 +16,10 @@ interface ThemeCardProps {
     likedThemes: any;
     className?: string;
     disableDownloads?: boolean;
+    noFooter?: boolean;
 }
 
-export function ThemeCard({ theme, likedThemes, className, disableDownloads = false }: ThemeCardProps) {
+export function ThemeCard({ theme, likedThemes, className, noFooter = false, disableDownloads = false }: ThemeCardProps) {
     const [isLiked, setLiked] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isDownloaded, setIsDownloaded] = useState(false);
@@ -54,46 +55,46 @@ export function ThemeCard({ theme, likedThemes, className, disableDownloads = fa
 
     return (
         <Card className={cn("group overflow-hidden flex flex-col justify-between h-full transition-all hover:translate-y-[-1px] border-border/40 bg-card", className)} onMouseLeave={handleMouseLeave}>
-            <Link href={`/theme/${Number(theme.id)}`}>
-                <div className="flex flex-col h-full">
-                    <CardHeader className="p-0 relative">
-                        <div className="aspect-[16/9] overflow-hidden bg-muted relative">
-                            <Image priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        </div>
-                        <div className="absolute bottom-2 left-2 z-2 flex flex-wrap gap-1.5">
-                            {theme.tags?.slice(0, 3).map((tag) => (
-                                <Button key={tag} variant="outline" size="sm" className="text-[10px] h-6 px-2 bg-card/80 backdrop-blur-sm" onClick={(e) => e.preventDefault()}>
-                                    {tag}
-                                </Button>
-                            ))}
-                            {theme.tags && theme.tags.length > 3 && (
-                                <Popover open={isOpen} onOpenChange={setIsOpen}>
-                                    <div onMouseEnter={handleMouseEnter}>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" size="sm" onClick={(e) => e.preventDefault()} className="text-[10px] h-6 px-2 bg-card/80 backdrop-blur-sm">
-                                                +{theme.tags.length - 3}
+            <Link href={`/theme/${Number(theme.id)}`} className="h-full flex flex-col">
+                <CardHeader className="p-0 relative">
+                    <div className="aspect-[16/9] overflow-hidden bg-muted relative">
+                        <Image priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    </div>
+                    <div className="absolute bottom-2 left-2 z-2 flex flex-wrap gap-1.5">
+                        {theme.tags?.slice(0, 3).map((tag) => (
+                            <Button key={tag} variant="outline" size="sm" className="text-[10px] h-6 px-2 bg-card/80 backdrop-blur-sm" onClick={(e) => e.preventDefault()}>
+                                {tag}
+                            </Button>
+                        ))}
+                        {theme.tags && theme.tags.length > 3 && (
+                            <Popover open={isOpen} onOpenChange={setIsOpen}>
+                                <div onMouseEnter={handleMouseEnter}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" size="sm" onClick={(e) => e.preventDefault()} className="text-[10px] h-6 px-2 bg-card/80 backdrop-blur-sm">
+                                            +{theme.tags.length - 3}
+                                        </Button>
+                                    </PopoverTrigger>
+                                </div>
+                                <PopoverContent className="w-auto p-2 border-border/40 bg-card">
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {theme.tags.slice(3).map((tag) => (
+                                            <Button key={tag} variant="outline" size="sm" className="text-[10px] h-6 px-2" onClick={(e) => e.preventDefault()}>
+                                                {tag}
                                             </Button>
-                                        </PopoverTrigger>
+                                        ))}
                                     </div>
-                                    <PopoverContent className="w-auto p-2 border-border/40 bg-card">
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {theme.tags.slice(3).map((tag) => (
-                                                <Button key={tag} variant="outline" size="sm" className="text-[10px] h-6 px-2" onClick={(e) => e.preventDefault()}>
-                                                    {tag}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
-                            )}
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-4 flex-grow">
-                        <h3 className="text-base font-medium tracking-tight text-foreground">{theme.name}</h3>
-                        <ReactMarkdown className="description text-sm text-muted-foreground mt-1" remarkPlugins={[remarkGfm]}>
-                            {theme.description}
-                        </ReactMarkdown>
-                    </CardContent>
+                                </PopoverContent>
+                            </Popover>
+                        )}
+                    </div>
+                </CardHeader>
+                <CardContent className="p-4 flex-grow">
+                    <h3 className="text-base font-medium tracking-tight text-foreground">{theme.name}</h3>
+                    <ReactMarkdown className="description text-sm text-muted-foreground mt-1" remarkPlugins={[remarkGfm]}>
+                        {theme.description}
+                    </ReactMarkdown>
+                </CardContent>
+                {!noFooter && (
                     <CardFooter className="p-4 pt-0 mt-auto">
                         <div className="flex justify-between items-center w-full">
                             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
@@ -123,7 +124,7 @@ export function ThemeCard({ theme, likedThemes, className, disableDownloads = fa
                             )}
                         </div>
                     </CardFooter>
-                </div>
+                )}
             </Link>
         </Card>
     );

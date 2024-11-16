@@ -1,14 +1,16 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { ThemeCard } from "./card";
 import { type Theme } from "@types";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@components/ui/pagination";
 import { Input } from "@components/ui/input";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = false, endlessScroll = false }: { themes?: Theme[]; likedThemes?: []; disableDownloads?: boolean, endlessScroll?: boolean }) {
+export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = false, endlessScroll = false }: { themes?: Theme[]; likedThemes?: []; disableDownloads?: boolean; endlessScroll?: boolean }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [isEllipsisClicked, setIsEllipsisClicked] = useState(false);
     const [inputPage, setInputPage] = useState("");
+    const [inputError, setInputError] = useState(false);
+    const gridRef = useRef<HTMLDivElement>(null);
     const itemsPerPage = 12;
 
     useEffect(() => {
@@ -22,10 +24,18 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
     const endIndex = endlessScroll ? themes.length : startIndex + itemsPerPage;
     const currentThemes = themes.slice(startIndex, endIndex);
 
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    };
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         setIsEllipsisClicked(false);
         setInputPage("");
+        scrollToTop();
     };
 
     const handleEllipsisClick = () => {
@@ -33,6 +43,7 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
     };
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setInputError(false);
         setInputPage(e.target.value);
     };
 
@@ -40,6 +51,10 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
         const pageNumber = parseInt(inputPage, 10);
         if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
             setCurrentPage(pageNumber);
+            scrollToTop();
+            setInputError(false);
+        } else {
+            setInputError(true);
         }
         setIsEllipsisClicked(false);
         setInputPage("");
@@ -108,24 +123,24 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" ref={gridRef}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentThemes.map((theme) => (
-                    <ThemeCard 
-                        key={theme.id} 
-                        theme={theme} 
-                        likedThemes={likedThemes} 
-                        disableDownloads={disableDownloads}
-                    />
+                    <ThemeCard key={theme.id} theme={theme} likedThemes={likedThemes} disableDownloads={disableDownloads} />
                 ))}
             </div>
             {!endlessScroll && (
-                <Pagination className="w-full">
+                <Pagination className="w-full" role="navigation" aria-label="Page navigation">
                     <PaginationContent className="flex flex-wrap gap-2">
                         <PaginationItem>
-                            <PaginationPrevious 
-                                onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
-                                className={`text-sm ${currentPage === 1 ? "pointer-events-none opacity-50" : ""}`}
+                            <PaginationPrevious
+                                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                                className={`text-sm transition-all hover:bg-primary 
+                                    ${currentPage === 1 ? "pointer-events-none opacity-50" : ""}`}
+                                aria-label={`Go to previous page, page ${currentPage - 1}`}
+                                title={`Previous page (${currentPage - 1})`}
+                                onKeyDown={(e) => e.key === "Enter" && handlePageChange(Math.max(1, currentPage - 1))}
+                                tabIndex={0}
                             >
                                 <ChevronLeft className="h-4 w-4" />
                                 <span className="sr-only md:not-sr-only md:ml-2">Previous</span>
@@ -133,28 +148,41 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
                         </PaginationItem>
 
                         <PaginationItem className="md:hidden">
-                            <PaginationLink isActive>{currentPage}</PaginationLink>
+                            <PaginationLink isActive aria-current="page" aria-label={`Current page, page ${currentPage}`}>
+                                {currentPage}
+                            </PaginationLink>
                         </PaginationItem>
 
-                        <div className="hidden md:flex items-center">
+                        <div className="hidden md:flex items-center gap-1">
                             {renderPaginationItems()}
                             {isEllipsisClicked && (
                                 <PaginationItem>
-                                    <Input 
-                                        type="text" 
-                                        value={inputPage} 
-                                        onChange={handleInputChange} 
-                                        onBlur={handleInputBlur} 
-                                        className="w-12 h-8 text-center" 
+                                    <Input
+                                        type="text"
+                                        value={inputPage}
+                                        onChange={handleInputChange}
+                                        onBlur={handleInputBlur}
+                                        onKeyDown={(e) => e.key === "Enter" && handleInputBlur()}
+                                        className={`w-16 h-8 text-center transition-all focus:ring-2
+                                            ${inputError ? "border-red-500 focus:ring-red-200" : "focus:ring-blue-200"}`}
+                                        aria-label="Go to page number"
+                                        placeholder="Page"
+                                        maxLength={4}
+                                        aria-invalid={inputError}
                                     />
                                 </PaginationItem>
                             )}
                         </div>
 
                         <PaginationItem>
-                            <PaginationNext 
-                                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} 
-                                className={`text-sm ${currentPage === totalPages ? "pointer-events-none opacity-50" : ""}`}
+                            <PaginationNext
+                                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                className={`text-sm transition-all hover:bg-primary
+                                    ${currentPage === totalPages ? "pointer-events-none opacity-50" : ""}`}
+                                aria-label={`Go to next page, page ${currentPage + 1}`}
+                                title={`Next page (${currentPage + 1})`}
+                                onKeyDown={(e) => e.key === "Enter" && handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                tabIndex={0}
                             >
                                 <span className="sr-only md:not-sr-only md:mr-2">Next</span>
                                 <ChevronRight className="h-4 w-4" />
