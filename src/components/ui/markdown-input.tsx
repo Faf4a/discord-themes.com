@@ -91,12 +91,10 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
         }
     };
 
-    const showToolbar = (isFocused || content.length > 0) && !disableToolbar;
-
     return (
-        <div className={cn("description w-full space-y-4 p-4", className)}>
+        <div className={cn("description w-full space-y-4", className)}>
             <div>
-                <div className={cn("flex items-center gap-0.5 bg-zinc-900 p-2 rounded-t-md transition-all duration-200 transform", showToolbar ? "translate-y-0 opacity-100 mb-2" : "-translate-y-2 opacity-0 pointer-events-none")}>
+                <div className="flex items-center gap-0.5 bg-zinc-900 p-2 rounded-t-md transition-all duration-200 transform">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-100" onClick={() => insertMarkdown("bold")} disabled={isPreview}>
                         <Bold className="h-4 w-4" />
                     </Button>
@@ -118,7 +116,7 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
                     </Button>
                 </div>
                 <div className="relative">
-                    <div className={cn("h-[200px] bg-zinc-900 transition-all duration-200", showToolbar ? "rounded-md" : "rounded-md")}>
+                    <div className="h-[200px] bg-zinc-900 transition-all duration-200 rounded-md">
                         {isPreview ? (
                             <div className="p-4 prose prose-invert max-w-none h-full overflow-auto">
                                 <ReactMarkdown className="whitespace-pre-wrap" remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>

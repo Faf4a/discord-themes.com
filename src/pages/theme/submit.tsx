@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Progress } from "@components/ui/progress";
@@ -37,7 +39,7 @@ export default function SubmitPage() {
 
         async function fetchData() {
             const response = await fetch("/api/user/isAuthed", {
-                method: "POST",
+                method: "GET",
                 headers: { "Content-Type": "application/json" , Authorization: `Bearer ${token}` }
             }).then((res) => res.json());
             setIsAuthed(response?.authenticated ?? false);

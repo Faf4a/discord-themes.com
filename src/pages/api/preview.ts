@@ -22,6 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 <span class="theme-help">
                     Nothing changing? The theme might not <br /> support both modes!
                 </span>
+                ${!url ? '<input id="css-url-input" type="text" placeholder="Enter CSS URL" /> <button id="load-css" class="load-css">Load CSS</button>' : ''}
             </div>
             <div class="toolbar-footer">
                 <span class="theme-disclaimer">
@@ -151,7 +152,31 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             line-height: 1.2;
             display: block;
         }
-    </style>
+
+        #css-url-input {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .load-css {
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            white-space: nowrap;
+        }
+
+        .load-css:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     </style>
     <script type="module">
         const toolbar = document.getElementById('theme-toolbar');
@@ -167,6 +192,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             toggle.className = 'theme-toggle ' + (isLightMode ? 'light' : 'dark');
             toggle.textContent = isLightMode ? 'Dark Mode' : 'Light Mode';
         });
+
+        const loadCssButton = document.getElementById('load-css');
+        if (loadCssButton) {
+            loadCssButton.addEventListener('click', () => {
+                const cssUrlInput = document.getElementById('css-url-input');
+                if (cssUrlInput && cssUrlInput.value) {
+                    window.location.search = '?url=' + encodeURIComponent(cssUrlInput.value);
+                }
+            });
+        }
     </script>
 `;
 
