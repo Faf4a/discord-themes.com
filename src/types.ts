@@ -1,6 +1,7 @@
 import { APIUser as User } from "discord-api-types/v10";
 
 export interface Theme {
+    last_updated: string;
     id: string;
     name: string;
     file_name: string;

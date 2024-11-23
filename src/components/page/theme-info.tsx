@@ -20,9 +20,9 @@ export default function Component({ id }: { id?: string }) {
 
     useEffect(() => {
         if (!id || isLoading || error) return;
-    
+
         const theme = themes.find((x) => x.id == id);
-        
+
         if (!theme) {
             window.location.href = "/";
         } else {
@@ -111,9 +111,9 @@ export default function Component({ id }: { id?: string }) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token}`
             },
-            body: JSON.stringify({ themeId }),
+            body: JSON.stringify({ themeId })
         });
 
         if (response.ok) {
@@ -122,7 +122,7 @@ export default function Component({ id }: { id?: string }) {
                 setTheme((prev) => ({ ...prev, likes: (prev.likes || 0) + 1 }));
             }
         }
-    }
+    };
 
     async function getLikedThemes() {
         function getCookie(name: string): string | undefined {
@@ -135,7 +135,7 @@ export default function Component({ id }: { id?: string }) {
 
         const response = await fetch("/api/likes/get", {
             method: "GET",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
         }).then((res) => res.json());
 
         setLikedThemes(response);
@@ -178,11 +178,6 @@ export default function Component({ id }: { id?: string }) {
                 </header>
 
                 <div className="container mx-auto px-4 py-6">
-                    <Button variant="outline" onClick={() => (window.location.href = "/")} className="mb-6">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
-                    </Button>
-
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_300px]">
                         <div className="space-y-6">
                             {loading ? (
@@ -192,13 +187,22 @@ export default function Component({ id }: { id?: string }) {
                                     <Skeleton className="h-64 w-full" />
                                 </>
                             ) : (
-                                <div className="rounded-lg border-b border-border/40 bg-card p-6">
-                                    <h2 className="text-2xl font-bold mb-4">{theme.name}</h2>
-                                    <p className="description text-muted-foreground mb-4">
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.description}</ReactMarkdown>
-                                    </p>
-                                    <div className="bg-muted rounded-lg flex justify-center items-center">
-                                        <Image src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
+                                <div>
+                                    <div className="rounded-lg border-b border-border/40 bg-card p-6 mb-2">
+                                        <h2 className="text-2xl font-bold mb-4">{theme.name}</h2>
+                                        <p className="description text-muted-foreground">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.description}</ReactMarkdown>
+                                        </p>
+                                    </div>
+                                    <div className="rounded-lg border-b border-border/40 bg-card p-6">
+                                        {theme?.longDescription && (
+                                            <p className="description text-muted-foreground mb-4">
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.longDescription}</ReactMarkdown>
+                                            </p>
+                                        )}
+                                        <div className="bg-muted rounded-lg flex justify-center items-center">
+                                            <Image src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -225,41 +229,32 @@ export default function Component({ id }: { id?: string }) {
                                         {window.innerWidth <= 768 ? "Not available on mobile" : "Preview"}
                                     </Button>
                                     {!loading && isAuthenticated && (
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             className={`w-full ${
                                                 // @ts-ignore
-                                                likedThemes?.likes?.find(t => t.themeId === theme.id)?.hasLiked 
-                                                ? "text-primary border-primary hover:bg-primary/10" 
-                                                : ""
-                                            }`} 
+                                                likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "text-primary border-primary hover:bg-primary/10" : ""
+                                            }`}
                                             onClick={handleLike(theme.id)}
                                         >
                                             {
-                                            // @ts-ignore
-                                            likedThemes?.likes?.find(t => t.themeId === theme.id)?.hasLiked ? (
-                                                <Heart className="fill-current mr-2 h-4 w-4" />
-                                            ) : (
-                                                <Heart className="mr-2 h-4 w-4" />
-                                            )}
-                                            {// @ts-ignore
-                                            likedThemes?.likes?.find(t => t.themeId === theme.id)?.hasLiked ? "Liked" : "Like"}
+                                                // @ts-ignore
+                                                likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? <Heart className="fill-current mr-2 h-4 w-4" /> : <Heart className="mr-2 h-4 w-4" />
+                                            }
+                                            {
+                                                // @ts-ignore
+                                                likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "Liked" : "Like"
+                                            }
                                         </Button>
                                     )}
                                     {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
                                         <>
-                                        <h2>Author Options</h2>
-                                            <Button variant="outline" className="w-full" onClick={() => window.open(`/theme/edit/${theme.id}`, "_blank")}
-                                                disabled>
+                                            <h2>Author Options</h2>
+                                            <Button variant="outline" className="w-full" onClick={() => window.open(`/theme/edit/${theme.id}`, "_blank")} disabled>
                                                 <Code className="mr-2 h-4 w-4" />
                                                 Edit
                                             </Button>
-                                            <Button 
-                                                variant="outline" 
-                                                className="w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
-                                                onClick={() => window.open(`/theme/delete/${theme.id}`, "_blank")}
-                                                disabled
-                                            >
+                                            <Button variant="outline" className="w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => window.open(`/theme/delete/${theme.id}`, "_blank")} disabled>
                                                 <Code className="mr-2 h-4 w-4" />
                                                 Delete
                                             </Button>

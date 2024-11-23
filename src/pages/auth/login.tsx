@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 
 const development = process.env.NODE_ENV === "development";
 
-const redirect = development ? "https://discord.com/oauth2/authorize?client_id=1257819493422465235&response_type=code&redirect_uri=https://literate-engine-rv7579wprjq2px77-4321.app.github.dev/api/user/auth?callback={CALLBACK}&scope=connections identify" : "https://discord.com/oauth2/authorize?client_id=1257819493422465235&response_type=code&redirect_uri=https://discord-themes.com/api/user/auth?callback={CALLBACK}&scope=connections identify";
+const redirect = development ? "https://discord.com/oauth2/authorize?client_id=1257819493422465235&response_type=code&redirect_uri=http://localhost:4321/api/user/auth?callback={CALLBACK}&scope=connections identify" : "https://discord.com/oauth2/authorize?client_id=1257819493422465235&response_type=code&redirect_uri=https://discord-themes.com/api/user/auth?callback={CALLBACK}&scope=connections identify";
 
 export default function AuthCallback() {
     const router = useRouter();

@@ -6,7 +6,7 @@ import { ThemeGrid } from "@components/theme/grid";
 import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { Plus, Search, SearchX, X } from "lucide-react";
+import { CalendarPlus, LayoutList, Plus, Search, SearchX, X } from "lucide-react";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useAuth } from "@context/auth";
@@ -88,7 +88,6 @@ function App() {
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
     const [likedThemes, setLikedThemes] = useState([]);
-    const [endlessScroll, setEndlessScroll] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
@@ -129,10 +128,6 @@ function App() {
             setUser(false);
         }
     }, [isLoading, authorizedUser, isAuthenticated]);
-
-    useEffect(() => {
-        setEndlessScroll(localStorage.getItem("endlessScroll") === "true");
-    }, []);
 
     const allFilters = [
         ...themes.reduce((acc, theme) => {
@@ -189,15 +184,15 @@ function App() {
                         <h1 className={cn("text-xl font-semibold text-foreground transition-opacity flex-shrink-0", isSearchExpanded && "hidden md:block")}>
                             <a href="/">Theme Library</a>
                         </h1>
-                        <div className={cn("flex-1 max-w-xl transition-all duration-200", isSearchExpanded ? "absolute top-0 left-0 right-0 z-50 bg-background p-4 md:relative md:bg-transparent md:p-0" : "hidden md:block")}>
-                            <div className="flex items-center gap-2 justify-center sm:justify-start">
-                                {isSearchExpanded && (
-                                    <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSearchExpanded(false)}>
+                        <div className={cn("flex-1 max-w-xl transition-all duration-200", isSearchExpanded ? "absolute top-0 left-0 right-0 z-50 bg-background p-4 md:relative md:bg-transparent md:p-0 flex items-center" : "hidden md:block")}>
+                            {isSearchExpanded && (
+                                <div className="flex items-center w-full">
+                                    <SearchBar onSearch={setSearchQuery} className="w-full" />
+                                    <Button variant="ghost" size="icon" className="ml-2" onClick={() => setIsSearchExpanded(false)}>
                                         <X className="h-5 w-5" />
                                     </Button>
-                                )}
-                                <SearchBar onSearch={setSearchQuery} className={cn("w-full", isSearchExpanded && "md:max-w-xl")} />
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center gap-4 ml-auto">
                             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSearchExpanded(true)}>
@@ -210,33 +205,45 @@ function App() {
             </header>
 
             <div className="container mx-auto px-4 py-6">
-                <h2 className="text-2xl font-semibold mb-3 mt-3">Recently Added</h2>
-                <div className="flex items-center justify-between mb-6">
-                    <ThemeCarousel themes={themes} />
-                </div>
-                <h2 className="text-2xl font-semibold p-2" id="scroll-to">Themes</h2>
-                <div className="flex items-center justify-between mb-3 mt-3">
-                    <div className="flex items-center gap-2">
-                        <FilterDropdown options={allFilters} placeholder="Filter results..." emptyMessage="No filters found" onChange={setFilters} />
-                        <span className="text-sm text-muted-foreground hidden sm:block">{filteredThemes.length} themes</span>
+                <div className={`transform transition-all duration-300 ease-in-out overflow-hidden ${searchQuery === "" ? "opacity-100 translate-y-0 max-h-[500px]" : "opacity-0 -translate-y-10 max-h-0"} hidden md:block`}>
+                    <div className="flex flex-col items-center">
+                        <div className="relative inline-flex items-center justify-center">
+                            <div className="opacity-30 transform rotate-12">
+                                <CalendarPlus size={25} className="text-primary mr-2" />
+                            </div>
+                            <h2 className="text-xl font-semibold mb-3 mt-3 relative z-10">Recently Updated</h2>
+                        </div>
+                        <ThemeCarousel themes={themes} />
                     </div>
-                    <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
-                        {isValid ? (
-                            <>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Submit Theme
-                            </>
-                        ) : (
-                            "Login with Discord"
-                        )}
-                    </Button>
+                    <div className="border-t border-1 border-muted rounded-lg m-4"></div>
+                </div>
+                <div className="mb-3 mt-3">
+                    <div className="mb-3">
+                        <SearchBar onSearch={setSearchQuery} />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <FilterDropdown options={allFilters} placeholder="Filter tags..." emptyMessage="No tags found" onChange={setFilters} />
+                            <span className="text-sm text-muted-foreground hidden sm:block">{filteredThemes.length} themes</span>
+                        </div>
+                        <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
+                            {isValid ? (
+                                <>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Submit Theme
+                                </>
+                            ) : (
+                                "Login with Discord"
+                            )}
+                        </Button>
+                    </div>
                 </div>
                 {loading ? (
                     <SkeletonGrid amount={6} />
                 ) : error ? (
                     <div className="text-red-500">Error: {error.message}</div>
                 ) : filteredThemes.length ? (
-                    <ThemeGrid likedThemes={likedThemes as any as []} themes={filteredThemes} endlessScroll={endlessScroll} />
+                    <ThemeGrid likedThemes={likedThemes as any as []} themes={filteredThemes} />
                 ) : (
                     <div>
                         <NoResults /> <SkeletonGrid amount={6} />

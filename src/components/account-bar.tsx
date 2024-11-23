@@ -1,21 +1,17 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
-import { Switch } from "@components/ui/switch";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useAuth } from "@context/auth";
-import { useRouter } from "next/router";
 
 interface AccountBarProps {
     className?: string;
 }
 
 export function AccountBar({ className }: AccountBarProps) {
-    const router = useRouter();
     const [user, setUser] = useState<UserData | object>({});
     const [isValid, setValid] = useState(null);
-    const [endlessScroll, setEndlessScroll] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("endlessScroll") === "true" : false));
     const { authorizedUser, isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
@@ -59,16 +55,6 @@ export function AccountBar({ className }: AccountBarProps) {
         window.location.href = "/";
     };
 
-    const toggleEndlessScroll = () => {
-        const newValue = !endlessScroll;
-        setEndlessScroll(newValue);
-        console.log("%c[client/settings]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", `Endless Scroll: ${newValue}`);
-        router.replace({ query: { endless: newValue ? "true" : "false" } }, undefined, { shallow: true });
-        // refresh window
-        window.location.reload();
-        localStorage.setItem("endlessScroll", String(newValue));
-    };
-
     return (
         <div>
             {isValid && user && (
@@ -84,12 +70,6 @@ export function AccountBar({ className }: AccountBarProps) {
                     <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem onClick={() => (window.location.href = "/users/@me")} className="transition-colors cursor-pointer">
                             My Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="transition-colors">
-                            <div className="flex items-center justify-between w-full">
-                                <span>Endless Scroll</span>
-                                <Switch className="cursor-pointer" checked={endlessScroll} onCheckedChange={toggleEndlessScroll} />
-                            </div>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700 transition-colors cursor-pointer">
                             Logout

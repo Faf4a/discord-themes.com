@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Filter, SearchX, X } from "lucide-react";
+import { SearchX, Tags, X } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
@@ -46,10 +46,10 @@ export function FilterDropdown({ options, placeholder = "Select filters...", emp
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button variant="outline" className="justify-start relative">
-                    <Filter className="mr-2 h-4 w-4" />
+                    <Tags className="mr-2 h-4 w-4" />
                     {selectedValues.length > 0 ? (
                         <>
-                            Filters
+                            Tags
                             <Badge variant="secondary" className="ml-2 rounded-lg px-1 font-normal">
                                 {selectedValues.length}
                             </Badge>
@@ -68,7 +68,7 @@ export function FilterDropdown({ options, placeholder = "Select filters...", emp
                             )}
                         </>
                     ) : (
-                        "Filters"
+                        "Tags"
                     )}
                 </Button>
             </PopoverTrigger>

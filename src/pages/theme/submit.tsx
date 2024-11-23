@@ -1,15 +1,16 @@
 "use client";
 
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { type FocusEvent, useEffect, useRef, useState } from "react";
 import { Progress } from "@components/ui/progress";
 import { Card } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { Button } from "@components/ui/button";
-import { ImageIcon, Upload, Users } from "lucide-react";
+import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import MarkdownInput from "@components/ui/markdown-input";
 import Image from "next/image";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 
 export default function SubmitPage() {
     const router = useRouter();
@@ -24,9 +25,21 @@ export default function SubmitPage() {
         file: null,
         fileUrl: "",
         longDescription: "",
-        contributors: ""
+        contributors: [""],
+        sourceLink: ""
     });
     const [fetching, setFetching] = useState(true);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+    const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+    const [validSource, setValidSource] = useState(true);
+    const [urlError, setUrlError] = useState(false);
+
+    const isValidImageUrl = (url: string) => {
+        if (!url) return false;
+        const validExtensions = [".png", ".gif", ".webp", ".jpg", ".jpeg"];
+        return validExtensions.some((ext) => url.toLowerCase().endsWith(ext));
+    };
 
     useEffect(() => {
         function getCookie(name: string): string | undefined {
@@ -40,7 +53,7 @@ export default function SubmitPage() {
         async function fetchData() {
             const response = await fetch("/api/user/isAuthed", {
                 method: "GET",
-                headers: { "Content-Type": "application/json" , Authorization: `Bearer ${token}` }
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             }).then((res) => res.json());
             setIsAuthed(response?.authenticated ?? false);
             setUser(response.user);
@@ -129,6 +142,90 @@ export default function SubmitPage() {
         console.log(form);
     };
 
+    const fetchPreview = async (url: string) => {
+        setIsLoadingPreview(true);
+        try {
+            const response = await fetch(`/api/preview/screenshot?url=${encodeURIComponent(url)}`);
+            const base64Image = await response.text();
+            setFormData((prev) => ({
+                ...prev,
+                file: `data:image/png;base64,${base64Image}`
+            }));
+            setShowPreviewModal(false);
+        } catch (error) {
+            console.error("Failed to fetch preview:", error);
+        } finally {
+            setIsLoadingPreview(false);
+        }
+    };
+
+    const isValidSourceUrl = (url: string) => {
+        if (!url) return true;
+        return url.includes("github.com/") || url.includes("github.io/") || url.includes("gitlab.com/");
+    };
+
+    const ContributorInputs = () => {
+        const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+        const [bulkInput, setBulkInput] = useState("");
+
+        const handleBulkInput = (e: FocusEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            if (!value) return;
+
+            const newContributors = value
+                .split(/[\s,]+/)
+                .filter((id) => id.trim())
+                .map((id) => id.trim());
+
+            setFormData((prev) => ({
+                ...prev,
+                contributors: [...prev.contributors.filter((c) => c), ...newContributors]
+            }));
+
+            setBulkInput("");
+        };
+
+        const removeField = (index: number) => {
+            setFormData((prev) => ({
+                ...prev,
+                contributors: prev.contributors.filter((_, i) => i !== index)
+            }));
+        };
+
+        return (
+            <div className="space-y-2 mt-2">
+                {formData.contributors
+                    .filter((c) => c)
+                    .map((contributor, index) => (
+                        <div key={`contributor-${index}`} className="flex items-center gap-2">
+                            <Input
+                                value={contributor}
+                                onChange={(e) => {
+                                    const newContributors = [...formData.contributors];
+                                    newContributors[index] = e.target.value;
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        contributors: newContributors
+                                    }));
+                                }}
+                                placeholder="Discord User ID"
+                                ref={(el) => {
+                                    inputRefs.current[index] = el;
+                                }}
+                            />
+                            <Button variant="ghost" size="icon" onClick={() => removeField(index)}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    ))}
+
+                <div className="flex items-center gap-4 mt-4">
+                    <Input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} onBlur={handleBulkInput} placeholder="Type multiple IDs separated by spaces..." className="italic" />
+                </div>
+            </div>
+        );
+    };
+
     return (
         <>
             <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -150,7 +247,7 @@ export default function SubmitPage() {
                                         <h2 className="text-lg font-semibold mb-4">Progress</h2>
                                         <div className="space-y-4">
                                             <Progress value={progress} className="h-2" />
-                                            {["Title", "Short Description", "Long Description", "Cover Image", "Contributors"].map((label, index) => (
+                                            {["Title", "Short Description", "Long Description", "Cover Image", "Attribution"].map((label, index) => (
                                                 <div key={label} className={`flex items-center gap-3 ${step === index + 1 ? "text-primary font-medium" : "text-muted-foreground"}`}>
                                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${step === index + 1 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>{index + 1}</div>
                                                     <span>{label}</span>
@@ -168,7 +265,7 @@ export default function SubmitPage() {
                                                 <p className="text-muted-foreground">Choose a clear and descriptive title for your theme.</p>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="title">Title</Label>
-                                                    <Input id="title" value={formData.title} onChange={(e) => updateFormData("title", e.target.value)} placeholder="Enter project title..." />
+                                                    <Input id="title" value={formData.title} onChange={(e) => updateFormData("title", e.target.value)} placeholder="Enter theme title..." />
                                                 </div>
                                             </div>
                                         )}
@@ -192,12 +289,7 @@ export default function SubmitPage() {
                                         {step === 4 && (
                                             <div className="space-y-4">
                                                 <h2 className="text-2xl font-semibold">Theme Preview</h2>
-                                                <p className="text-muted-foreground">
-                                                    Upload a preview image of your theme. If you don't have one, use our API:
-                                                    <a href="/api/preview" className="text-primary hover:underline ml-1" target="_blank" rel="noopener noreferrer">
-                                                        https://discord-themes.com/api/preview?url=https://...
-                                                    </a>
-                                                </p>
+                                                <p className="text-muted-foreground">Upload a preview image of your theme. If you don't have one, generate a preview by using the "I don't have a Picture" button.</p>
                                                 <div className="space-y-6">
                                                     <div className={`border-2 ${dragActive ? "border-primary" : "border-input"} hover:border-primary transition-colors duration-200 border-dashed rounded-lg p-8 text-center`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
                                                         <Input type="file" accept="image/png, image/gif, image/webp" onChange={(e) => handleFileChange(e.target.files[0])} className="hidden" id="file-upload" />
@@ -212,26 +304,87 @@ export default function SubmitPage() {
                                                             <Image priority width={854} height={480} src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center space-x-2">
-                                                        <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                                                        <Input value={formData.fileUrl} onChange={(e) => updateFormData("fileUrl", e.target.value)} placeholder="Or enter image URL..." className="flex-1" />
-                                                        <Button variant="outline" onClick={() => updateFormData("file", formData.fileUrl)}>
-                                                            Load
-                                                        </Button>
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="flex items-center space-x-2">
+                                                            <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                                                            <Input
+                                                                value={formData.fileUrl}
+                                                                onChange={(e) => {
+                                                                    setUrlError(false);
+                                                                    updateFormData("fileUrl", e.target.value);
+                                                                }}
+                                                                placeholder="Or enter image URL..."
+                                                                className={`flex-1 ${urlError ? "border-red-500" : ""}`}
+                                                            />
+                                                            <Button
+                                                                variant="outline"
+                                                                onClick={() => {
+                                                                    if (isValidImageUrl(formData.fileUrl)) {
+                                                                        setUrlError(false);
+                                                                        updateFormData("file", formData.fileUrl);
+                                                                    } else {
+                                                                        setUrlError(true);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Load
+                                                            </Button>
+                                                        </div>
+                                                        {urlError && <p className="text-sm text-red-500">Please enter a valid image URL (PNG, GIF, WEBP, JPG)</p>}
                                                     </div>
+                                                    <Button variant="outline" onClick={() => setShowPreviewModal(true)} className="mt-4">
+                                                        I don't have a Picture
+                                                    </Button>
+
+                                                    <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Generate Theme Preview</DialogTitle>
+                                                            </DialogHeader>
+                                                            <div className="space-y-4">
+                                                                <Input placeholder="Enter theme URL..." value={previewUrl} onChange={(e) => setPreviewUrl(e.target.value)} />
+                                                                <Button onClick={() => fetchPreview(previewUrl)} disabled={isLoadingPreview} className="w-full">
+                                                                    {isLoadingPreview ? (
+                                                                        <>
+                                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                            Generating Preview...
+                                                                        </>
+                                                                    ) : (
+                                                                        "Generate Preview"
+                                                                    )}
+                                                                </Button>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             </div>
                                         )}
 
                                         {step === 5 && (
                                             <div className="space-y-4">
-                                                <h2 className="text-2xl font-semibold">Contributors</h2>
-                                                <p className="text-muted-foreground">Any contributors? List their Discord User Ids below!</p>
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <Users className="h-12 w-12 text-muted-foreground" />
-                                                        <Input value={formData.contributors} onChange={(e) => updateFormData("contributors", e.target.value)} placeholder="Enter contributors (comma separated)..." />
+                                                <section>
+                                                    <h2 className="text-2xl font-semibold">Attribution</h2>
+                                                    <p className="text-muted-foreground">
+                                                        Any contributors? List their Discord User IDs below! <br /> You do not have to list yourself!
+                                                    </p>
+                                                    <div className="space-y-4">
+                                                        <ContributorInputs />
                                                     </div>
+                                                </section>
+                                                <div className="space-y-4">
+                                                    <h2 className="text-2xl font-semibold">Source</h2>
+                                                    <p className="text-muted-foreground">If your theme has a dedicated GitHub/GitLab repository, feel free to provide the link below.</p>
+                                                    <Input
+                                                        className={`${!validSource ? "border-red-500" : ""}`}
+                                                        value={formData.sourceLink}
+                                                        onChange={(e) => {
+                                                            const value = e.target.value;
+                                                            setValidSource(isValidSourceUrl(value));
+                                                            updateFormData("sourceLink", value);
+                                                        }}
+                                                        placeholder="Enter source URL..."
+                                                    />
+                                                    {!validSource && <p className="text-sm text-red-500">URL must start with github.com/.io or gitlab.com</p>}{" "}
                                                 </div>
                                             </div>
                                         )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@components/ui/carousel";
 import { Card, CardContent } from "@components/ui/card";
 import Autoplay from "embla-carousel-autoplay";
 import { ThemeCard } from "./card";
@@ -25,7 +25,7 @@ export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
     }, [themes]);
 
     return (
-        <div className="w-full relative px-4 md:px-16">
+        <div className="w-full relative">
             <Carousel
                 plugins={[Autoplay({ delay: 3500 })]}
                 opts={{
@@ -35,20 +35,18 @@ export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
                 }}
                 className="w-full"
             >
-                <CarouselContent className="-ml-2 md:-ml-4">
+                <CarouselContent>
                     {filteredThemes.map((theme) => (
-                        <CarouselItem key={theme.id} className="w-full sm:basis-full md:basis-1/3 pl-2 md:pl-4">
-                            <Card className="border-0 shadow-none bg-transparent">
+                        <CarouselItem key={theme.id} className="w-full sm:basis-full md:basis-1/2 md:pl-4">
+                            <Card className="bg-transparent border border-muted">
                                 <CardContent className="p-0">
                                      {/* @ts-ignore */}
-                                    <ThemeCard theme={theme} noFooter />
+                                    <ThemeCard theme={theme} noFooter diagonal lastUpdated />
                                 </CardContent>
                             </Card>
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute -left-12 hidden md:flex" />
-                <CarouselNext className="absolute -right-12 hidden md:flex" />
             </Carousel>
         </div>
     );

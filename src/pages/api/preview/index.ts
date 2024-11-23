@@ -7,7 +7,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return res.status(405).json({ message: "Method not allowed", wants: "GET" });
     }
 
-    const { url } = req.query;
+    const { url, hideToolbar, theme } = req.query;
     const filePath = join(process.cwd(), "public", "preview", "index.html");
     let htmlContent = readFileSync(filePath, "utf8");
 
@@ -22,7 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 <span class="theme-help">
                     Nothing changing? The theme might not <br /> support both modes!
                 </span>
-                ${!url ? '<input id="css-url-input" type="text" placeholder="Enter CSS URL" /> <button id="load-css" class="load-css">Load CSS</button>' : ''}
+                ${!url ? '<input id="css-url-input" type="text" placeholder="Enter CSS URL" /> <button id="load-css" class="load-css">Load CSS</button>' : ""}
             </div>
             <div class="toolbar-footer">
                 <span class="theme-disclaimer">
@@ -181,7 +181,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     <script type="module">
         const toolbar = document.getElementById('theme-toolbar');
         const toggle = document.getElementById('theme-toggle');
-        let isLightMode = false;
+        let isLightMode = ${theme === "light" ? true : false};
 
         toggle.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -206,11 +206,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 `;
 
     if (url) {
-        const linkTag = `<link rel="stylesheet" type="text/css" href="${url}">`;
+        const linkTag = `<link rel="stylesheet" href="${decodeURIComponent(url as any as string)}">`;
         htmlContent = htmlContent.replace("<!--injectSpace-->", linkTag);
     }
 
-    htmlContent = htmlContent.replace("</body>", `${toolbarHTML}</body>`);
+    if (!hideToolbar) htmlContent = htmlContent.replace("</body>", `${toolbarHTML}</body>`);
 
     res.setHeader("Content-Type", "text/html");
     res.status(200).send(htmlContent);

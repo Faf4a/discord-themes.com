@@ -14,31 +14,34 @@ function App({ Component, pageProps }) {
                     <meta name="application-name" content="Theme Library" />
                     <meta name="description" content="Find your favourite themes all at one place." />
                     <title>Theme Library</title>
+                    <link rel="icon" href="/favicon.ico" />
                 </Head>
                 <div className="min-h-screen flex flex-col">
                     <main className="flex-1">
-                        <Component {...pageProps} />
-                    </main>
-                    <footer className="bg-background border-t border-border/40 select-none">
-                        <div className="container mx-auto px-4 py-8">
-                            <div className="flex flex-col items-center gap-4">
-                                <p className="text-center text-sm text-muted-foreground">discord-themes(.com) is not affiliated with or endorsed by Discord Inc.</p>
-                                <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-muted-foreground">
-                                    <a href="https://www.cloudflare.com" className="text-muted-foreground no-underline hover:text-foreground transition-colors duration-200 flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                                        Protected by Cloudflare
-                                    </a>
-                                    <div className="h-4 w-px bg-muted-foreground/60 sm:block hidden"></div>
-                                    <a href="https://vercel.com" className="text-muted-foreground no-underline hover:text-foreground transition-colors duration-200 flex items-center gap-2" target="_blank" rel="noopener noreferrer">
-                                        Hosted on ▲ Vercel
-                                    </a>
-                                    <div className="h-4 w-px bg-muted-foreground/60 sm:block hidden"></div>
-                                    <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-muted-foreground no-underline hover:text-foreground transition-colors duration-200 flex items-center gap-2">
-                                        Privacy Policy
-                                    </a>
+                        <div className="max-w-7xl mx-auto px-4 md:px-8">
+                            <Component {...pageProps} />
+                        </div>
+                        <footer className="bg-background select-none">
+                            <div className="container mx-auto px-2 py-8">
+                                <div className="flex flex-col items-center gap-4">
+                                    <p className="text-center text-sm text-muted-foreground">discord-themes(.com) is not affiliated with or endorsed by Discord Inc.</p>
+                                    <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-muted-foreground">
+                                        <a href="https://www.cloudflare.com" className="text-muted-foreground no-underline hover:text-foreground transition-colors duration-200 flex items-center gap-2" target="_blank" rel="noopener noreferrer">
+                                            Protected by Cloudflare
+                                        </a>
+                                        <div className="h-4 w-px bg-muted-foreground/60 sm:block hidden"></div>
+                                        <a href="https://vercel.com" className="text-muted-foreground no-underline hover:text-foreground transition-colors duration-200 flex items-center gap-2" target="_blank" rel="noopener noreferrer">
+                                            Hosted on ▲ Vercel
+                                        </a>
+                                        <div className="h-4 w-px bg-muted-foreground/60 sm:block hidden"></div>
+                                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-muted-foreground no-underline hover:text-foreground transition-colors duration-200 flex items-center gap-2">
+                                            Privacy Policy
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </footer>
+                        </footer>
+                    </main>
                 </div>
             </ThemeProvider>
         </AuthProvider>
