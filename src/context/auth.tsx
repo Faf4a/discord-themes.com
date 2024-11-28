@@ -77,4 +77,4 @@ export function AuthProvider({ children }) {
     );
 }
 
-export const useAuth = () => useContext(WebContext);
+export const useWebContext = () => useContext(WebContext);

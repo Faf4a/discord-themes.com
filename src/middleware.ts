@@ -1,35 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SERVER } from "@constants";
 
 const rateLimit = new Map<string, { count: number; lastRequest: number; hits: number }>();
 
-const RATE_LIMIT_WINDOW = 4000;
-const RATE_LIMIT_MAX_REQUESTS = 5;
-
-const HIGHER_RATE_LIMIT_WINDOW = 25000;
-const HIGHER_RATE_LIMIT_MAX_REQUESTS = 5;
-const RATE_LIMIT_THRESHOLD = 3;
-
-const AUTH_RATE_LIMIT_WINDOW = 2000;
-const AUTH_RATE_LIMIT_MAX_REQUESTS = 10;
-
+const RATE_LIMIT_WINDOW = 3500;
+const RATE_LIMIT_MAX_REQUESTS = 10;
 const SCREENSHOT_RATE_LIMIT_WINDOW = 15000;
 const SCREENSHOT_RATE_LIMIT_MAX_REQUESTS = 2;
 
 export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     const path = url.pathname;
-    const ip = req.headers.get("x-forwarded-for") || req.ip || "unknown";
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
 
-    let isAuthenticated = false;
     if (path.startsWith("/api")) {
         const now = Date.now();
-
-        if (req.method === "POST") {
-            const body = await req.json();
-            if (body.token) {
-                isAuthenticated = true;
-            }
-        }
 
         if (path === "/api/preview/screenshot") {
             if (!rateLimit.has(ip)) {
@@ -60,17 +45,11 @@ export async function middleware(req: NextRequest) {
             } else {
                 const rateInfo = rateLimit.get(ip)!;
 
-                const window = isAuthenticated ? AUTH_RATE_LIMIT_WINDOW : rateInfo.hits >= RATE_LIMIT_THRESHOLD ? HIGHER_RATE_LIMIT_WINDOW : RATE_LIMIT_WINDOW;
-
-                const maxRequests = isAuthenticated ? AUTH_RATE_LIMIT_MAX_REQUESTS : rateInfo.hits >= RATE_LIMIT_THRESHOLD ? HIGHER_RATE_LIMIT_MAX_REQUESTS : RATE_LIMIT_MAX_REQUESTS;
-
-                if (now - rateInfo.lastRequest < window) {
+                if ((now - rateInfo.lastRequest) < RATE_LIMIT_WINDOW) {
                     rateInfo.count += 1;
-                    if (rateInfo.count > maxRequests) {
-                        if (!isAuthenticated) {
-                            rateInfo.hits += 1;
-                        }
-                        const retryAfter = Math.ceil((window - (now - rateInfo.lastRequest)) / 1000);
+                    if (rateInfo.count > RATE_LIMIT_MAX_REQUESTS) {
+                        rateInfo.hits += 1;
+                        const retryAfter = Math.ceil((RATE_LIMIT_WINDOW - (now - rateInfo.lastRequest)));
                         return new NextResponse(JSON.stringify({ message: "Too many requests" }), {
                             status: 429,
                             headers: {

@@ -1,3 +1,5 @@
+"use cache";
+
 import clientPromise from "@utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 

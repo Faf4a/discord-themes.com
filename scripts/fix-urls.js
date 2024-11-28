@@ -11,7 +11,6 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let cssContent = readFileSync("./styles.css", "utf-8");
 
-// Process CSS to remove unused classes and replace asset paths
 const processCSS = async () => {
     const root = postcss.parse(cssContent);
 
@@ -55,7 +54,6 @@ const processCSS = async () => {
     await Promise.all(assetPromises);
 
     writeFileSync("./new-styles.css", root.toString());
-    console.log("CSS processing complete: Unused classes removed and asset URLs converted.");
 };
 
-processCSS().catch((err) => console.error("Error processing CSS:", err));
+processCSS().catch((err) => console.error(err));

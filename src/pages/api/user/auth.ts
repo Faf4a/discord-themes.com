@@ -24,6 +24,7 @@ declare module "discord-api-types/v10" {
 }
 
 async function fetchGitHubAccount(token: string): Promise<string | null> {
+    "use cache";
     const response = await fetch("https://discord.com/api/users/@me/connections", {
         headers: {
             Authorization: `${token}`
@@ -79,8 +80,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             authorization: `${oauthResponse.token_type} ${oauthResponse.access_token}`
         }
     });
-
-    console.log(response);
 
     if (!response.ok) {
         return res.status(401).json({ status: 401, message: "Invalid or expired Discord token" });

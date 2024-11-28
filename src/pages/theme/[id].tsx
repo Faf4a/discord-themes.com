@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from 'next/router';
 import App from "@components/page/theme-info"
 

@@ -1,3 +1,5 @@
+"use cache";
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import clientPromise from "@utils/db";
 import { isAuthed } from "@utils/auth";

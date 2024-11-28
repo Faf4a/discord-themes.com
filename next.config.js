@@ -28,6 +28,9 @@ module.exports = {
             }
         ]
     },
+    experimental: {
+        dynamicIO: true,
+    },
     reactStrictMode: false,
     productionBrowserSourceMaps: false
 };

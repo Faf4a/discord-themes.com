@@ -6,45 +6,12 @@ import { ThemeGrid } from "@components/theme/grid";
 import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { CalendarPlus, LayoutList, Plus, Search, SearchX, X } from "lucide-react";
+import { CalendarPlus, Plus, Search, SearchX, X } from "lucide-react";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
-import { useAuth } from "@context/auth";
+import { useWebContext } from "@context/auth";
 import ThemeCarousel from "@components/theme/carousel";
-
-const THEMES_CACHE_KEY = "themes_cache";
-
-const fetchThemes = async () => {
-    const response = await fetch("/api/themes");
-    return response.json();
-};
-
-const useThemes = () => {
-    const [themes, setThemes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const cachedThemes = localStorage.getItem(THEMES_CACHE_KEY);
-        if (cachedThemes) {
-            setThemes(JSON.parse(cachedThemes));
-            setLoading(false);
-        } else {
-            fetchThemes()
-                .then((data) => {
-                    setThemes(data);
-                    localStorage.setItem(THEMES_CACHE_KEY, JSON.stringify(data));
-                    setLoading(false);
-                })
-                .catch((err) => {
-                    setError(err);
-                    setLoading(false);
-                });
-        }
-    }, []);
-
-    return { themes, loading, error };
-};
+import { DropdownFilter } from "@components/ui/dropdown-filter";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -82,45 +49,45 @@ const NoResults = () => (
 );
 
 function App() {
-    const { themes, loading, error } = useThemes();
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
     const [likedThemes, setLikedThemes] = useState([]);
-    const { authorizedUser, isAuthenticated, isLoading } = useAuth();
-
+    const [sort, setSort] = useState("most-popular");
+    const { authorizedUser, isAuthenticated, isLoading, error, themes } = useWebContext();
+    
     useEffect(() => {
         if (isLoading) return;
-
+    
         function getCookie(name: string): string | undefined {
             const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
             if (parts.length === 2) return parts.pop()?.split(";").shift();
         }
-
+    
         const token = getCookie("_dtoken");
-
+    
         async function getLikedThemes() {
             const cachedLikedThemes = localStorage.getItem("likedThemes");
             const cacheTime = localStorage.getItem("ct");
             const now = Date.now();
-
+    
             if (cachedLikedThemes && cacheTime && now - parseInt(cacheTime, 10) < 3600000) {
                 setLikedThemes(JSON.parse(cachedLikedThemes));
                 return;
             }
-
+    
             const response = await fetch("/api/likes/get", {
                 method: "GET",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             }).then((res) => res.json());
-
+    
             localStorage.setItem("likedThemes", JSON.stringify(response));
             localStorage.setItem("ct", now.toString());
             setLikedThemes(response);
         }
-
+    
         if (token && isAuthenticated) {
             setUser(authorizedUser);
             getLikedThemes();
@@ -128,8 +95,8 @@ function App() {
             setUser(false);
         }
     }, [isLoading, authorizedUser, isAuthenticated]);
-
-    const allFilters = [
+    
+    const allFilters = isLoading ? [] : [
         ...themes.reduce((acc, theme) => {
             theme.tags.forEach((tag) => acc.set(tag, (acc.get(tag) || 0) + 1));
             return acc;
@@ -140,34 +107,28 @@ function App() {
             value: tag,
             label: tag.charAt(0).toUpperCase() + tag.slice(1)
         }));
-
-    type Sort = "likes" | "downloads" | "release_date";
-
-    const sort: Sort = "likes";
-
-    const filteredThemes = themes
+    
+    const filteredThemes = isLoading ? [] : themes
         .filter((t) => {
             const match = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase());
             const tags = filters.length === 0 || filters.every((f) => t.tags.includes(f.value));
             return match && tags;
         })
         .sort((a, b) => {
-            const aMatch = a.name.toLowerCase().includes(searchQuery.toLowerCase());
-            const bMatch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
-            if (aMatch !== bMatch) return aMatch ? -1 : 1;
-
-            switch (sort as Sort) {
-                case "likes":
+            switch (sort) {
+                case "most-liked":
                     return b.likes - a.likes;
-                case "downloads":
+                case "most-popular":
                     return b.downloads - a.downloads;
-                case "release_date":
-                    return +new Date(b.release_date) - +new Date(a.release_date);
+                case "recently-updated":
+                    return +new Date(b.updated_at) - +new Date(a.updated_at);
+                case "recently-uploaded":
+                    return +new Date(b.created_at) - +new Date(a.created_at);
                 default:
                     return 0;
             }
         });
-
+    
     const handleSubmit = () => {
         if (isValid) {
             window.location.href = "/theme/submit";
@@ -218,15 +179,8 @@ function App() {
                     <div className="border-t border-1 border-muted rounded-lg m-4"></div>
                 </div>
                 <div className="mb-3 mt-3">
-                    <div className="mb-3">
-                        <SearchBar onSearch={setSearchQuery} />
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <FilterDropdown options={allFilters} placeholder="Filter tags..." emptyMessage="No tags found" onChange={setFilters} />
-                            <span className="text-sm text-muted-foreground hidden sm:block">{filteredThemes.length} themes</span>
-                        </div>
-                        <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
+                    <div className="flex justify-end mb-3">
+                        <Button disabled={isLoading} onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
                             {isValid ? (
                                 <>
                                     <Plus className="mr-2 h-4 w-4" />
@@ -237,8 +191,17 @@ function App() {
                             )}
                         </Button>
                     </div>
+                    <div className="flex mb-4 flex-col md:flex-row md:items-center md:gap-4 w-full">
+                        <div className="mb-3 md:mb-0 flex-grow md:flex-grow-[2/3]">
+                            <SearchBar onSearch={setSearchQuery} />
+                        </div>
+                        <div className="flex items-center gap-2 md:flex-grow-[1/3]">
+                            <FilterDropdown options={allFilters} placeholder="Filter tags..." emptyMessage="No tags found" onChange={setFilters} />
+                            <DropdownFilter onChange={setSort} />
+                        </div>
+                    </div>
                 </div>
-                {loading ? (
+                {isLoading ? (
                     <SkeletonGrid amount={6} />
                 ) : error ? (
                     <div className="text-red-500">Error: {error.message}</div>

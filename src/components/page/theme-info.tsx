@@ -5,7 +5,7 @@ import Head from "next/head";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Image from "next/image";
-import { useAuth } from "@context/auth";
+import { useWebContext } from "@context/auth";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -14,7 +14,7 @@ export default function Component({ id }: { id?: string }) {
     const [isDownloaded, setIsDownloaded] = useState(false);
     const [loading, setLoading] = useState(true);
     const [likedThemes, setLikedThemes] = useState();
-    const { authorizedUser, isAuthenticated, isLoading, themes, error } = useAuth();
+    const { authorizedUser, isAuthenticated, isLoading, themes, error } = useWebContext();
 
     const previewUrl = `/api/preview?url=/api/${id}`;
 

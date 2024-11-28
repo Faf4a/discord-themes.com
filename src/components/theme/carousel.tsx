@@ -27,7 +27,7 @@ export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
     return (
         <div className="w-full relative">
             <Carousel
-                plugins={[Autoplay({ delay: 3500 })]}
+                plugins={[Autoplay({ delay: 5500 })]}
                 opts={{
                     loop: true,
                     align: "start",

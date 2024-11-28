@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
-import { useAuth } from "@context/auth";
+import { useWebContext } from "@context/auth";
 
 interface AccountBarProps {
     className?: string;
@@ -12,7 +12,7 @@ interface AccountBarProps {
 export function AccountBar({ className }: AccountBarProps) {
     const [user, setUser] = useState<UserData | object>({});
     const [isValid, setValid] = useState(null);
-    const { authorizedUser, isAuthenticated, isLoading } = useAuth();
+    const { authorizedUser, isAuthenticated, isLoading } = useWebContext();
 
     useEffect(() => {
         if (isLoading) return;

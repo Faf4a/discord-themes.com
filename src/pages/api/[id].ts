@@ -1,3 +1,5 @@
+"use cache";
+
 import clientPromise from "@utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -8,10 +10,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const { id } = req.query;
 
-    // TODO: find a better way to serve themes efficiently
-    // i somehow have to find a way to not
-    // send 29245 billion requests to the database for each theme
-    // cache might be enough?
     const client = await clientPromise;
     const db = client.db("themesDatabase");
     const themesCollection = db.collection("themes");

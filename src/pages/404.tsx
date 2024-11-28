@@ -1,6 +1,4 @@
 import { Button } from "@components/ui/button";
-import blob from "/public/favicon.ico";
-import Image from "next/image";
 import { useEffect } from "react";
 
 const ScreamsOfTheDoomed = () => {
@@ -11,6 +9,7 @@ const ScreamsOfTheDoomed = () => {
         let dx = 2;
         let dy = 2;
         const faviconSize = 100;
+        favicon.classList.remove('hidden');
         const moveFavicon = () => {
             x += dx;
             y += dy;
@@ -36,7 +35,7 @@ const ScreamsOfTheDoomed = () => {
 
     return (
         <>
-            <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none pointer-events-none" />            <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex">
                         <h1 className="text-xl font-semibold">

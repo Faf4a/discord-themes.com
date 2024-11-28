@@ -2,6 +2,8 @@ import React from "react";
 import { AuthProvider } from "@context/auth";
 import ThemeProvider from "@components/theme-provider";
 import Head from "next/head";
+import blob from "/public/favicon.ico";
+import Image from "next/image";
 import "./theme.css";
 
 function App({ Component, pageProps }) {
@@ -17,6 +19,8 @@ function App({ Component, pageProps }) {
                     <link rel="icon" href="/favicon.ico" />
                 </Head>
                 <div className="min-h-screen flex flex-col">
+                <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />
+
                     <main className="flex-1">
                         <div className="max-w-7xl mx-auto px-4 md:px-8">
                             <Component {...pageProps} />

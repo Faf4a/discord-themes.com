@@ -1,3 +1,5 @@
+"use cache";
+
 import { NextApiRequest, NextApiResponse } from "next";
 import { SERVER } from "@constants";
 export const dynamic = "force-dynamic";
