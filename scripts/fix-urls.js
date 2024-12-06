@@ -37,15 +37,15 @@ const processCSS = async () => {
                             const arrayBuffer = await response.arrayBuffer();
                             const mimeType = response.headers.get("content-type") || mime.getType(assetUrl);
                             decl.value = encodeToBase64(arrayBuffer, mimeType);
-                            console.log(`Replaced URL with base64 data URI.`);
+                            console.log(`Replaced: ${assetUrl.slice(0, 15)}`);
                         } catch (error) {
-                            console.error(`Error fetching asset`, error);
+                            console.error(error);
                         }
                     })();
 
                     assetPromises.push(promise);
                 } else {
-                    console.log(`Skipping non-/assets/ URL: ${assetUrl}`);
+                    console.log(`Skipping: ${assetUrl.slice(0, 15)}`);
                 }
             }
         });

@@ -1,35 +1,26 @@
-const fs = require("fs");
-const path = require("path");
+const { mkdir, readdir } = require("fs");
+const { join, extname } = require("path");
 const { exec } = require("child_process");
 
-const imagesDir = path.join(__dirname, "../public/thumbnails");
+const images = path.join(__dirname, "../public/thumbnails");
 
-fs.readdir(imagesDir, (err, files) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
+readdir(images, (err, files) => {
+    if (err) return console.error(err);
 
     files.forEach((file) => {
-        const filePath = path.join(imagesDir, file);
-        const fileExt = path.extname(file).toLowerCase();
+        const path = join(images, file);
+        const ext = extname(file).toLowerCase();
 
-        if (fileExt === ".jpg" || fileExt === ".jpeg" || fileExt === ".png" || fileExt === ".gif") {
-            const outputFilePath = path.join(imagesDir, "compressed", file);
+        if (ext === ".jpg" || ext === ".jpeg" || ext === ".png" || ext === ".gif") {
+            const outputFilePath = join(images, "tmp", file);
 
-            fs.mkdir(path.join(imagesDir, "compressed"), { recursive: true }, (err) => {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
+            mkdir(join(images, "tmp"), { recursive: true }, (err) => {
+                if (err) return console.error(err);
 
-                const command = `ffmpeg -i "${filePath}" -q:v 1 "${outputFilePath}"`;
-                exec(command, (err, stdout, stderr) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    console.log(`Compressed ${file} successfully.`);
+                const c = `ffmpeg -i "${path}" -q:v 1 "${outputFilePath}"`;
+                exec(c, (err, stdout, stderr) => {
+                    if (err) return console.error(err);
+                    console.log(`Compressed: ${file}`);
                 });
             });
         }

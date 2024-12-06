@@ -7,7 +7,8 @@ let { code } = transform({
     filename: "styles.css",
     code: Buffer.from(css),
     minify: true,
-    sourceMap: false
+    sourceMap: false,
+    errorRecovery: true
 });
 
 writeFileSync("./styles.css", code);
