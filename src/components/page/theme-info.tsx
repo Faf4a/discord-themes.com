@@ -52,7 +52,7 @@ export default function Component({ id }: { id?: string }) {
     const renderAuthor = (author) => {
         if (isLoading) {
             return (
-                <div key={author.discord_snowflake} className="p-2 rounded-md border bg-background border-input">
+                <div key={author.discord_snowflake} className="p-2 rounded-lg border bg-background border-input">
                     <Skeleton className="h-4 w-1/2 mb-2" />
                     <Skeleton className="h-4 w-1/3" />
                     <Skeleton className="h-4 w-1/4 mt-2" />
@@ -61,7 +61,7 @@ export default function Component({ id }: { id?: string }) {
         }
 
         return (
-            <div key={author.discord_snowflake} className="p-2 rounded-md border bg-background border-input flex justify-between items-center">
+            <div key={author.discord_snowflake} className="p-2 rounded-lg border bg-background border-input flex justify-between items-center">
                 <div>
                     <p>{author.discord_name}</p>
                     <p className="text-xs text-muted-foreground">{author.discord_snowflake}</p>
@@ -170,9 +170,11 @@ export default function Component({ id }: { id?: string }) {
                 <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="container mx-auto px-4 py-4">
                         <div className="flex items-center justify-between">
-                            <h1 className="text-xl font-semibold">
-                                <a href="/">Theme Library</a>
-                            </h1>
+                        <h1 className="text-xl font-bold">
+                            <a href="/" className="hover:opacity-80 transition-opacity">
+                                Theme Library
+                            </a>
+                        </h1>
                         </div>
                     </div>
                 </header>

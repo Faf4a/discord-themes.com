@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
     const path = url.pathname;
     const ip = req.headers.get("x-forwarded-for") || "unknown";
 
-    if (path.startsWith("/api")) {
+    if (path.startsWith("/api") && !path.startsWith("/api/user")) {
         const now = Date.now();
 
         if (path === "/api/preview/screenshot") {

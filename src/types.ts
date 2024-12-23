@@ -34,4 +34,5 @@ export interface UserData {
     avatar?: User["avatar"];
     global_name?: User["global_name"];
     preferredColor?: string;
+    admin?: boolean;
 }

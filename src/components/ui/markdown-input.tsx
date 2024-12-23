@@ -116,7 +116,7 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
                     </Button>
                 </div>
                 <div className="relative">
-                    <div className="h-[200px] bg-zinc-900 transition-all duration-200 rounded-md">
+                    <div className="h-[200px] bg-zinc-900 transition-all duration-200 rounded-lg">
                         {isPreview ? (
                             <div className="p-4 prose prose-invert max-w-none h-full overflow-auto">
                                 <ReactMarkdown className="whitespace-pre-wrap" remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>

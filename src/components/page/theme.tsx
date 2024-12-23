@@ -142,8 +142,10 @@ function App() {
             <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-3">
                     <div className="flex items-center gap-4">
-                        <h1 className={cn("text-xl font-semibold text-foreground transition-opacity flex-shrink-0", isSearchExpanded && "hidden md:block")}>
-                            <a href="/">Theme Library</a>
+                        <h1 className={cn("text-xl font-bold text-foreground transition-opacity flex-shrink-0", isSearchExpanded && "hidden md:block")}>
+                            <a href="/" className="hover:opacity-80 transition-opacity">
+                                Theme Library
+                            </a>
                         </h1>
                         <div className={cn("flex-1 max-w-xl transition-all duration-200", isSearchExpanded ? "absolute top-0 left-0 right-0 z-50 bg-background p-4 md:relative md:bg-transparent md:p-0 flex items-center" : "hidden md:block")}>
                             {isSearchExpanded && (
@@ -169,18 +171,14 @@ function App() {
                 <div className={`transform transition-all duration-300 ease-in-out overflow-hidden ${searchQuery === "" ? "opacity-100 translate-y-0 max-h-[500px]" : "opacity-0 -translate-y-10 max-h-0"} hidden md:block`}>
                     <div className="flex flex-col items-center">
                         <div className="relative inline-flex items-center justify-center">
-                            <div className="opacity-30 transform rotate-12">
-                                <CalendarPlus size={25} className="text-primary mr-2" />
-                            </div>
                             <h2 className="text-xl font-semibold mb-3 mt-3 relative z-10">Recently Updated</h2>
                         </div>
                         <ThemeCarousel themes={themes} />
                     </div>
-                    <div className="border-t border-1 border-muted rounded-lg m-4"></div>
                 </div>
-                <div className="mb-3 mt-3">
+                <div className="mb-3 mt-8">
                     <div className="flex justify-end mb-3">
-                        <Button disabled={isLoading} onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
+                        <Button disabled={isLoading} onClick={handleSubmit} className="rounded-lg bg-primary hover:bg-primary/90">
                             {isValid ? (
                                 <>
                                     <Plus className="mr-2 h-4 w-4" />
@@ -196,7 +194,7 @@ function App() {
                             <SearchBar onSearch={setSearchQuery} />
                         </div>
                         <div className="flex items-center gap-2 md:flex-grow-[1/3]">
-                            <FilterDropdown options={allFilters} placeholder="Filter tags..." emptyMessage="No tags found" onChange={setFilters} />
+                            <FilterDropdown options={allFilters} onChange={setFilters} />
                             <DropdownFilter onChange={setSort} />
                         </div>
                     </div>

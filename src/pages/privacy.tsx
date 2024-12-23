@@ -18,8 +18,10 @@ export default function PrivacyPolicy() {
                 <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                     <div className="container mx-auto px-4 py-4">
                         <div className="flex items-center gap-4">
-                            <h1 className="text-2xl font-bold text-foreground transition-opacity hover:opacity-80">
-                                <a href="/">Theme Library</a>
+                            <h1 className="text-xl font-bold">
+                                <a href="/" className="hover:opacity-80 transition-opacity">
+                                    Theme Library
+                                </a>
                             </h1>
                         </div>
                     </div>
@@ -41,7 +43,7 @@ export default function PrivacyPolicy() {
                                                 {lastUpdated.toLocaleString("en-US", {
                                                     weekday: "long",
                                                     year: "numeric",
-                                                    month: "long", 
+                                                    month: "long",
                                                     day: "numeric",
                                                     hour: "numeric",
                                                     minute: "numeric",
