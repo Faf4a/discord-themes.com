@@ -12,24 +12,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const { userId } = req.body;
     const { authorization } = req.headers;
 
-    if (!authorization) {
-        return res.status(400).json({ message: "Cannot check authorization without unique token" });
-    }
+    const token = authorization?.replace("Bearer ", "").trim();
 
-    const token = authorization.replace("Bearer ", "").trim();
-
-    if (!token) {
-        return res.status(400).json({ message: "Cannot get themes without unique token" });
-    }
-
-    const auth = await isAuthed(token as string);
-
-    if (!auth) {
-        return res.status(401).json({ message: "User is not authorized" });
-    }
-
-    if (!userId) {
-        return res.status(400).json({ message: "Cannot get themes without user id" });
+    if (!token && !userId) {
+        return res.status(400).json({ message: "Cannot get themes without unique token or user ID" });
     }
 
     const client = await clientPromise;
@@ -39,6 +25,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     let requestedUser;
 
     if (userId === "@me") {
+        const auth = await isAuthed(token as string);
+        if (!auth) return res.status(401).json({ status: 401, message: "Unauthorized" });
         const userEntry = await users.findOne({ "user.key": auth.key });
         if (!userEntry) return res.status(404).json({ status: 400, message: "No user found with those credentials" });
         delete userEntry.user.key;

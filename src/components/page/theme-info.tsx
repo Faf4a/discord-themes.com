@@ -1,11 +1,14 @@
 import { Button } from "@components/ui/button";
-import { ArrowLeft, Calendar, Check, Code, Download, ExternalLink, Eye, Github, Heart } from "lucide-react";
+import { Calendar, Check, Code, Download, ExternalLink, Eye, Github, Heart, Book } from "lucide-react";
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Image from "next/image";
 import { useWebContext } from "@context/auth";
+import { Card, CardContent } from "@components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/tooltip";
+import { AccountBar } from "@components/account-bar";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -14,6 +17,7 @@ export default function Component({ id }: { id?: string }) {
     const [isDownloaded, setIsDownloaded] = useState(false);
     const [loading, setLoading] = useState(true);
     const [likedThemes, setLikedThemes] = useState();
+    const [downloadProgress, setDownloadProgress] = useState(0);
     const { authorizedUser, isAuthenticated, isLoading, themes, error } = useWebContext();
 
     const previewUrl = `/api/preview?url=/api/${id}`;
@@ -84,14 +88,37 @@ export default function Component({ id }: { id?: string }) {
     };
 
     const handleDownload = async () => {
-        setIsDownloaded(true);
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", `/api/download/${theme.id}`);
+        xhr.responseType = "blob";
 
-        // /api/download/:id
-        window.location.href = `/api/download/${theme.id}`;
+        xhr.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const progress = Math.round((event.loaded / event.total) * 100);
+                setDownloadProgress(progress);
+            }
+        };
 
-        setTimeout(() => {
-            setIsDownloaded(false);
-        }, 5000);
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                const url = window.URL.createObjectURL(xhr.response);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${theme.name}.theme.css`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                setIsDownloaded(true);
+                setTimeout(() => {
+                    setIsDownloaded(false);
+                    setDownloadProgress(0);
+                }, 5000);
+            }
+        };
+
+        xhr.send();
     };
 
     const handleLike = (themeId) => async () => {
@@ -141,6 +168,43 @@ export default function Component({ id }: { id?: string }) {
         setLikedThemes(response);
     }
 
+    const statsItems = [
+        {
+            icon: Download,
+            label: "Downloads",
+            value: theme?.downloads || 0
+        },
+        {
+            icon: Heart,
+            label: "Likes",
+            value: theme?.likes || 0
+        },
+        {
+            icon: Calendar,
+            label: "Created",
+            value: theme?.release_date ? new Date(theme.release_date).toLocaleDateString() : "Recently"
+        },
+        {
+            icon: Book,
+            label: "Version",
+            value: theme?.version || "1.0.0"
+        }
+    ];
+
+    const ThemeStats = () => (
+        <div className="grid grid-cols-2 gap-4 mt-6">
+            {statsItems.map(({ icon: Icon, label, value }) => (
+                <Card key={label} className="p-4">
+                    <CardContent className="p-0 flex flex-col items-center">
+                        <Icon className="h-5 w-5 text-muted-foreground mb-2" />
+                        <p className="text-xl font-bold">{value}</p>
+                        <p className="text-xs text-muted-foreground">{label}</p>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+
     return (
         <>
             {!loading && (
@@ -167,14 +231,15 @@ export default function Component({ id }: { id?: string }) {
                 </Head>
             )}
             <div className="min-h-screen bg-background">
-                <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <div className="container mx-auto px-4 py-4">
+                <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                    <div className="container mx-auto px-4 py-3">
                         <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold">
-                            <a href="/" className="hover:opacity-80 transition-opacity">
-                                Theme Library
-                            </a>
-                        </h1>
+                            <h1 className="text-xl font-bold">
+                                <a href="/" className="hover:opacity-80 transition-opacity">
+                                    Theme Library
+                                </a>
+                            </h1>
+                            <AccountBar className="ml-auto" />
                         </div>
                     </div>
                 </header>
@@ -213,8 +278,13 @@ export default function Component({ id }: { id?: string }) {
                         <div className="space-y-4">
                             <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                 <div className="space-y-3">
-                                    <Button disabled={loading || isDownloaded} onClick={handleDownload} className="w-full" size="lg">
-                                        {isDownloaded ? (
+                                    <Button disabled={loading || isDownloaded} onClick={handleDownload} className="w-full relative overflow-hidden" size="lg">
+                                        {downloadProgress > 0 && downloadProgress < 100 ? (
+                                            <>
+                                                <div className="absolute left-0 top-0 h-full bg-primary/20 transition-all duration-200" style={{ width: `${downloadProgress}%` }} />
+                                                <span className="relative z-10">{downloadProgress}%</span>
+                                            </>
+                                        ) : isDownloaded ? (
                                             <>
                                                 <Check className="mr-2 h-4 w-4" />
                                                 Downloaded
@@ -230,25 +300,40 @@ export default function Component({ id }: { id?: string }) {
                                         <Eye className="mr-2 h-4 w-4" />
                                         {window.innerWidth <= 768 ? "Not available on mobile" : "Preview"}
                                     </Button>
-                                    {!loading && isAuthenticated && (
-                                        <Button
-                                            variant="outline"
-                                            className={`w-full ${
-                                                // @ts-ignore
-                                                likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "text-primary border-primary hover:bg-primary/10" : ""
-                                            }`}
-                                            onClick={handleLike(theme.id)}
-                                        >
-                                            {
-                                                // @ts-ignore
-                                                likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? <Heart className="fill-current mr-2 h-4 w-4" /> : <Heart className="mr-2 h-4 w-4" />
-                                            }
-                                            {
-                                                // @ts-ignore
-                                                likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "Liked" : "Like"
-                                            }
-                                        </Button>
-                                    )}
+                                    {!loading &&
+                                        (isAuthenticated ? (
+                                            <Button
+                                                variant="outline"
+                                                disabled={!isAuthenticated}
+                                                className={`w-full ${
+                                                    // @ts-ignore
+                                                    likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "text-primary border-primary hover:bg-primary/10" : ""
+                                                }`}
+                                                onClick={handleLike(theme.id)}
+                                            >
+                                                {
+                                                    // @ts-ignore
+                                                    likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? <Heart className="fill-current mr-2 h-4 w-4" /> : <Heart className="mr-2 h-4 w-4" />
+                                                }
+                                                {
+                                                    // @ts-ignore
+                                                    likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "Liked" : "Like"
+                                                }
+                                            </Button>
+                                        ) : (
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger className="w-full">
+                                                        <Button variant="outline" disabled={!isAuthenticated} className="w-full">
+                                                            <Heart className="mr-2 h-4 w-4" /> Like
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>You must be logged in to like themes.</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        ))}
                                     {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
                                         <>
                                             <h2>Author Options</h2>
@@ -263,22 +348,7 @@ export default function Component({ id }: { id?: string }) {
                                         </>
                                     )}
                                 </div>
-                                {!loading && (
-                                    <div className="mt-4 p-4 text-sm text-muted-foreground">
-                                        <p className="flex items-center mb-2">
-                                            <Code className="mr-2 h-4 w-4" /> Version: <span className="text-primary ml-1">{theme?.version || "1.0.0"}</span>
-                                        </p>
-                                        <p className="flex items-center mb-2">
-                                            <Calendar className="mr-2 h-4 w-4" /> Released: <span className="text-primary ml-1">{theme?.release_date ? new Date(theme.release_date).toLocaleDateString() : "Recently"}</span>
-                                        </p>
-                                        <p className="flex items-center mb-2">
-                                            <Heart className="mr-2 h-4 w-4" /> Likes: <span className="text-primary ml-1">{theme?.likes || "0"}</span>
-                                        </p>
-                                        <p className="flex items-center">
-                                            <Download className="mr-2 h-4 w-4" /> Downloads: <span className="text-primary ml-1">{theme?.downloads ?? 0}</span>
-                                        </p>
-                                    </div>
-                                )}
+                                {!loading && <ThemeStats />}
                             </div>
                             {!loading && (
                                 <div className="rounded-lg border-b border-border/40 bg-card p-4">

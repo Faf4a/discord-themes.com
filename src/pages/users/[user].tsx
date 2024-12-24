@@ -44,8 +44,6 @@ export default function AuthCallback() {
     const [showScrollTop, setShowScrollTop] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading, themes } = useWebContext();
 
-    console.log(authorizedUser);
-
     const userToken = useMemo(() => {
         if (typeof document === "undefined") return undefined;
         const value = `; ${document.cookie}`;
@@ -54,19 +52,21 @@ export default function AuthCallback() {
     }, []);
 
     const fetchThemes = useCallback(async () => {
-        if (!userToken || !user || !loading) return;
-
+        if (!user || loading) return;
         try {
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            if (userToken) {
+                headers.Authorization = `Bearer ${userToken}`;
+            }
+
             const response = await fetch(`/api/user/themes`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${userToken}`
-                },
+                headers,
                 body: JSON.stringify({ userId: user })
             });
 
             const data = await response.json();
+            console.log(data);
             if (response.status === 200) {
                 setUserThemes(data);
             } else {
@@ -81,7 +81,7 @@ export default function AuthCallback() {
     }, [user, userToken, loading]);
 
     const fetchLikedThemes = useCallback(async () => {
-        if (!userToken || !(user === "@me" || user === authorizedUser?.id) || loading) return;
+        if (!userToken || !(user === "@me" || user === authorizedUser?.id) || loading || isLoading) return;
 
         try {
             const response = await fetch("/api/likes/get", {
@@ -103,15 +103,19 @@ export default function AuthCallback() {
     }, [userToken, user, authorizedUser, loading, themes]);
 
     useEffect(() => {
-        if (!isAuthenticated && !isLoading) {
+        if (!isAuthenticated && !isLoading && user === "@me") {
             router.push("/auth/login");
         } else {
-            fetchThemes();
             fetchLikedThemes();
-            setDisplayCount(THEMES_PER_PAGE);
-            setHasMore(true);
         }
-    }, [fetchThemes, fetchLikedThemes, isAuthenticated, isLoading, router]);
+    }, [isLoading, fetchLikedThemes]);
+
+    useEffect(() => {
+        fetchThemes();
+        setDisplayCount(THEMES_PER_PAGE);
+        setHasMore(true);
+        setLoading(false);
+    }, [fetchThemes]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -174,7 +178,7 @@ export default function AuthCallback() {
                     <div className="flex items-center gap-2 mt-4">
                         <h1 className="text-2xl font-bold">{userThemes.user.global_name}</h1>
                         {userThemes.user.admin && (
-                            <Badge className="fill-current">
+                            <Badge className="fill-current select-none">
                                 <Shield className="w-3 h-3 mr-1" />
                                 Admin
                             </Badge>
@@ -184,7 +188,7 @@ export default function AuthCallback() {
                     {!userThemes.user.global_name && <p className="mt-4 text-sm text-muted-foreground text-center">User hasn't migrated yet, some data may be missing</p>}
                     <UserStats />
 
-                    {authorizedUser.admin && (
+                    {authorizedUser?.admin && (
                         <div className="w-full mt-6 space-y-4">
                             {userThemes.user.admin && (
                                 <Alert className="border-yellow-600/20 bg-yellow-500/10">

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
+import { UserIcon, LogOutIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
+import { Button } from "./ui/button";
 
 interface AccountBarProps {
     className?: string;
@@ -57,25 +59,41 @@ export function AccountBar({ className }: AccountBarProps) {
 
     return (
         <div>
-            {isValid && user && (
+            {isValid && user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <div className={cn("flex items-center gap-2", className)}>
-                            <Avatar className="h-8 w-8 cursor-pointer hover:opacity-80 transition-opacity">
+                        <div className={cn("flex items-center gap-2 hover:opacity-90 transition-all", className)}>
+                            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary/20 transition-all">
                                 <AvatarImage src={`https://cdn.discordapp.com/avatars/${(user as UserData)?.id}/${(user as UserData)?.avatar}.png`} />
                                 <AvatarFallback>{(user as UserData)?.global_name}</AvatarFallback>
                             </Avatar>
                         </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => (window.location.href = "/users/@me")} className="transition-colors cursor-pointer">
+                    <DropdownMenuContent align="end" className="w-56 p-2 space-y-1">
+                        <div className="px-2 py-1.5 mb-2">
+                            <p className="text-sm font-medium">{(user as UserData)?.global_name}</p>
+                            <p className="text-xs text-muted-foreground">{(user as UserData)?.id}</p>
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => (window.location.href = "/users/@me")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                            <UserIcon className="h-4 w-4" />
                             My Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleLogout} className="text-red-600 hover:text-red-700 transition-colors cursor-pointer">
+                        <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md transition-colors">
+                            <LogOutIcon className="h-4 w-4" />
                             Logout
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+            ) : (
+                <Button
+                    onClick={() => {
+                        window.location.href = "/auth/login";
+                    }}
+                    className={cn("flex items-center gap-2 hover:opacity-90 transition-all", className)}
+                >
+                    Login with Discord
+                </Button>
             )}
         </div>
     );

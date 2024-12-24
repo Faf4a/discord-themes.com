@@ -6,7 +6,7 @@ import { ThemeGrid } from "@components/theme/grid";
 import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { CalendarPlus, Plus, Search, SearchX, X } from "lucide-react";
+import { Plus, Search, SearchX, X, ArrowUp } from "lucide-react";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
@@ -56,38 +56,53 @@ function App() {
     const [likedThemes, setLikedThemes] = useState([]);
     const [sort, setSort] = useState("most-popular");
     const { authorizedUser, isAuthenticated, isLoading, error, themes } = useWebContext();
-    
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrolled = window.scrollY;
+            setShowScrollTop(scrolled > 300);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     useEffect(() => {
         if (isLoading) return;
-    
+
         function getCookie(name: string): string | undefined {
             const value = "; " + document.cookie;
             const parts = value.split("; " + name + "=");
             if (parts.length === 2) return parts.pop()?.split(";").shift();
         }
-    
+
         const token = getCookie("_dtoken");
-    
+
         async function getLikedThemes() {
             const cachedLikedThemes = localStorage.getItem("likedThemes");
             const cacheTime = localStorage.getItem("ct");
             const now = Date.now();
-    
+
             if (cachedLikedThemes && cacheTime && now - parseInt(cacheTime, 10) < 3600000) {
                 setLikedThemes(JSON.parse(cachedLikedThemes));
                 return;
             }
-    
+
             const response = await fetch("/api/likes/get", {
                 method: "GET",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             }).then((res) => res.json());
-    
+
             localStorage.setItem("likedThemes", JSON.stringify(response));
             localStorage.setItem("ct", now.toString());
             setLikedThemes(response);
         }
-    
+
         if (token && isAuthenticated) {
             setUser(authorizedUser);
             getLikedThemes();
@@ -95,40 +110,44 @@ function App() {
             setUser(false);
         }
     }, [isLoading, authorizedUser, isAuthenticated]);
-    
-    const allFilters = isLoading ? [] : [
-        ...themes.reduce((acc, theme) => {
-            theme.tags.forEach((tag) => acc.set(tag, (acc.get(tag) || 0) + 1));
-            return acc;
-        }, new Map())
-    ]
-        .sort(([, countA], [, countB]) => countB - countA)
-        .map(([tag]) => ({
-            value: tag,
-            label: tag.charAt(0).toUpperCase() + tag.slice(1)
-        }));
-    
-    const filteredThemes = isLoading ? [] : themes
-        .filter((t) => {
-            const match = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase());
-            const tags = filters.length === 0 || filters.every((f) => t.tags.includes(f.value));
-            return match && tags;
-        })
-        .sort((a, b) => {
-            switch (sort) {
-                case "most-liked":
-                    return b.likes - a.likes;
-                case "most-popular":
-                    return b.downloads - a.downloads;
-                case "recently-updated":
-                    return +new Date(b.updated_at) - +new Date(a.updated_at);
-                case "recently-uploaded":
-                    return +new Date(b.created_at) - +new Date(a.created_at);
-                default:
-                    return 0;
-            }
-        });
-    
+
+    const allFilters = isLoading
+        ? []
+        : [
+              ...themes.reduce((acc, theme) => {
+                  theme.tags.forEach((tag) => acc.set(tag, (acc.get(tag) || 0) + 1));
+                  return acc;
+              }, new Map())
+          ]
+              .sort(([, countA], [, countB]) => countB - countA)
+              .map(([tag]) => ({
+                  value: tag,
+                  label: tag.charAt(0).toUpperCase() + tag.slice(1)
+              }));
+
+    const filteredThemes = isLoading
+        ? []
+        : themes
+              .filter((t) => {
+                  const match = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase());
+                  const tags = filters.length === 0 || filters.every((f) => t.tags.includes(f.value));
+                  return match && tags;
+              })
+              .sort((a, b) => {
+                  switch (sort) {
+                      case "most-liked":
+                          return b.likes - a.likes;
+                      case "most-popular":
+                          return b.downloads - a.downloads;
+                      case "recently-updated":
+                          return +new Date(b.updated_at) - +new Date(a.updated_at);
+                      case "recently-uploaded":
+                          return +new Date(b.created_at) - +new Date(a.created_at);
+                      default:
+                          return 0;
+                  }
+              });
+
     const handleSubmit = () => {
         if (isValid) {
             window.location.href = "/theme/submit";
@@ -211,6 +230,11 @@ function App() {
                     </div>
                 )}
             </div>
+            {showScrollTop && (
+                <Button variant="outline" size="icon" className="fixed bottom-8 right-8 rounded-full" onClick={scrollToTop}>
+                    <ArrowUp className="h-4 w-4" />
+                </Button>
+            )}
         </div>
     );
 }
