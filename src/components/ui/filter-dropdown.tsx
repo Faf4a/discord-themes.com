@@ -56,16 +56,25 @@ export function FilterDropdown({
           aria-label="Select filters"
           className="w-[240px] justify-between"
         >
-          <span className="flex items-center gap-2 truncate">
+          <span className="flex items-center gap-2 max-w-full overflow-hidden text-ellipsis">
             {selectedValues.length > 0 ? (
-              <Badge variant="secondary" className="font-normal">
-                {selectedValues.length} selected
-              </Badge>
+              <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                {selectedValues.slice(0, 2).map((value) => (
+                  <Badge key={value} variant="secondary" className="font-normal truncate text-ellipsis">
+                    {value}
+                  </Badge>
+                ))}
+                {selectedValues.length > 2 && (
+                  <Badge variant="secondary" className="font-normal">
+                    +{selectedValues.length - 2}
+                  </Badge>
+                )}
+              </div>
             ) : (
-              "Select filter..."
+              "Tags"
             )}
           </span>
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1">
             {selectedValues.length > 0 && (
               <X
                 className="h-4 w-4 opacity-50 hover:opacity-100 cursor-pointer"

@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
     );
 
     if (themes) console.log("%c[client/fetch]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", "themes fetched");
-
+    
     return (
         <WebContext.Provider
             value={{

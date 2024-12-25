@@ -11,12 +11,10 @@ import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import MarkdownInput from "@components/ui/markdown-input";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
+import { useWebContext } from "@context/auth";
 
 export default function SubmitPage() {
     const router = useRouter();
-    const [isAuthed, setIsAuthed] = useState(null);
-    // eslint-disable-next-line no-unused-vars
-    const [user, setUser] = useState({});
     const [step, setStep] = useState(1);
     const [dragActive, setDragActive] = useState(false);
     const [formData, setFormData] = useState({
@@ -28,12 +26,13 @@ export default function SubmitPage() {
         contributors: [""],
         sourceLink: ""
     });
-    const [fetching, setFetching] = useState(true);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [previewUrl, setPreviewUrl] = useState("");
     const [isLoadingPreview, setIsLoadingPreview] = useState(false);
     const [validSource, setValidSource] = useState(true);
     const [urlError, setUrlError] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const { authorizedUser, isAuthenticated, isLoading } = useWebContext();
 
     const isValidImageUrl = (url: string) => {
         if (!url) return false;
@@ -41,31 +40,6 @@ export default function SubmitPage() {
         return validExtensions.some((ext) => url.toLowerCase().endsWith(ext));
     };
 
-    useEffect(() => {
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
-
-        const token = getCookie("_dtoken");
-
-        async function fetchData() {
-            const response = await fetch("/api/user/isAuthed", {
-                method: "GET",
-                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
-            }).then((res) => res.json());
-            setIsAuthed(response?.authenticated ?? false);
-            setUser(response.user);
-            setFetching(false);
-        }
-
-        if (token) {
-            fetchData();
-        } else {
-            setIsAuthed(false);
-        }
-    }, []);
 
     useEffect(() => {
         function getCookie(name: string): string | undefined {
@@ -80,11 +54,11 @@ export default function SubmitPage() {
 
         const token = getCookie("_dtoken");
 
-        if (isAuthed === false && token) {
+        if (isAuthenticated === false && token) {
             deleteCookie("_dtoken");
             router.push("/");
         }
-    }, [router, isAuthed]);
+    }, [router, isAuthenticated]);
 
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -105,8 +79,23 @@ export default function SubmitPage() {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+    function validateStep(step: number, data: typeof formData) {
+        const newErrors: Record<string, string> = {};
+        if (step === 1 && !data.title.trim()) newErrors.title = "Title is required.";
+        if (step === 2 && !data.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
+        if (step === 3 && !data.longDescription.trim()) newErrors.longDescription = "Long description is required.";
+        if (step === 4 && !data.file) newErrors.file = "Preview image is required.";
+        if (step === 5 && data.sourceLink && !isValidSourceUrl(data.sourceLink)) newErrors.sourceLink = "Invalid source link.";
+        return newErrors;
+    }
+
     const nextStep = () => {
-        if (step < totalSteps) setStep(step + 1);
+        const stepErrors = validateStep(step, formData);
+        if (Object.keys(stepErrors).length > 0) {
+            setErrors(stepErrors);
+            return;
+        }
+        setStep(step + 1);
     };
 
     const prevStep = () => {
@@ -139,6 +128,13 @@ export default function SubmitPage() {
     };
 
     const handleSubmit = (form) => {
+        const finalErrors = validateStep(step, form);
+        if (Object.keys(finalErrors).length > 0) {
+            setErrors(finalErrors);
+            return;
+        }
+
+        form.contributors = [authorizedUser, ...form.contributors.filter((c) => c)];
         console.log(form);
     };
 
@@ -146,7 +142,10 @@ export default function SubmitPage() {
         setIsLoadingPreview(true);
         try {
             const response = await fetch(`/api/preview/screenshot?url=${encodeURIComponent(url)}`);
-            const base64Image = await response.text();
+            const buffer = await response.arrayBuffer();
+            const base64Image = btoa(
+                new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+            );
             setFormData((prev) => ({
                 ...prev,
                 file: `data:image/png;base64,${base64Image}`
@@ -238,8 +237,8 @@ export default function SubmitPage() {
                 </div>
             </header>
             <div className="min-h-screen">
-                {!fetching &&
-                    (isAuthed ? (
+                {!isLoading &&
+                    (isAuthenticated ? (
                         <div className="container mx-auto px-4 py-8">
                             <div className="flex gap-8 max-w-6xl mx-auto">
                                 <div className="w-64 hidden md:block">
@@ -266,6 +265,7 @@ export default function SubmitPage() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="title">Title</Label>
                                                     <Input id="title" value={formData.title} onChange={(e) => updateFormData("title", e.target.value)} placeholder="Enter theme title..." />
+                                                    {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
                                                 </div>
                                             </div>
                                         )}
@@ -275,6 +275,7 @@ export default function SubmitPage() {
                                                 <h2 className="text-2xl font-semibold">Short Description</h2>
                                                 <p className="text-muted-foreground">Provide a brief description of your theme, this will be shown on the front-page cards.</p>
                                                 <MarkdownInput defaultContent={formData.shortDescription} onChange={(value) => updateFormData("shortDescription", value)} lines={3} />
+                                                {errors.shortDescription && <p className="text-sm text-red-500">{errors.shortDescription}</p>}
                                             </div>
                                         )}
 
@@ -283,6 +284,7 @@ export default function SubmitPage() {
                                                 <h2 className="text-2xl font-semibold">Long Description</h2>
                                                 <p className="text-muted-foreground">Provide detailed information about your theme, this will be shown on the theme page.</p>
                                                 <MarkdownInput defaultContent={formData.longDescription} onChange={(value) => updateFormData("longDescription", value)} lines={10} />
+                                                {errors.longDescription && <p className="text-sm text-red-500">{errors.longDescription}</p>}
                                             </div>
                                         )}
 
@@ -341,6 +343,7 @@ export default function SubmitPage() {
                                                             <DialogHeader>
                                                                 <DialogTitle>Generate Theme Preview</DialogTitle>
                                                             </DialogHeader>
+                                                            <p className="text-muted-foreground">Enter the URL of your theme to generate a preview image. Try to use GitHub raw URLs</p>
                                                             <div className="space-y-4">
                                                                 <Input placeholder="Enter theme URL..." value={previewUrl} onChange={(e) => setPreviewUrl(e.target.value)} />
                                                                 <Button onClick={() => fetchPreview(previewUrl)} disabled={isLoadingPreview} className="w-full">
@@ -357,6 +360,7 @@ export default function SubmitPage() {
                                                         </DialogContent>
                                                     </Dialog>
                                                 </div>
+                                                {errors.file && <p className="text-sm text-red-500">{errors.file}</p>}
                                             </div>
                                         )}
 
@@ -365,7 +369,7 @@ export default function SubmitPage() {
                                                 <section>
                                                     <h2 className="text-2xl font-semibold">Attribution</h2>
                                                     <p className="text-muted-foreground">
-                                                        Any contributors? List their Discord User IDs below! <br /> You do not have to list yourself!
+                                                        Anyone else that contributored to your theme? List their Discord User ID below! Make sure they used this site before, otherwise only their username will be shown.
                                                     </p>
                                                     <div className="space-y-4">
                                                         <ContributorInputs />
@@ -386,6 +390,7 @@ export default function SubmitPage() {
                                                     />
                                                     {!validSource && <p className="text-sm text-red-500">URL must start with github.com/.io or gitlab.com</p>}{" "}
                                                 </div>
+                                                {errors.sourceLink && <p className="text-sm text-red-500">{errors.sourceLink}</p>}
                                             </div>
                                         )}
 

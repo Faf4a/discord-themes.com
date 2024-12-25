@@ -17,6 +17,9 @@ function App({ Component, pageProps }) {
                     <meta name="description" content="Find your favourite themes all at one place." />
                     <title>Theme Library</title>
                     <link rel="icon" href="/favicon.ico" />
+                    <link rel="preconnect" href="https://fonts.googleapis.com" />
+                    <link rel="preconnect" href="https://fonts.gstatic.com" />
+                    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
                 </Head>
                 <div className="min-h-screen flex flex-col">
                 <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />

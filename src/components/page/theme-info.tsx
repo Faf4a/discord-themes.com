@@ -65,24 +65,24 @@ export default function Component({ id }: { id?: string }) {
         }
 
         return (
-            <div key={author.discord_snowflake} className="p-2 rounded-lg border bg-background border-input flex justify-between items-center">
-                <div>
-                    <p>{author.discord_name}</p>
-                    <p className="text-xs text-muted-foreground">{author.discord_snowflake}</p>
+            <div key={author.discord_snowflake} className="p-3 rounded-lg border bg-background border-input hover:border-primary/40 transition-colors">
+                <p className="font-semibold">{author.discord_name}</p>
+                <p className="text-xs text-muted-foreground">ID: {author.discord_snowflake}</p>
+                <div className={`grid ${author.github_name ? "grid-cols-2" : "grid-cols-1"} gap-2 mt-2`}>
+                    <Button variant="outline" onClick={() => handleAuthorClick(author)}>
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Profile
+                    </Button>
                     {author.github_name && (
-                        <div className="flex items-center mt-2 hover:text-gray-500 cursor-pointer transition-colors duration-200">
-                            <span className="rounded-full bg-input p-1 mr-2">
-                                <Github width={12} height={12} />
-                            </span>
-                            <a target="_blank" href={`https://github.com/${author.github_name}`}>
-                                {author.github_name}
-                            </a>
-                        </div>
+                        <Button
+                            variant="outline"
+                            onClick={() => window.open(`https://github.com/${author.github_name}`, "_blank")}
+                        >
+                            <Github className="mr-2 h-4 w-4" />
+                            Github
+                        </Button>
                     )}
                 </div>
-                <Button variant="outline" onClick={() => handleAuthorClick(author)} className="ml-2 p-1">
-                    <ExternalLink className="h-4 w-6" />
-                </Button>
             </div>
         );
     };
@@ -278,20 +278,20 @@ export default function Component({ id }: { id?: string }) {
                         <div className="space-y-4">
                             <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                 <div className="space-y-3">
-                                    <Button disabled={loading || isDownloaded} onClick={handleDownload} className="w-full relative overflow-hidden" size="lg">
-                                        {downloadProgress > 0 && downloadProgress < 100 ? (
+                                    <Button
+                                        size="sm"
+                                        disabled={loading || isDownloaded}
+                                        onClick={handleDownload}
+                                        className="w-full flex items-center gap-2 justify-center"
+                                    >
+                                        {isDownloaded ? (
                                             <>
-                                                <div className="absolute left-0 top-0 h-full bg-primary/20 transition-all duration-200" style={{ width: `${downloadProgress}%` }} />
-                                                <span className="relative z-10">{downloadProgress}%</span>
-                                            </>
-                                        ) : isDownloaded ? (
-                                            <>
-                                                <Check className="mr-2 h-4 w-4" />
+                                                <Check className="h-4 w-4" />
                                                 Downloaded
                                             </>
                                         ) : (
                                             <>
-                                                <Download className="mr-2 h-4 w-4" />
+                                                <Download className="h-4 w-4" />
                                                 Download
                                             </>
                                         )}
@@ -353,8 +353,10 @@ export default function Component({ id }: { id?: string }) {
                             {!loading && (
                                 <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                     <div className="space-y-3">
-                                        <h2>Contributors</h2>
-                                        {Array.isArray(theme.author) ? theme.author.map(renderAuthor) : renderAuthor(theme.author)}
+                                        <h2 className="text-lg font-semibold">Contributors</h2>
+                                        <div className="grid gap-2">
+                                            {Array.isArray(theme.author) ? theme.author.map(renderAuthor) : renderAuthor(theme.author)}
+                                        </div>
                                     </div>
                                 </div>
                             )}

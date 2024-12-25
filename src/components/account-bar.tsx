@@ -65,7 +65,7 @@ export function AccountBar({ className }: AccountBarProps) {
                         <div className={cn("flex items-center gap-2 hover:opacity-90 transition-all", className)}>
                             <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary/20 transition-all">
                                 <AvatarImage src={`https://cdn.discordapp.com/avatars/${(user as UserData)?.id}/${(user as UserData)?.avatar}.png`} />
-                                <AvatarFallback>{(user as UserData)?.global_name}</AvatarFallback>
+                                <AvatarFallback className="overflow-hidden">{(user as UserData)?.global_name}</AvatarFallback>
                             </Avatar>
                         </div>
                     </DropdownMenuTrigger>
@@ -86,14 +86,17 @@ export function AccountBar({ className }: AccountBarProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
+                typeof window != "undefined" && window.location.href === "/" && (
                 <Button
                     onClick={() => {
                         window.location.href = "/auth/login";
                     }}
+                    disabled={isLoading}
                     className={cn("flex items-center gap-2 hover:opacity-90 transition-all", className)}
                 >
                     Login with Discord
                 </Button>
+                )
             )}
         </div>
     );

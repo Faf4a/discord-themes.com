@@ -3,6 +3,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { NextApiRequest, NextApiResponse } from "next";
+import DOMPurify from "dompurify";
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET") {
@@ -180,8 +181,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     </script>
 `;
 
+    const escapeHtml = (unsafe: string): string => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
     if (url) {
-        const linkTag = `<link rel="stylesheet" href="${decodeURIComponent(url as any as string)}">`;
+        const sanitizedUrl = escapeHtml(decodeURIComponent(url as any as string));
+        const linkTag = `<link rel="stylesheet" href="${sanitizedUrl}">`;
         htmlContent = htmlContent.replace("<!--injectSpace-->", linkTag);
     }
 

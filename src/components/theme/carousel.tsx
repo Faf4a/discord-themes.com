@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { Carousel, CarouselContent, CarouselItem } from "@components/ui/carousel";
 import { Card, CardContent } from "@components/ui/card";
 import Autoplay from "embla-carousel-autoplay";
@@ -17,11 +17,10 @@ interface ThemeCarouselProps {
 }
 
 export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
-    const [filteredThemes, setFilteredThemes] = useState<Theme[]>([]);
-
-    useEffect(() => {
-        const sortedThemes = [...themes].sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()).slice(0, 10);
-        setFilteredThemes(sortedThemes);
+    const sortedThemes = useMemo(() => {
+        return [...themes]
+            .sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime())
+            .slice(0, 10);
     }, [themes]);
 
     return (
@@ -36,11 +35,11 @@ export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
                 className="w-full"
             >
                 <CarouselContent>
-                    {filteredThemes.map((theme) => (
+                    {sortedThemes.map((theme) => (
                         <CarouselItem key={theme.id} className="w-full sm:basis-full md:basis-1/2 md:pl-4">
                             <Card className="bg-transparent border border-muted">
                                 <CardContent className="p-0">
-                                     {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                     <ThemeCard theme={theme} noFooter diagonal lastUpdated />
                                 </CardContent>
                             </Card>

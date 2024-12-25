@@ -27,7 +27,7 @@ interface ThemesResponse {
 
 const THEMES_PER_PAGE = 4;
 
-export default function AuthCallback() {
+export default function User() {
     const router = useRouter();
     const { user } = router.query;
 
@@ -117,11 +117,21 @@ export default function AuthCallback() {
         setLoading(false);
     }, [fetchThemes]);
 
+    // Add throttle/debounce utility 
+    const debounce = (func: Function, wait: number) => {
+        let timeout: NodeJS.Timeout;
+        return (...args: any[]) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(null, args), wait);
+        };
+    };
+
+    // Update scroll handler with debounce
     useEffect(() => {
-        const handleScroll = () => {
+        const handleScroll = debounce(() => {
             const scrolled = window.scrollY;
             setShowScrollTop(scrolled > 300);
-        };
+        }, 100);
 
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
@@ -171,12 +181,12 @@ export default function AuthCallback() {
 
     const UserProfile = () => (
         <div className="relative">
-            <div className="w-full h-32 rounded-t-lg" style={{ backgroundColor: userThemes.user?.preferredColor || "#1a1a1a" }} />
+            <div className="w-full h-32 rounded-t-lg" style={{ backgroundColor: userThemes.user?.preferredColor || "" }} />
             <div className="p-6 -mt-16">
                 <div className="flex flex-col items-center">
-                    <Image priority height={128} width={128} className="w-24 h-24 rounded-full ring-4 ring-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/5.png"} alt="Avatar" />
+                    <Image priority height={128} width={128} className="w-24 h-24 rounded-full ring-4 ring-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Math.floor(Number(userThemes.user.id) / Math.pow(2, 22)) % 6}.png`} alt="Avatar" />{" "}
                     <div className="flex items-center gap-2 mt-4">
-                        <h1 className="text-2xl font-bold">{userThemes.user.global_name}</h1>
+                        <h1 className="text-2xl font-bold">{userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? userThemes.themes[0].author.discord_name : "Unknown User"}</h1>
                         {userThemes.user.admin && (
                             <Badge className="fill-current select-none">
                                 <Shield className="w-3 h-3 mr-1" />
@@ -185,9 +195,8 @@ export default function AuthCallback() {
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground">{userThemes.user.id}</p>
-                    {!userThemes.user.global_name && <p className="mt-4 text-sm text-muted-foreground text-center">User hasn't migrated yet, some data may be missing</p>}
+                    {!userThemes.user.global_name && <p className="mt-4 text-sm text-muted-foreground text-center">User hasn't migrated yet, some data may be missing {userThemes.user.global_name ? "" : userThemes.themes.length ? "(pulled partial data from theme submissions)" : "(failed)"}</p>}
                     <UserStats />
-
                     {authorizedUser?.admin && (
                         <div className="w-full mt-6 space-y-4">
                             {userThemes.user.admin && (
@@ -198,7 +207,7 @@ export default function AuthCallback() {
                             )}
 
                             <div className="grid grid-cols-2 gap-4">
-                                <Button variant="outline" className="flex items-center gap-2">
+                                <Button variant="outline" disabled className="flex items-center gap-2">
                                     <Flag className="w-4 h-4" />
                                     View Reports
                                 </Button>
@@ -213,7 +222,9 @@ export default function AuthCallback() {
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the account and remove the user's data <b>permanently</b> until they sign up again.</AlertDialogDescription>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the account and remove the user's data <b>permanently</b> until they sign up again.
+                                            </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -247,9 +258,10 @@ export default function AuthCallback() {
         </div>
     );
 
-    const ThemesList = ({ themes, showLoadMore = false }) => (
+    // Update ThemesList component with proper typing
+    const ThemesList = ({ themes }: { themes: Theme[] }) => (
         <div className="space-y-4">
-            {themes.slice(0, displayCount).map((theme) => (
+            {themes.slice(0, displayCount).map((theme: Theme) => (
                 <ThemeCard key={theme.id} theme={theme} likedThemes={likedThemes} disableDownloads={activeTab === "authored"} />
             ))}
 
@@ -341,11 +353,11 @@ export default function AuthCallback() {
                                     Liked Themes
                                 </TabsTrigger>
                             </TabsList>
-                            <TabsContent value="authored">{userThemes.themes.length > 0 ? <ThemesList themes={userThemes.themes} showLoadMore={true} /> : <EmptyState icon={Book} title="No themes yet" description="You haven't created any themes" />}</TabsContent>
-                            <TabsContent value="liked">{userLikedThemes.length > 0 ? <ThemesList themes={userLikedThemes.reverse()} showLoadMore={true} /> : <EmptyState icon={Heart} title="No liked themes" description="You haven't liked any themes yet" />}</TabsContent>
+                            <TabsContent value="authored">{userThemes.themes.length > 0 ? <ThemesList themes={userThemes.themes} /> : <EmptyState icon={Book} title="No themes yet" description="You haven't created any themes" />}</TabsContent>
+                            <TabsContent value="liked">{userLikedThemes.length > 0 ? <ThemesList themes={userLikedThemes.reverse()} /> : <EmptyState icon={Heart} title="No liked themes" description="You haven't liked any themes yet" />}</TabsContent>
                         </Tabs>
                     ) : (
-                        <div>{userThemes.themes.length > 0 ? <ThemesList themes={userThemes.themes} showLoadMore={true} /> : <EmptyState icon={Book} title="No themes" description="This user hasn't created any themes" />}</div>
+                        <div>{userThemes.themes.length > 0 ? <ThemesList themes={userThemes.themes} /> : <EmptyState icon={Book} title="No themes" description="This user hasn't created any themes" />}</div>
                     )}
                 </Card>
             </div>

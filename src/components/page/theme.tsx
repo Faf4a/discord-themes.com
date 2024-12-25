@@ -129,6 +129,8 @@ function App() {
         ? []
         : themes
               .filter((t) => {
+                  t.downloads === undefined ? (t.downloads = 0) : (t.downloads = t.downloads);
+                  t.likes === undefined ? (t.likes = 0) : (t.likes = t.likes);
                   const match = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase());
                   const tags = filters.length === 0 || filters.every((f) => t.tags.includes(f.value));
                   return match && tags;
@@ -140,11 +142,11 @@ function App() {
                       case "most-popular":
                           return b.downloads - a.downloads;
                       case "recently-updated":
-                          return +new Date(b.updated_at) - +new Date(a.updated_at);
+                          return +new Date(b.last_updated) - +new Date(a.last_updated);
                       case "recently-uploaded":
-                          return +new Date(b.created_at) - +new Date(a.created_at);
+                          return +new Date(b.release_date) - +new Date(a.release_date);
                       default:
-                          return 0;
+                          return b.likes - a.likes;
                   }
               });
 
@@ -161,26 +163,13 @@ function App() {
             <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-3">
                     <div className="flex items-center gap-4">
-                        <h1 className={cn("text-xl font-bold text-foreground transition-opacity flex-shrink-0", isSearchExpanded && "hidden md:block")}>
+                        <h1 className={"text-xl font-bold text-foreground transition-opacity flex-shrink-0"}>
                             <a href="/" className="hover:opacity-80 transition-opacity">
                                 Theme Library
                             </a>
                         </h1>
-                        <div className={cn("flex-1 max-w-xl transition-all duration-200", isSearchExpanded ? "absolute top-0 left-0 right-0 z-50 bg-background p-4 md:relative md:bg-transparent md:p-0 flex items-center" : "hidden md:block")}>
-                            {isSearchExpanded && (
-                                <div className="flex items-center w-full">
-                                    <SearchBar onSearch={setSearchQuery} className="w-full" />
-                                    <Button variant="ghost" size="icon" className="ml-2" onClick={() => setIsSearchExpanded(false)}>
-                                        <X className="h-5 w-5" />
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
                         <div className="flex items-center gap-4 ml-auto">
-                            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsSearchExpanded(true)}>
-                                <Search className="h-5 w-5" />
-                            </Button>
-                            <AccountBar className={cn("transition-opacity", isSearchExpanded && "hidden md:block")} />
+                            <AccountBar className="transition-opacity" />
                         </div>
                     </div>
                 </div>
@@ -208,13 +197,15 @@ function App() {
                             )}
                         </Button>
                     </div>
-                    <div className="flex mb-4 flex-col md:flex-row md:items-center md:gap-4 w-full">
-                        <div className="mb-3 md:mb-0 flex-grow md:flex-grow-[2/3]">
+                    <div className="flex flex-col gap-3 w-full md:grid-cols-none md:flex md:flex-row md:space-x-4 md:items-center">
+                        <div className="w-full md:w-2/3">
                             <SearchBar onSearch={setSearchQuery} />
                         </div>
-                        <div className="flex items-center gap-2 md:flex-grow-[1/3]">
-                            <FilterDropdown options={allFilters} onChange={setFilters} />
-                            <DropdownFilter onChange={setSort} />
+                        <div className="w-full md:flex-1">
+                            <FilterDropdown options={allFilters} onChange={setFilters} className="w-full" />
+                        </div>
+                        <div className="w-full md:flex-1">
+                            <DropdownFilter onChange={setSort} className="w-full" />
                         </div>
                     </div>
                 </div>

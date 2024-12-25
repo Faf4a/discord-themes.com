@@ -17,6 +17,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const __theme__ = await themesCollection.findOne({ id: Number(id) });
     if (!__theme__) return res.status(404).json({ status: 404, message: `Couldn't find the theme with the id '${id}'` });
 
+    delete __theme__._id;
+
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Cache-Control", "public, max-age=1200");
     res.status(200).json(__theme__);

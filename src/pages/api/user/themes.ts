@@ -45,6 +45,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const themes = db.collection("themes");
     const userThemes = await themes.find({ "author.discord_snowflake": String(requestedUser.id) }).toArray();
 
+    userThemes.forEach((theme) => {
+        delete theme._id;
+    });
+    
     res.setHeader("Content-Type", "application/json");
 
     if (!userThemes) {
