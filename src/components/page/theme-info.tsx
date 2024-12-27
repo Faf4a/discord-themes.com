@@ -9,6 +9,7 @@ import { useWebContext } from "@context/auth";
 import { Card, CardContent } from "@components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/tooltip";
 import { AccountBar } from "@components/account-bar";
+import { useToast } from "@hooks/use-toast";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -17,8 +18,9 @@ export default function Component({ id }: { id?: string }) {
     const [isDownloaded, setIsDownloaded] = useState(false);
     const [loading, setLoading] = useState(true);
     const [likedThemes, setLikedThemes] = useState();
-    const [downloadProgress, setDownloadProgress] = useState(0);
+    const [isLikeDisabled, setIsLikeDisabled] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading, themes, error } = useWebContext();
+    const { toast } = useToast();
 
     const previewUrl = `/api/preview?url=/api/${id}`;
 
@@ -74,10 +76,7 @@ export default function Component({ id }: { id?: string }) {
                         Profile
                     </Button>
                     {author.github_name && (
-                        <Button
-                            variant="outline"
-                            onClick={() => window.open(`https://github.com/${author.github_name}`, "_blank")}
-                        >
+                        <Button variant="outline" onClick={() => window.open(`https://github.com/${author.github_name}`, "_blank")}>
                             <Github className="mr-2 h-4 w-4" />
                             Github
                         </Button>
@@ -91,13 +90,6 @@ export default function Component({ id }: { id?: string }) {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", `/api/download/${theme.id}`);
         xhr.responseType = "blob";
-
-        xhr.onprogress = (event) => {
-            if (event.lengthComputable) {
-                const progress = Math.round((event.loaded / event.total) * 100);
-                setDownloadProgress(progress);
-            }
-        };
 
         xhr.onload = () => {
             if (xhr.status === 200) {
@@ -113,7 +105,6 @@ export default function Component({ id }: { id?: string }) {
                 setIsDownloaded(true);
                 setTimeout(() => {
                     setIsDownloaded(false);
-                    setDownloadProgress(0);
                 }, 5000);
             }
         };
@@ -122,9 +113,10 @@ export default function Component({ id }: { id?: string }) {
     };
 
     const handleLike = (themeId) => async () => {
-        if (!isAuthenticated) {
-            return;
-        }
+        if (!isAuthenticated || isLikeDisabled) return;
+        if (!themeId || !likedThemes) return;
+
+        setIsLikeDisabled(true);
 
         function getCookie(name: string): string | undefined {
             const value = "; " + document.cookie;
@@ -133,22 +125,78 @@ export default function Component({ id }: { id?: string }) {
         }
 
         const token = getCookie("_dtoken");
+        let response: Response;
+        // @ts-ignore
+        const isCurrentlyLiked = likedThemes?.likes?.find((t) => t.themeId === themeId)?.hasLiked;
 
-        const response = await fetch("/api/likes/add", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ themeId })
-        });
+        setLikedThemes((prev) => ({
+            // @ts-ignore
+            ...prev,
+            likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: !isCurrentlyLiked } : like))
+        }));
 
-        if (response.ok) {
-            const data = await response.json();
-            if (data.status === 200) {
-                setTheme((prev) => ({ ...prev, likes: (prev.likes || 0) + 1 }));
+        setTheme((prev) => ({
+            ...prev,
+            likes: prev.likes + (isCurrentlyLiked ? -1 : 1)
+        }));
+
+        try {
+            if (isCurrentlyLiked) {
+                response = await fetch("/api/likes/remove", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ themeId })
+                });
+            } else {
+                response = await fetch("/api/likes/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ themeId })
+                });
             }
+
+            if (!response.ok) {
+                setLikedThemes((prev) => ({
+                    // @ts-ignore
+                    ...prev,
+                    likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
+                }));
+
+                setTheme((prev) => ({
+                    ...prev,
+                    likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
+                }));
+
+                toast({
+                    description: "Failed to like theme, try again later."
+                });
+            }
+        } catch (error) {
+            setLikedThemes((prev) => ({
+                // @ts-ignore
+                ...prev,
+                likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
+            }));
+
+            setTheme((prev) => ({
+                ...prev,
+                likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
+            }));
+
+            toast({
+                description: "Failed to like theme, try again later."
+            });
         }
+
+        setTimeout(() => {
+            setIsLikeDisabled(false);
+        }, 1500);
     };
 
     async function getLikedThemes() {
@@ -278,12 +326,7 @@ export default function Component({ id }: { id?: string }) {
                         <div className="space-y-4">
                             <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                 <div className="space-y-3">
-                                    <Button
-                                        size="sm"
-                                        disabled={loading || isDownloaded}
-                                        onClick={handleDownload}
-                                        className="w-full flex items-center gap-2 justify-center"
-                                    >
+                                    <Button size="sm" disabled={loading || isDownloaded} onClick={handleDownload} className="w-full flex items-center gap-2 justify-center">
                                         {isDownloaded ? (
                                             <>
                                                 <Check className="h-4 w-4" />
@@ -304,7 +347,7 @@ export default function Component({ id }: { id?: string }) {
                                         (isAuthenticated ? (
                                             <Button
                                                 variant="outline"
-                                                disabled={!isAuthenticated}
+                                                disabled={!isAuthenticated || isLoading || isLikeDisabled}
                                                 className={`w-full ${
                                                     // @ts-ignore
                                                     likedThemes?.likes?.find((t) => t.themeId === theme.id)?.hasLiked ? "text-primary border-primary hover:bg-primary/10" : ""
@@ -354,9 +397,7 @@ export default function Component({ id }: { id?: string }) {
                                 <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                     <div className="space-y-3">
                                         <h2 className="text-lg font-semibold">Contributors</h2>
-                                        <div className="grid gap-2">
-                                            {Array.isArray(theme.author) ? theme.author.map(renderAuthor) : renderAuthor(theme.author)}
-                                        </div>
+                                        <div className="grid gap-2">{Array.isArray(theme.author) ? theme.author.map(renderAuthor) : renderAuthor(theme.author)}</div>
                                     </div>
                                 </div>
                             )}

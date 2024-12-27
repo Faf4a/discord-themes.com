@@ -56,7 +56,7 @@ module.exports = {
         ]
     },
     experimental: {
-        dynamicIO: true
+        dynamicIO: true,
     },
     reactStrictMode: false,
     productionBrowserSourceMaps: false

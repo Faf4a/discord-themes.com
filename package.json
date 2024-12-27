@@ -44,6 +44,7 @@
         "@radix-ui/react-tooltip": "^1.1.4",
         "@sparticuz/chromium-min": "^131.0.0",
         "autoprefixer": "^10.4.20",
+        "babel-plugin-react-compiler": "19.0.0-beta-b2e8e9c-20241220",
         "caniuse-lite": "^1.0.30001684",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",

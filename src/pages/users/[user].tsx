@@ -117,7 +117,6 @@ export default function User() {
         setLoading(false);
     }, [fetchThemes]);
 
-    // Add throttle/debounce utility 
     const debounce = (func: Function, wait: number) => {
         let timeout: NodeJS.Timeout;
         return (...args: any[]) => {
@@ -126,7 +125,6 @@ export default function User() {
         };
     };
 
-    // Update scroll handler with debounce
     useEffect(() => {
         const handleScroll = debounce(() => {
             const scrolled = window.scrollY;
@@ -169,7 +167,7 @@ export default function User() {
         <div className="grid grid-cols-3 gap-4 mt-6">
             {statsItems.map(({ icon: Icon, label, value }) => (
                 <Card key={label} className="p-4">
-                    <CardContent className="p-0 flex flex-col items-center">
+                    <CardContent className="p-0 flex flex-col items-center select-none">
                         <Icon className="h-5 w-5 text-muted-foreground mb-2" />
                         <p className="text-xl font-bold">{value}</p>
                         <p className="text-xs text-muted-foreground">{label}</p>
@@ -195,45 +193,52 @@ export default function User() {
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground">{userThemes.user.id}</p>
-                    {!userThemes.user.global_name && <p className="mt-4 text-sm text-muted-foreground text-center">User hasn't migrated yet, some data may be missing {userThemes.user.global_name ? "" : userThemes.themes.length ? "(pulled partial data from theme submissions)" : "(failed)"}</p>}
-                    <UserStats />
-                    {authorizedUser?.admin && (
-                        <div className="w-full mt-6 space-y-4">
-                            {userThemes.user.admin && (
-                                <Alert className="border-yellow-600/20 bg-yellow-500/10">
-                                    <AlertTitle className="text-md font-semibold text-yellow-500">You cannot moderate this user</AlertTitle>
-                                    <AlertDescription className="text-yellow-500/90 text-sm">This user has administrative privileges and cannot be moderated.</AlertDescription>
-                                </Alert>
-                            )}
+                    {invalid ? (
+                        <p className="text-sm text-muted-foreground">User not found or was deleted</p>
+                    ) : (
+                        <>
+                            {!userThemes.user.global_name && <p className="mt-4 text-sm text-muted-foreground text-center">User hasn't migrated yet, some data may be missing {userThemes.user.global_name ? "" : userThemes.themes.length ? "(pulled partial data from theme submissions)" : "(failed)"}</p>}
+                            <UserStats />
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <Button variant="outline" disabled className="flex items-center gap-2">
-                                    <Flag className="w-4 h-4" />
-                                    View Reports
-                                </Button>
+                            {authorizedUser?.admin && (
+                                <div className="w-full mt-6 space-y-4">
+                                    {userThemes.user.admin && (
+                                        <Alert className="border-yellow-600/20 bg-yellow-500/10">
+                                            <AlertTitle className="text-md font-semibold text-yellow-500">You cannot moderate this user</AlertTitle>
+                                            <AlertDescription className="text-yellow-500/90 text-sm">This user has administrative privileges and cannot be moderated.</AlertDescription>
+                                        </Alert>
+                                    )}
 
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" disabled={userThemes.user.admin} className="flex items-center gap-2">
-                                            <Ban className="w-4 h-4" />
-                                            Delete User
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Button variant="outline" disabled className="flex items-center gap-2">
+                                            <Flag className="w-4 h-4" />
+                                            View Reports
                                         </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. This will permanently delete the account and remove the user's data <b>permanently</b> until they sign up again.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction>Continue</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
-                        </div>
+
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" disabled={userThemes.user.admin || invalid} className="flex items-center gap-2">
+                                                    <Ban className="w-4 h-4" />
+                                                    Delete User
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete the account and remove the user's data <b>permanently</b> until they sign up again.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction className="hover:bg-destructive">Continue</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
@@ -258,7 +263,6 @@ export default function User() {
         </div>
     );
 
-    // Update ThemesList component with proper typing
     const ThemesList = ({ themes }: { themes: Theme[] }) => (
         <div className="space-y-4">
             {themes.slice(0, displayCount).map((theme: Theme) => (
@@ -292,12 +296,12 @@ export default function User() {
                                 Theme Library
                             </a>
                         </h1>
-                        {!(user === "@me" || user === authorizedUser?.id) && !isLoading && <AccountBar className="ml-auto" />}
+                        {!isLoading && <AccountBar className="ml-auto" />}
                     </div>
                 </div>
             </header>
             <main className="container mx-auto px-4 py-8">
-                <div className="flex flex-col md:flex-row gap-8 min-h-[calc(100vh-5rem)]">{children}</div>
+                <div className="flex flex-col-reverse md:flex-row gap-8 min-h-[calc(100vh-5rem)] ">{children}</div>
             </main>
         </div>
     );
@@ -318,13 +322,23 @@ export default function User() {
     }
 
     if (invalid) {
+        router.push("/");
         return (
             <Layout>
-                <div className="w-full md:w-2/3 rounded-lg bg-card">
+                <div className="w-full md:w-2/3 rounded-xl bg-card">
                     <div className="h-[50vh] flex items-center justify-center">
                         <div className="flex flex-col items-center">
                             <SearchX className="w-16 h-16 mb-4 text-muted-foreground" />
                             <p className="text-lg text-muted-foreground">User not found or was deleted</p>
+                            {user === "@me" && isAuthenticated ? (
+                                <Button variant="outline" onClick={() => router.push("/users/@me")} className="mt-4">
+                                    My Profile
+                                </Button>
+                            ) : (
+                                <Button variant="outline" onClick={() => router.push("/")} className="mt-4">
+                                    Head Back
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -357,7 +371,21 @@ export default function User() {
                             <TabsContent value="liked">{userLikedThemes.length > 0 ? <ThemesList themes={userLikedThemes.reverse()} /> : <EmptyState icon={Heart} title="No liked themes" description="You haven't liked any themes yet" />}</TabsContent>
                         </Tabs>
                     ) : (
-                        <div>{userThemes.themes.length > 0 ? <ThemesList themes={userThemes.themes} /> : <EmptyState icon={Book} title="No themes" description="This user hasn't created any themes" />}</div>
+                        <div>
+                            {userThemes.themes.length > 0 ? (
+                                <div>
+                                    <div className="flex flex-col items-center justify-center text-center">
+                                        <p className="text-2xl font-bold mb-1">
+                                            Explore {userThemes.themes.length > 1 ? userThemes.themes.length : "one"} {userThemes.themes.length > 1 ? "Themes" : "Theme"}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground mb-4">created by {userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? userThemes.themes[0].author.discord_name : "Unknown User"}</p>
+                                    </div>
+                                    <ThemesList themes={userThemes.themes} />
+                                </div>
+                            ) : (
+                                <EmptyState icon={Book} title="No themes" description="This user hasn't created any themes" />
+                            )}
+                        </div>
                     )}
                 </Card>
             </div>

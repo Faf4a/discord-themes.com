@@ -57,7 +57,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         await themesCollection.updateOne({ id: themeId }, { $inc: { likes: 1 } });
         res.setHeader("Content-Type", "application/json");
-        res.status(200).json({ status: 200, message: "Successfully liked theme" });
+        res.status(200).json({ status: 200 });
     } catch (error) {
         res.status(500).json({ status: 500, message: `Failed to register likes of theme '${themeId}' with reason: ${error.message}` });
     }

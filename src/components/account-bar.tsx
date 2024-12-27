@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
-import { UserIcon, LogOutIcon } from "lucide-react";
+import { UserIcon, LogOutIcon, Shield } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
 import { Button } from "./ui/button";
-
+import { Badge } from "./ui/badge";
 interface AccountBarProps {
     className?: string;
 }
@@ -71,14 +71,29 @@ export function AccountBar({ className }: AccountBarProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 p-2 space-y-1">
                         <div className="px-2 py-1.5 mb-2">
-                            <p className="text-sm font-medium">{(user as UserData)?.global_name}</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium">{(user as UserData)?.global_name}</p>
+                                {(user as UserData)?.admin && (
+                                    <Badge className="h-5 m-1 px-1.5 fill-current select-none">
+                                        <Shield className="w-2.5 h-2.5 mr-1" />
+                                        Admin
+                                    </Badge>
+                                )}
+                            </div>
                             <p className="text-xs text-muted-foreground">{(user as UserData)?.id}</p>
                         </div>
                         <DropdownMenuSeparator />
+
                         <DropdownMenuItem onClick={() => (window.location.href = "/users/@me")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
                             <UserIcon className="h-4 w-4" />
                             My Profile
                         </DropdownMenuItem>
+                        {(user as UserData).admin && (
+                            <DropdownMenuItem onClick={() => (window.location.href = "/admin")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                                <Shield className="h-4 w-4" />
+                                Admin Panel
+                            </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md transition-colors">
                             <LogOutIcon className="h-4 w-4" />
                             Logout
@@ -86,16 +101,17 @@ export function AccountBar({ className }: AccountBarProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
-                typeof window != "undefined" && window.location.href === "/" && (
-                <Button
-                    onClick={() => {
-                        window.location.href = "/auth/login";
-                    }}
-                    disabled={isLoading}
-                    className={cn("flex items-center gap-2 hover:opacity-90 transition-all", className)}
-                >
-                    Login with Discord
-                </Button>
+                typeof window != "undefined" &&
+                window.location.href === "/" && (
+                    <Button
+                        onClick={() => {
+                            window.location.href = "/auth/login";
+                        }}
+                        disabled={isLoading}
+                        className={cn("flex items-center gap-2 hover:opacity-90 transition-all", className)}
+                    >
+                        Login with Discord
+                    </Button>
                 )
             )}
         </div>

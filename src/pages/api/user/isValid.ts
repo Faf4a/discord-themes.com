@@ -1,14 +1,12 @@
-import { NextResponse } from "next/server";
 import PQueue from "p-queue";
-import type { NextRequest } from "next/server";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { isAuthed } from "@utils/auth";
 
 const queue = new PQueue({
     intervalCap: 45,
     interval: 1000,
     carryoverConcurrencyCount: true
 });
-
-export const runtime = "edge";
 
 async function validateDiscordUser(userId: string) {
     try {
@@ -34,22 +32,49 @@ async function validateDiscordUser(userId: string) {
     }
 }
 
-export default async function GET(request: NextRequest) {
-    const userId = request.nextUrl.searchParams.get("userId");
-
-    if (!userId) {
-        return NextResponse.json({ error: "Missing userId parameter" }, { status: 400 });
-    }
-
+export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const user = await queue.add(() => validateDiscordUser(userId));
-
-        if (!user) {
-            return NextResponse.json({ error: "Invalid Discord user" }, { status: 404 });
+        if (req.method !== "POST") {
+            return res.status(405).json({ message: "Method not allowed", wants: "POST" });
         }
 
-        return NextResponse.json({ user });
+        const { users } = req.body;
+        const { authorization } = req.headers;
+
+        if (!authorization) {
+            return res.status(400).json({ message: "Cannot check authorization without unique token" });
+        }
+
+        const token = authorization?.replace("Bearer ", "")?.trim() ?? null;
+
+        if (!token) {
+            return res.status(400).json({ message: "Invalid Request, unique user token is missing" });
+        }
+        const user = await isAuthed(token as string);
+
+        if (!user) {
+            return res.status(401).json({ status: 401, message: "Given token is not authorized" });
+        }
+
+        if (!users || !Array.isArray(users)) {
+            return res.status(400).json({ message: "Missing users array in body" });
+        }
+
+        if (users.length > 5) {
+            return res.status(400).json({ message: "Maximum 5 users allowed per request" });
+        }
+
+        const validationPromises = users.map((userId) => queue.add(() => validateDiscordUser(userId)));
+
+        const validatedUsers = await Promise.all(validationPromises);
+        const filteredUsers = validatedUsers.filter((user) => user !== null);
+
+        if (filteredUsers.length === 0) {
+            return res.status(404).json({ status: 404, message: "No valid Discord users found" });
+        }
+
+        return res.status(200).json({ users: filteredUsers });
     } catch (error) {
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        return res.status(500).json({ status: 500, message: "Internal server error" });
     }
 }

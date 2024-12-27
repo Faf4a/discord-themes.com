@@ -9,9 +9,15 @@ import { Label } from "@components/ui/label";
 import { Button } from "@components/ui/button";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import MarkdownInput from "@components/ui/markdown-input";
-import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { useWebContext } from "@context/auth";
+import { Alert, AlertDescription } from "@components/ui/alert";
+
+interface ValidatedUser {
+    id: string;
+    username: string;
+    avatar: string;
+}
 
 export default function SubmitPage() {
     const router = useRouter();
@@ -24,14 +30,16 @@ export default function SubmitPage() {
         fileUrl: "",
         longDescription: "",
         contributors: [""],
-        sourceLink: ""
+        sourceLink: "",
+        validatedUsers: {} as Record<string, ValidatedUser>
     });
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [previewUrl, setPreviewUrl] = useState("");
     const [isLoadingPreview, setIsLoadingPreview] = useState(false);
-    const [validSource, setValidSource] = useState(true);
+    const [validSource, setValidSource] = useState(false);
     const [urlError, setUrlError] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [shakeError, setShakeError] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading } = useWebContext();
 
     const isValidImageUrl = (url: string) => {
@@ -39,7 +47,6 @@ export default function SubmitPage() {
         const validExtensions = [".png", ".gif", ".webp", ".jpg", ".jpeg"];
         return validExtensions.some((ext) => url.toLowerCase().endsWith(ext));
     };
-
 
     useEffect(() => {
         function getCookie(name: string): string | undefined {
@@ -85,7 +92,13 @@ export default function SubmitPage() {
         if (step === 2 && !data.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
         if (step === 3 && !data.longDescription.trim()) newErrors.longDescription = "Long description is required.";
         if (step === 4 && !data.file) newErrors.file = "Preview image is required.";
-        if (step === 5 && data.sourceLink && !isValidSourceUrl(data.sourceLink)) newErrors.sourceLink = "Invalid source link.";
+        if (step === 5) {
+            if (!data.sourceLink.trim()) {
+                newErrors.sourceLink = "Source link is required.";
+            } else if (!isValidSourceUrl(data.sourceLink.trim())) {
+                newErrors.sourceLink = "Invalid source link.";
+            }
+        }
         return newErrors;
     }
 
@@ -93,8 +106,12 @@ export default function SubmitPage() {
         const stepErrors = validateStep(step, formData);
         if (Object.keys(stepErrors).length > 0) {
             setErrors(stepErrors);
+            setShakeError(true);
+            setTimeout(() => setShakeError(false), 500);
             return;
         }
+
+        if (step === totalSteps) return handleSubmit(formData);
         setStep(step + 1);
     };
 
@@ -134,7 +151,15 @@ export default function SubmitPage() {
             return;
         }
 
-        form.contributors = [authorizedUser, ...form.contributors.filter((c) => c)];
+        form.contributors = [authorizedUser.id, ...form.contributors.filter((c) => c)];
+        form.validatedUsers = {
+            ...form.validatedUsers,
+            [authorizedUser.id]: {
+                id: authorizedUser.id,
+                username: authorizedUser.global_name,
+                avatar: authorizedUser.avatar
+            }
+        };
         console.log(form);
     };
 
@@ -143,9 +168,7 @@ export default function SubmitPage() {
         try {
             const response = await fetch(`/api/preview/screenshot?url=${encodeURIComponent(url)}`);
             const buffer = await response.arrayBuffer();
-            const base64Image = btoa(
-                new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-            );
+            const base64Image = btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ""));
             setFormData((prev) => ({
                 ...prev,
                 file: `data:image/png;base64,${base64Image}`
@@ -160,66 +183,149 @@ export default function SubmitPage() {
 
     const isValidSourceUrl = (url: string) => {
         if (!url) return true;
-        return url.includes("github.com/") || url.includes("github.io/") || url.includes("gitlab.com/");
+        return url.includes("github.com/") || url.includes("github.io/") || url.includes("gitlab.com/") || url.includes("raw.githubusercontent.com/");
+    };
+
+    const validateDiscordUsers = async (userIds: string[]) => {
+        try {
+            function getCookie(name: string): string | undefined {
+                const value = "; " + document.cookie;
+                const parts = value.split("; " + name + "=");
+                if (parts.length === 2) return parts.pop()?.split(";").shift();
+            }
+
+            const response = await fetch("/api/user/isValid", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getCookie("_dtoken")}`
+                },
+                body: JSON.stringify({ users: userIds })
+            });
+
+            if (!response.ok) return [];
+
+            const data = await response.json();
+            return data.users as ValidatedUser[];
+        } catch (error) {
+            console.error("Failed to validate users:", error);
+            return [];
+        }
     };
 
     const ContributorInputs = () => {
+        const [isValidating, setIsValidating] = useState(false);
+        const [validationError, setValidationError] = useState("");
         const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
         const [bulkInput, setBulkInput] = useState("");
 
-        const handleBulkInput = (e: FocusEvent<HTMLInputElement>) => {
+        const validateAndAddUser = async (userId: string) => {
+            if (!userId.trim()) return;
+            setIsValidating(true);
+            setValidationError("");
+
+            const validUsers = await validateDiscordUsers([userId]);
+            if (validUsers.length > 0) {
+                const validUser = validUsers[0];
+                setFormData((prev) => ({
+                    ...prev,
+                    validatedUsers: {
+                        ...prev.validatedUsers,
+                        [userId]: validUser
+                    }
+                }));
+            } else {
+                setValidationError(`Invalid Discord ID: ${userId}`);
+            }
+            setIsValidating(false);
+        };
+
+        const handleBulkInput = async (e: FocusEvent<HTMLInputElement>) => {
             const value = e.target.value;
             if (!value) return;
 
-            const newContributors = value
-                .split(/[\s,]+/)
-                .filter((id) => id.trim())
-                .map((id) => id.trim());
-
-            setFormData((prev) => ({
-                ...prev,
-                contributors: [...prev.contributors.filter((c) => c), ...newContributors]
-            }));
-
+            const newIds = value.split(/[\s,]+/).filter((id) => id.trim());
             setBulkInput("");
-        };
 
-        const removeField = (index: number) => {
-            setFormData((prev) => ({
-                ...prev,
-                contributors: prev.contributors.filter((_, i) => i !== index)
-            }));
+            setIsValidating(true);
+            const validUsers = await validateDiscordUsers(newIds);
+
+            if (validUsers.length > 0) {
+                const newValidatedUsers = validUsers.reduce(
+                    (acc, user) => {
+                        acc[user.id] = user;
+                        return acc;
+                    },
+                    {} as Record<string, ValidatedUser>
+                );
+
+                setFormData((prev) => ({
+                    ...prev,
+                    contributors: [...new Set([...prev.contributors, ...validUsers.map((u) => u.id)])],
+                    validatedUsers: { ...prev.validatedUsers, ...newValidatedUsers }
+                }));
+            }
+            setIsValidating(false);
         };
 
         return (
             <div className="space-y-2 mt-2">
                 {formData.contributors
-                    .filter((c) => c)
-                    .map((contributor, index) => (
+                    .filter((id) => id)
+                    .map((contributorId, index) => (
                         <div key={`contributor-${index}`} className="flex items-center gap-2">
-                            <Input
-                                value={contributor}
-                                onChange={(e) => {
-                                    const newContributors = [...formData.contributors];
-                                    newContributors[index] = e.target.value;
+                            <div className="flex-1 select-none flex items-center gap-2 p-2 border border-muted rounded">
+                                {formData.validatedUsers[contributorId] ? (
+                                    <div className="flex items-center gap-2 min-w-0">
+                                    <img 
+                                        src={`https://cdn.discordapp.com/avatars/${contributorId}/${formData.validatedUsers[contributorId].avatar}.png`} 
+                                        className="w-8 h-8 rounded-full flex-shrink-0" 
+                                        draggable={false} 
+                                        alt={formData.validatedUsers[contributorId].username} 
+                                    />
+                                    <span className="truncate">{formData.validatedUsers[contributorId].username}</span>
+                                    <span className="text-muted-foreground text-sm truncate flex-shrink-0">({contributorId})</span>
+                                </div>
+                                ) : (
+                                    <Input
+                                        value={contributorId}
+                                        onChange={(e) => {
+                                            const newContributors = [...formData.contributors];
+                                            newContributors[index] = e.target.value;
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                contributors: newContributors
+                                            }));
+                                        }}
+                                        onBlur={(e) => validateAndAddUser(e.target.value)}
+                                        placeholder="Discord User ID"
+                                        ref={(el) => (inputRefs.current[index] = el)}
+                                    />
+                                )}
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
                                     setFormData((prev) => ({
                                         ...prev,
-                                        contributors: newContributors
+                                        contributors: prev.contributors.filter((_, i) => i !== index)
                                     }));
                                 }}
-                                placeholder="Discord User ID"
-                                ref={(el) => {
-                                    inputRefs.current[index] = el;
-                                }}
-                            />
-                            <Button variant="ghost" size="icon" onClick={() => removeField(index)}>
+                            >
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
                     ))}
 
-                <div className="flex items-center gap-4 mt-4">
-                    <Input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} onBlur={handleBulkInput} placeholder="Type multiple IDs separated by spaces..." className="italic" />
+                <div className="flex flex-col gap-2">
+                    <Input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} onBlur={handleBulkInput} placeholder="Type multiple IDs separated by spaces..." className="italic" disabled={isValidating} />
+                    {isValidating && <p className="text-sm text-muted-foreground">Validating users...</p>}
+                    {validationError && (
+                        <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                            <AlertDescription className="text-sm">{validationError}</AlertDescription>
+                        </Alert>
+                    )}
                 </div>
             </div>
         );
@@ -227,7 +333,7 @@ export default function SubmitPage() {
 
     return (
         <>
-            <header className="sticky top-0 z-999 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <h1 className="text-xl font-semibold">
@@ -242,8 +348,8 @@ export default function SubmitPage() {
                         <div className="container mx-auto px-4 py-8">
                             <div className="flex gap-8 max-w-6xl mx-auto">
                                 <div className="w-64 hidden md:block">
-                                    <div className="sticky top-8">
-                                        <h2 className="text-lg font-semibold mb-4">Progress</h2>
+                                    <div className="top-8 select-none">
+                                        <h2 className="font-semibold mb-4">Progress</h2>
                                         <div className="space-y-4">
                                             <Progress value={progress} className="h-2" />
                                             {["Title", "Short Description", "Long Description", "Cover Image", "Attribution"].map((label, index) => (
@@ -265,7 +371,11 @@ export default function SubmitPage() {
                                                 <div className="space-y-2">
                                                     <Label htmlFor="title">Title</Label>
                                                     <Input id="title" value={formData.title} onChange={(e) => updateFormData("title", e.target.value)} placeholder="Enter theme title..." />
-                                                    {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+                                                    {errors.title && (
+                                                        <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                                                            <AlertDescription className="text-sm">{errors.title}</AlertDescription>
+                                                        </Alert>
+                                                    )}
                                                 </div>
                                             </div>
                                         )}
@@ -275,7 +385,11 @@ export default function SubmitPage() {
                                                 <h2 className="text-2xl font-semibold">Short Description</h2>
                                                 <p className="text-muted-foreground">Provide a brief description of your theme, this will be shown on the front-page cards.</p>
                                                 <MarkdownInput defaultContent={formData.shortDescription} onChange={(value) => updateFormData("shortDescription", value)} lines={3} />
-                                                {errors.shortDescription && <p className="text-sm text-red-500">{errors.shortDescription}</p>}
+                                                {errors.shortDescription && (
+                                                    <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                                                        <AlertDescription className="text-sm">{errors.shortDescription}</AlertDescription>
+                                                    </Alert>
+                                                )}
                                             </div>
                                         )}
 
@@ -284,7 +398,11 @@ export default function SubmitPage() {
                                                 <h2 className="text-2xl font-semibold">Long Description</h2>
                                                 <p className="text-muted-foreground">Provide detailed information about your theme, this will be shown on the theme page.</p>
                                                 <MarkdownInput defaultContent={formData.longDescription} onChange={(value) => updateFormData("longDescription", value)} lines={10} />
-                                                {errors.longDescription && <p className="text-sm text-red-500">{errors.longDescription}</p>}
+                                                {errors.longDescription && (
+                                                    <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                                                        <AlertDescription className="text-sm">{errors.longDescription}</AlertDescription>
+                                                    </Alert>
+                                                )}
                                             </div>
                                         )}
 
@@ -295,7 +413,7 @@ export default function SubmitPage() {
                                                 <div className="space-y-6">
                                                     <div className={`border-2 ${dragActive ? "border-primary" : "border-input"} hover:border-primary transition-colors duration-200 border-dashed rounded-lg p-8 text-center`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
                                                         <Input type="file" accept="image/png, image/gif, image/webp" onChange={(e) => handleFileChange(e.target.files[0])} className="hidden" id="file-upload" />
-                                                        <Label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer">
+                                                        <Label htmlFor="file-upload" className="flex flex-col select-none items-center justify-center cursor-pointer">
                                                             <Upload className="w-12 h-12 text-muted-foreground mb-4" />
                                                             <p className="text-lg font-medium mb-2">Drag and drop a file here, or click to select</p>
                                                             <p className="text-sm text-muted-foreground">Supports PNG, GIF, WEBP</p>
@@ -303,7 +421,8 @@ export default function SubmitPage() {
                                                     </div>
                                                     {formData.file && (
                                                         <div className="mt-4">
-                                                            <Image priority width={854} height={480} src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
+                                                            {/* Using <img> instead of <Image> because Next.js complains about hosts */}
+                                                            <img draggable={false} width={854} height={480} src={formData.file} alt="Uploaded preview" className="rounded-lg w-full h-auto object-cover" />
                                                         </div>
                                                     )}
                                                     <div className="flex flex-col gap-2">
@@ -332,7 +451,11 @@ export default function SubmitPage() {
                                                                 Load
                                                             </Button>
                                                         </div>
-                                                        {urlError && <p className="text-sm text-red-500">Please enter a valid image URL (PNG, GIF, WEBP, JPG)</p>}
+                                                        {urlError && (
+                                                            <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                                                                <AlertDescription className="text-sm">Please enter a valid image URL (PNG, GIF, WEBP, JPG)</AlertDescription>
+                                                            </Alert>
+                                                        )}
                                                     </div>
                                                     <Button variant="outline" onClick={() => setShowPreviewModal(true)} className="mt-4">
                                                         I don't have a Picture
@@ -346,7 +469,7 @@ export default function SubmitPage() {
                                                             <p className="text-muted-foreground">Enter the URL of your theme to generate a preview image. Try to use GitHub raw URLs</p>
                                                             <div className="space-y-4">
                                                                 <Input placeholder="Enter theme URL..." value={previewUrl} onChange={(e) => setPreviewUrl(e.target.value)} />
-                                                                <Button onClick={() => fetchPreview(previewUrl)} disabled={isLoadingPreview} className="w-full">
+                                                                <Button onClick={() => fetchPreview(previewUrl)} disabled={isLoadingPreview || !previewUrl || !(previewUrl.startsWith("/api/") || previewUrl.startsWith("https://") || previewUrl.startsWith("http://"))} className="w-full">
                                                                     {isLoadingPreview ? (
                                                                         <>
                                                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -355,12 +478,16 @@ export default function SubmitPage() {
                                                                     ) : (
                                                                         "Generate Preview"
                                                                     )}
-                                                                </Button>
+                                                                </Button>{" "}
                                                             </div>
                                                         </DialogContent>
                                                     </Dialog>
                                                 </div>
-                                                {errors.file && <p className="text-sm text-red-500">{errors.file}</p>}
+                                                {errors.file && (
+                                                    <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                                                        <AlertDescription className="text-sm">{errors.file}</AlertDescription>
+                                                    </Alert>
+                                                )}
                                             </div>
                                         )}
 
@@ -368,16 +495,16 @@ export default function SubmitPage() {
                                             <div className="space-y-4">
                                                 <section>
                                                     <h2 className="text-2xl font-semibold">Attribution</h2>
-                                                    <p className="text-muted-foreground">
-                                                        Anyone else that contributored to your theme? List their Discord User ID below! Make sure they used this site before, otherwise only their username will be shown.
-                                                    </p>
+                                                    <p className="text-muted-foreground">Anyone else that contributored to your theme? List their Discord User ID below! Make sure they used this site before, otherwise only their username will be shown.</p>
                                                     <div className="space-y-4">
                                                         <ContributorInputs />
                                                     </div>
                                                 </section>
                                                 <div className="space-y-4">
                                                     <h2 className="text-2xl font-semibold">Source</h2>
-                                                    <p className="text-muted-foreground">If your theme has a dedicated GitHub/GitLab repository, feel free to provide the link below.</p>
+                                                    <p className="text-muted-foreground">
+                                                        Please use the <b>direct link</b> to your theme which contains the full source, this later will be served as a download link for the users.
+                                                    </p>
                                                     <Input
                                                         className={`${!validSource ? "border-red-500" : ""}`}
                                                         value={formData.sourceLink}
@@ -388,9 +515,17 @@ export default function SubmitPage() {
                                                         }}
                                                         placeholder="Enter source URL..."
                                                     />
-                                                    {!validSource && <p className="text-sm text-red-500">URL must start with github.com/.io or gitlab.com</p>}{" "}
+                                                    {!validSource && formData.sourceLink && (
+                                                        <Alert className="mt-4 border-yellow-600/20 bg-yellow-500/10">
+                                                            <AlertDescription className="text-sm">Please use GitHub or GitLab for the source link.</AlertDescription>
+                                                        </Alert>
+                                                    )}
                                                 </div>
-                                                {errors.sourceLink && <p className="text-sm text-red-500">{errors.sourceLink}</p>}
+                                                {errors.sourceLink && (
+                                                    <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
+                                                        <AlertDescription className="text-sm">{errors.sourceLink}</AlertDescription>
+                                                    </Alert>
+                                                )}
                                             </div>
                                         )}
 
@@ -398,7 +533,7 @@ export default function SubmitPage() {
                                             <Button variant="outline" onClick={prevStep} disabled={step === 1}>
                                                 Previous
                                             </Button>
-                                            <Button onClick={step === totalSteps ? () => handleSubmit(formData) : nextStep}>{step === totalSteps ? "Submit" : "Next"}</Button>
+                                            <Button onClick={nextStep}>{step === totalSteps ? "Submit" : "Next"}</Button>
                                         </div>
                                     </Card>
                                 </div>
