@@ -89,7 +89,7 @@ export function AccountBar({ className }: AccountBarProps) {
                             My Profile
                         </DropdownMenuItem>
                         {(user as UserData).admin && (
-                            <DropdownMenuItem onClick={() => (window.location.href = "/admin")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                            <DropdownMenuItem disabled onClick={() => (window.location.href = "/admin")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
                                 <Shield className="h-4 w-4" />
                                 Admin Panel
                             </DropdownMenuItem>

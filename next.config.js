@@ -1,4 +1,7 @@
 /** @type {import("next").NextConfig} */
+const env = process.env.NODE_ENV;
+const RAW_SERVER = env === "development" ? "literate-engine-rv7579wprjq2px77-4321.app.github.dev" : "discord-themes.com";
+
 module.exports = {
     async headers() {
         return [
@@ -41,6 +44,32 @@ module.exports = {
             }
         ];
     },
+    rewrites() {
+        return {
+            beforeFiles: [
+                {
+                    source: "/:path*",
+                    has: [
+                        {
+                            type: "host",
+                            value: `api.${RAW_SERVER}`
+                        }
+                    ],
+                    destination: "/api/:path*"
+                },
+                {
+                    source: "/api/thumbnail/:name*",
+                    has: [
+                        {
+                            type: "host",
+                            value: `cdn.${RAW_SERVER}`
+                        }
+                    ],
+                    destination: "/api/thumbnail/:name*"
+                }
+            ]
+        };
+    },
     images: {
         remotePatterns: [
             {
@@ -56,7 +85,7 @@ module.exports = {
         ]
     },
     experimental: {
-        dynamicIO: true,
+        dynamicIO: true
     },
     reactStrictMode: false,
     productionBrowserSourceMaps: false

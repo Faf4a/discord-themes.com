@@ -12,17 +12,18 @@ function App({ Component, pageProps }) {
             <ThemeProvider attribute="class" defaultTheme="dark">
                 <Head>
                     <meta name="viewport" content="initial-scale=1, width=device-width" />
+                    <meta name="keywords" content="discord, theme, custom, discord themes, betterdiscord, vencord" />
                     <meta name="theme-color" content="#5865F2" />
                     <meta name="application-name" content="Theme Library" />
-                    <meta name="description" content="Find your favourite themes all at one place." />
+                    <meta property="og:type" content="website" />
+                    <meta property="og:url" content="https://discord-themes.com/" />
+                    <meta property="og:title" content="ThemeLibrary" />
+                    <meta property="og:description" content="Find your favourite themes all at one place." />
                     <title>Theme Library</title>
                     <link rel="icon" href="/favicon.ico" />
-                    <link rel="preconnect" href="https://fonts.googleapis.com" />
-                    <link rel="preconnect" href="https://fonts.gstatic.com" />
-                    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
                 </Head>
                 <div className="min-h-screen flex flex-col">
-                <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />
+                    <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />
 
                     <main className="flex-1">
                         <div className="max-w-7xl mx-auto px-4 md:px-8">

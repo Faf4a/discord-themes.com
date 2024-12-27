@@ -135,11 +135,6 @@ export default function Component({ id }: { id?: string }) {
             likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: !isCurrentlyLiked } : like))
         }));
 
-        setTheme((prev) => ({
-            ...prev,
-            likes: prev.likes + (isCurrentlyLiked ? -1 : 1)
-        }));
-
         try {
             if (isCurrentlyLiked) {
                 response = await fetch("/api/likes/remove", {
@@ -168,11 +163,6 @@ export default function Component({ id }: { id?: string }) {
                     likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
                 }));
 
-                setTheme((prev) => ({
-                    ...prev,
-                    likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
-                }));
-
                 toast({
                     description: "Failed to like theme, try again later."
                 });
@@ -182,11 +172,6 @@ export default function Component({ id }: { id?: string }) {
                 // @ts-ignore
                 ...prev,
                 likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
-            }));
-
-            setTheme((prev) => ({
-                ...prev,
-                likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
             }));
 
             toast({
@@ -240,7 +225,7 @@ export default function Component({ id }: { id?: string }) {
     ];
 
     const ThemeStats = () => (
-        <div className="grid grid-cols-2 gap-4 mt-6">
+        <div className="grid grid-cols-2 gap-4 mt-6 select-none">
             {statsItems.map(({ icon: Icon, label, value }) => (
                 <Card key={label} className="p-4">
                     <CardContent className="p-0 flex flex-col items-center">
@@ -262,20 +247,18 @@ export default function Component({ id }: { id?: string }) {
                     <meta name="keywords" content="discord, theme, custom, discord themes" />
                     <meta name="author" content="discord-themes.com" />
 
-                    {/* Open Graph / Facebook */}
                     <meta property="og:type" content="website" />
                     <meta property="og:title" content={theme.name} />
                     <meta property="og:description" content={theme.description} />
                     <meta property="og:image" content={theme.thumbnail_url} />
                     <meta property="og:url" content="https://discord-themes.com" />
-                    <meta property="og:site_name" content="Discord Themes" />
+                    <meta property="og:site_name" content={`@${theme.author.discord_name} - https://discord-themes.com`} />
 
-                    {/* Twitter */}
                     <meta name="twitter:card" content="summary_large_image" />
                     <meta name="twitter:title" content={theme.name} />
                     <meta name="twitter:description" content={theme.description} />
                     <meta name="twitter:image" content={theme.thumbnail_url} />
-                    <meta name="twitter:site" content="@discordthemes" />
+                    <meta name="twitter:site" content="discord-themes.com" />
                 </Head>
             )}
             <div className="min-h-screen bg-background">
@@ -316,7 +299,7 @@ export default function Component({ id }: { id?: string }) {
                                             </p>
                                         )}
                                         <div className="bg-muted rounded-lg flex justify-center items-center">
-                                            <Image src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
+                                            <Image draggable={false} src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
                                         </div>
                                     </div>
                                 </div>
