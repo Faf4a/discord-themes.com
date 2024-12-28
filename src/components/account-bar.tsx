@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
-import { UserIcon, LogOutIcon, Shield } from "lucide-react";
+import { UserIcon, LogOutIcon, Shield, Settings } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
+import { getCookie, deleteCookie } from "@utils/cookies";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
 import { Button } from "./ui/button";
@@ -18,12 +19,6 @@ export function AccountBar({ className }: AccountBarProps) {
 
     useEffect(() => {
         if (isLoading) return;
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
-
         const token = getCookie("_dtoken");
 
         if (token) {
@@ -35,16 +30,6 @@ export function AccountBar({ className }: AccountBarProps) {
     }, [authorizedUser, isAuthenticated, isLoading]);
 
     useEffect(() => {
-        function deleteCookie(name: string) {
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        }
-
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
-
         const token = getCookie("_dtoken");
 
         if (isValid === false && token) {
@@ -94,6 +79,10 @@ export function AccountBar({ className }: AccountBarProps) {
                                 Admin Panel
                             </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem onClick={() => (window.location.href = "/users/@me/settings")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                            <Settings className="h-4 w-4" />
+                            Settings
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md transition-colors">
                             <LogOutIcon className="h-4 w-4" />
                             Logout

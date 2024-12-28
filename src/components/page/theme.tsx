@@ -6,8 +6,8 @@ import { ThemeGrid } from "@components/theme/grid";
 import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { Plus, Search, SearchX, X, ArrowUp } from "lucide-react";
-import { cn } from "@lib/utils";
+import { Plus, SearchX, ArrowUp } from "lucide-react";
+import { getCookie } from "@utils/cookies";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
 import ThemeCarousel from "@components/theme/carousel";
@@ -74,12 +74,6 @@ function App() {
 
     useEffect(() => {
         if (isLoading) return;
-
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
 
         const token = getCookie("_dtoken");
 

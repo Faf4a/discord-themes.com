@@ -16,8 +16,14 @@ export default function AuthCallback() {
             setCookie("_dtoken", token as string, 7);
         }
 
-        if (!redirected) router.push("/");
-        setRedirected(true);
+        if (localStorage.getItem("redirect")) {
+            router.push(localStorage.getItem("redirect"));
+            localStorage.removeItem("redirect");
+            setRedirected(true);
+        } else {
+            if (!redirected) router.push("/");
+            setRedirected(true);
+        }
     }, [redirected, token, router]);
 
     return (

@@ -10,6 +10,7 @@ import { Card, CardContent } from "@components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/tooltip";
 import { AccountBar } from "@components/account-bar";
 import { useToast } from "@hooks/use-toast";
+import { getCookie } from "@utils/cookies";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -118,12 +119,6 @@ export default function Component({ id }: { id?: string }) {
 
         setIsLikeDisabled(true);
 
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
-
         const token = getCookie("_dtoken");
         let response: Response;
         // @ts-ignore
@@ -185,12 +180,6 @@ export default function Component({ id }: { id?: string }) {
     };
 
     async function getLikedThemes() {
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
-
         const token = getCookie("_dtoken");
 
         const response = await fetch("/api/likes/get", {

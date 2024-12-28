@@ -5,6 +5,7 @@ import Head from "next/head";
 import blob from "/public/favicon.ico";
 import Image from "next/image";
 import "./theme.css";
+import { Toaster } from "@components/ui/toaster";
 
 function App({ Component, pageProps }) {
     return (
@@ -23,6 +24,8 @@ function App({ Component, pageProps }) {
                     <link rel="icon" href="/favicon.ico" />
                 </Head>
                 <div className="min-h-screen flex flex-col">
+                    <Toaster />
+
                     <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />
 
                     <main className="flex-1">

@@ -12,6 +12,7 @@ import MarkdownInput from "@components/ui/markdown-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { useWebContext } from "@context/auth";
 import { Alert, AlertDescription } from "@components/ui/alert";
+import { getCookie, deleteCookie } from "@utils/cookies";
 
 interface ValidatedUser {
     id: string;
@@ -49,16 +50,6 @@ export default function SubmitPage() {
     };
 
     useEffect(() => {
-        function getCookie(name: string): string | undefined {
-            const value = "; " + document.cookie;
-            const parts = value.split("; " + name + "=");
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        }
-
-        function deleteCookie(name: string) {
-            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-        }
-
         const token = getCookie("_dtoken");
 
         if (isAuthenticated === false && token) {
@@ -188,12 +179,6 @@ export default function SubmitPage() {
 
     const validateDiscordUsers = async (userIds: string[]) => {
         try {
-            function getCookie(name: string): string | undefined {
-                const value = "; " + document.cookie;
-                const parts = value.split("; " + name + "=");
-                if (parts.length === 2) return parts.pop()?.split(";").shift();
-            }
-
             const response = await fetch("/api/user/isValid", {
                 method: "POST",
                 headers: {
