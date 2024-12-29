@@ -173,14 +173,14 @@ function App() {
                 <div className={`transform transition-all duration-300 ease-in-out overflow-hidden ${searchQuery === "" ? "opacity-100 translate-y-0 max-h-[500px]" : "opacity-0 -translate-y-10 max-h-0"} hidden md:block`}>
                     <div className="flex flex-col items-center">
                         <div className="relative inline-flex items-center justify-center">
-                            <h2 className="text-xl font-semibold mb-3 mt-3 relative z-10">Recently Updated</h2>
+                            <h2 className="text-xl font-semibold mb-3 mt-3 relative z-10">Recently Updated & Added</h2>
                         </div>
                         <ThemeCarousel themes={themes} />
                     </div>
                 </div>
                 <div className="mb-3 mt-8">
                     <div className="flex justify-end mb-3">
-                        <Button disabled={isLoading} onClick={handleSubmit} className="rounded-lg bg-primary hover:bg-primary/90">
+                        <Button disabled={isLoading} onClick={handleSubmit} className="rounded-lg font-medium bg-primary hover:bg-primary/90">
                             {isValid ? (
                                 <>
                                     <Plus className="mr-2 h-4 w-4" />

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SERVER } from "@constants";
 
 const rateLimit = new Map<string, { count: number; lastRequest: number; hits: number }>();
 
@@ -8,12 +7,17 @@ const RATE_LIMIT_MAX_REQUESTS = 10;
 const SCREENSHOT_RATE_LIMIT_WINDOW = 15000;
 const SCREENSHOT_RATE_LIMIT_MAX_REQUESTS = 2;
 
+const EXCLUDED_FROM_RATE_LIMIT = [
+    "/api/user/isAuthed",
+    "/api/user/themes",
+];
+
 export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     const path = url.pathname;
     const ip = req.headers.get("x-forwarded-for") || "unknown";
 
-    if (path.startsWith("/api") && !path.startsWith("/api/user")) {
+    if (path.startsWith("/api") && !EXCLUDED_FROM_RATE_LIMIT.includes(path)) {
         const now = Date.now();
 
         if (path === "/api/preview/screenshot") {

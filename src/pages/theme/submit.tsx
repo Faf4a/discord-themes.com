@@ -7,12 +7,13 @@ import { Card } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { Button } from "@components/ui/button";
-import { ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { ImageIcon, Loader2, LoaderCircleIcon, Upload, X } from "lucide-react";
 import MarkdownInput from "@components/ui/markdown-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { useWebContext } from "@context/auth";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { getCookie, deleteCookie } from "@utils/cookies";
+import { toast } from "@hooks/use-toast";
 
 interface ValidatedUser {
     id: string;
@@ -39,6 +40,7 @@ export default function SubmitPage() {
     const [isLoadingPreview, setIsLoadingPreview] = useState(false);
     const [validSource, setValidSource] = useState(false);
     const [urlError, setUrlError] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [shakeError, setShakeError] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading } = useWebContext();
@@ -79,7 +81,7 @@ export default function SubmitPage() {
 
     function validateStep(step: number, data: typeof formData) {
         const newErrors: Record<string, string> = {};
-        if (step === 1 && !data.title.trim()) newErrors.title = "Title is required.";
+        if (step === 1 && data.title.trim().length < 3) newErrors.title = "Title must be longer than 3 characters.";
         if (step === 2 && !data.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
         if (step === 3 && !data.longDescription.trim()) newErrors.longDescription = "Long description is required.";
         if (step === 4 && !data.file) newErrors.file = "Preview image is required.";
@@ -135,14 +137,16 @@ export default function SubmitPage() {
         reader.readAsDataURL(file);
     };
 
-    const handleSubmit = (form) => {
+    const handleSubmit = async (form) => {
+        setSubmitting(true);
         const finalErrors = validateStep(step, form);
         if (Object.keys(finalErrors).length > 0) {
             setErrors(finalErrors);
             return;
         }
 
-        form.contributors = [authorizedUser.id, ...form.contributors.filter((c) => c)];
+        form.contributors = [authorizedUser.id, ...new Set(form.contributors)];
+
         form.validatedUsers = {
             ...form.validatedUsers,
             [authorizedUser.id]: {
@@ -151,7 +155,26 @@ export default function SubmitPage() {
                 avatar: authorizedUser.avatar
             }
         };
-        console.log(form);
+
+        const response = await fetch("/api/submit/theme", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${getCookie("_dtoken")}`
+            },
+            body: JSON.stringify(form)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            router.push(`/theme/submitted/${data.id}`);
+        } else {
+            toast({
+                title: "Failed to submit",
+                description: "An error occurred while submitting your theme. Please try again later.",
+                variant: "destructive"
+            })
+        }
     };
 
     const fetchPreview = async (url: string) => {
@@ -262,18 +285,14 @@ export default function SubmitPage() {
                             <div className="flex-1 select-none flex items-center gap-2 p-2 border border-muted rounded">
                                 {formData.validatedUsers[contributorId] ? (
                                     <div className="flex items-center gap-2 min-w-0">
-                                    <img 
-                                        src={`https://cdn.discordapp.com/avatars/${contributorId}/${formData.validatedUsers[contributorId].avatar}.png`} 
-                                        className="w-8 h-8 rounded-full flex-shrink-0" 
-                                        draggable={false} 
-                                        alt={formData.validatedUsers[contributorId].username} 
-                                    />
-                                    <span className="truncate">{formData.validatedUsers[contributorId].username}</span>
-                                    <span className="text-muted-foreground text-sm truncate flex-shrink-0">({contributorId})</span>
-                                </div>
+                                        <img src={`https://cdn.discordapp.com/avatars/${contributorId}/${formData.validatedUsers[contributorId].avatar}.png`} className="w-8 h-8 rounded-full flex-shrink-0" draggable={false} alt={formData.validatedUsers[contributorId].username} />
+                                        <span className="truncate">{formData.validatedUsers[contributorId].username}</span>
+                                        <span className="text-muted-foreground text-sm truncate flex-shrink-0">({contributorId})</span>
+                                    </div>
                                 ) : (
                                     <Input
                                         value={contributorId}
+                                        disabled={submitting}
                                         onChange={(e) => {
                                             const newContributors = [...formData.contributors];
                                             newContributors[index] = e.target.value;
@@ -291,6 +310,7 @@ export default function SubmitPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                disabled={submitting}
                                 onClick={() => {
                                     setFormData((prev) => ({
                                         ...prev,
@@ -304,7 +324,7 @@ export default function SubmitPage() {
                     ))}
 
                 <div className="flex flex-col gap-2">
-                    <Input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} onBlur={handleBulkInput} placeholder="Type multiple IDs separated by spaces..." className="italic" disabled={isValidating} />
+                    <Input value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} onBlur={handleBulkInput} placeholder="Type multiple IDs separated by spaces..." className="italic" disabled={isValidating || submitting} />
                     {isValidating && <p className="text-sm text-muted-foreground">Validating users...</p>}
                     {validationError && (
                         <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
@@ -490,9 +510,13 @@ export default function SubmitPage() {
                                                     <p className="text-muted-foreground">
                                                         Please use the <b>direct link</b> to your theme which contains the full source, this later will be served as a download link for the users.
                                                     </p>
+                                                    <Alert className="border-yellow-600/20 bg-yellow-500/10">
+                                                        <AlertDescription className="text-sm">Ensure your .css file/snippet has <b>metadata</b> at the top of it</AlertDescription>
+                                                    </Alert>
                                                     <Input
                                                         className={`${!validSource ? "border-red-500" : ""}`}
                                                         value={formData.sourceLink}
+                                                        disabled={submitting}
                                                         onChange={(e) => {
                                                             const value = e.target.value;
                                                             setValidSource(isValidSourceUrl(value));
@@ -515,10 +539,23 @@ export default function SubmitPage() {
                                         )}
 
                                         <div className="flex justify-between mt-8">
-                                            <Button variant="outline" onClick={prevStep} disabled={step === 1}>
+                                            <Button variant="outline" onClick={prevStep} disabled={step === 1 || submitting}>
                                                 Previous
                                             </Button>
-                                            <Button onClick={nextStep}>{step === totalSteps ? "Submit" : "Next"}</Button>
+                                            <Button disabled={/*en*/false} onClick={nextStep}>
+                                                {step === totalSteps ? (
+                                                    submitting ? (
+                                                        <>
+                                                            <LoaderCircleIcon className={`h-4 w-4 mr-2 animate-spin ${submitting ? "text-white" : "text-muted-foreground"}`} />
+                                                            Submitting...
+                                                        </>
+                                                    ) : (
+                                                        "Submit"
+                                                    )
+                                                ) : (
+                                                    "Next Step"
+                                                )}
+                                            </Button>
                                         </div>
                                     </Card>
                                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem } from "@components/ui/carousel";
 import { Card, CardContent } from "@components/ui/card";
 import Autoplay from "embla-carousel-autoplay";
@@ -17,16 +17,32 @@ interface ThemeCarouselProps {
 }
 
 export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
+    const [isVisible, setIsVisible] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
     const sortedThemes = useMemo(() => {
         return [...themes]
             .sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime())
             .slice(0, 10);
     }, [themes]);
 
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsVisible(entry.isIntersecting),
+            { threshold: 0.1 }
+        );
+
+        if (containerRef.current) {
+            observer.observe(containerRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
-        <div className="w-full relative">
+        <div className="w-full relative" ref={containerRef}>
             <Carousel
-                plugins={[Autoplay({ delay: 5500 })]}
+                plugins={isVisible ? [Autoplay({ delay: 5500 })] : []}
                 opts={{
                     loop: true,
                     align: "start",

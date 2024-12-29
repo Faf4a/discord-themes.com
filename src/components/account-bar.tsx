@@ -94,6 +94,7 @@ export function AccountBar({ className }: AccountBarProps) {
                 window.location.href === "/" && (
                     <Button
                         onClick={() => {
+                            localStorage.setItem("redirect", window.location.href);
                             window.location.href = "/auth/login";
                         }}
                         disabled={isLoading}

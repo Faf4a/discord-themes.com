@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { ThemeCard } from "@components/theme/card";
 import Image from "next/image";
 import { SearchX, Book, Heart, Download, Shield, Ban, Flag, ArrowUp } from "lucide-react";
-import { type Theme } from "@types";
+import { type Theme, type Author } from "@types";
 import { Button } from "@components/ui/button";
 import { AccountBar } from "@components/account-bar";
 import { useWebContext } from "@context/auth";
@@ -177,14 +177,27 @@ export default function User() {
         </div>
     );
 
+    function getAuthorDiscordName(author: Author | Author[], userId?: string): string {
+        if (isLoading) return "Loading...";
+        if (!userId) return "Unknown User";
+        if (!author) return "Unknown User";
+        if (Array.isArray(author)) {
+            const matchingAuthor = author.find((a) => a.discord_snowflake === userId);
+            return matchingAuthor?.discord_name ?? "Unknown User";
+        }
+        return author.discord_name;
+    }
+
+    const authorName = getAuthorDiscordName(userThemes.themes[0]?.author, userThemes.user.id);
+
     const UserProfile = () => (
         <div className="relative">
             <div className="w-full h-32 rounded-t-lg" style={{ backgroundColor: userThemes.user?.preferredColor || "" }} />
             <div className="p-6 -mt-16">
                 <div className="flex flex-col items-center">
-                    <Image priority height={128} width={128} className="w-24 h-24 rounded-full ring-4 ring-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Math.floor(Number(userThemes.user.id) / Math.pow(2, 22)) % 6}.png`} alt="Avatar" />{" "}
+                    <Image draggable={false} priority height={128} width={128} className="w-24 h-24 rounded-full ring-4 ring-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Math.floor(Number(userThemes.user.id) / Math.pow(2, 22)) % 6}.png`} alt="Avatar" />{" "}
                     <div className="flex items-center gap-2 mt-4">
-                        <h1 className="text-2xl font-bold">{userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? userThemes.themes[0].author.discord_name : "Unknown User"}</h1>
+                        <h1 className="text-2xl font-bold">{userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? authorName : "Unknown User"}</h1>
                         {userThemes.user.admin && (
                             <Badge className="fill-current select-none">
                                 <Shield className="w-3 h-3 mr-1" />
@@ -378,7 +391,7 @@ export default function User() {
                                         <p className="text-2xl font-bold mb-1">
                                             Explore {userThemes.themes.length > 1 ? userThemes.themes.length : "one"} {userThemes.themes.length > 1 ? "Themes" : "Theme"}
                                         </p>
-                                        <p className="text-sm text-muted-foreground mb-4">created by {userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? userThemes.themes[0].author.discord_name : "Unknown User"}</p>
+                                        <p className="text-sm text-muted-foreground mb-4">created by {userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? authorName : "Unknown User"}</p>
                                     </div>
                                     <ThemesList themes={userThemes.themes} />
                                 </div>

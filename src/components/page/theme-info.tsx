@@ -124,10 +124,17 @@ export default function Component({ id }: { id?: string }) {
         // @ts-ignore
         const isCurrentlyLiked = likedThemes?.likes?.find((t) => t.themeId === themeId)?.hasLiked;
 
+        // Update liked themes state
         setLikedThemes((prev) => ({
             // @ts-ignore
             ...prev,
             likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: !isCurrentlyLiked } : like))
+        }));
+
+        // Update theme likes count
+        setTheme((prev) => ({
+            ...prev,
+            likes: prev.likes + (isCurrentlyLiked ? -1 : 1)
         }));
 
         try {
@@ -152,10 +159,16 @@ export default function Component({ id }: { id?: string }) {
             }
 
             if (!response.ok) {
+                // Revert both states on error
                 setLikedThemes((prev) => ({
                     // @ts-ignore
                     ...prev,
                     likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
+                }));
+
+                setTheme((prev) => ({
+                    ...prev,
+                    likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
                 }));
 
                 toast({
@@ -163,10 +176,16 @@ export default function Component({ id }: { id?: string }) {
                 });
             }
         } catch (error) {
+            // Revert both states on error
             setLikedThemes((prev) => ({
                 // @ts-ignore
                 ...prev,
                 likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
+            }));
+
+            setTheme((prev) => ({
+                ...prev,
+                likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
             }));
 
             toast({

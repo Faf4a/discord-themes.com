@@ -1,7 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { APIConnection as Connection, APIUser as User} from "discord-api-types/v10";
+import type { APIConnection as Connection, APIUser as User } from "discord-api-types/v10";
 import clientPromise from "@utils/db";
 import { createHash, randomBytes } from "crypto";
+
+const WEBHOOK_LOGS_URL = process.env.WEBHOOK_LOGS;
 
 interface UserEntry {
     user: {
@@ -36,7 +38,7 @@ async function fetchGitHubAccount(token: string): Promise<string | null> {
     }
 
     const connections: Connection[] = await response.json();
-    const githubConnection = connections.find(connection => connection.type === "github");
+    const githubConnection = connections.find((connection) => connection.type === "github");
     return githubConnection ? githubConnection.name : null;
 }
 
@@ -48,7 +50,31 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { code, callback, error, error_description } = req.query;
 
     if (error && error_description) {
-        console.error("Auth Failed!", error, error_description);
+        await fetch(WEBHOOK_LOGS_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                embeds: [
+                    {
+                        title: "Failed to authorize user",
+                        color: 0xff0000,
+                        fields: [
+                            {
+                                name: "Error",
+                                value: error as string
+                            },
+                            {
+                                name: "Description",
+                                value: error_description as string
+                            }
+                        ]
+                    }
+                ]
+            })
+        });
+        console.log(`Failed to authorize user: ${error} - ${error_description}`);
         res.redirect("/");
     }
 
@@ -97,17 +123,45 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         const randomData = randomBytes(32);
         const salt = randomBytes(16);
         const timestamp = new Date().getTime().toString();
-        
-        return createHash('sha256')
+
+        return createHash("sha256")
             .update(Buffer.concat([randomData, salt]))
             .update(timestamp)
-            .digest('hex');
+            .digest("hex");
     };
-    
+
     const userEntry = (await users.findOne({ "user.id": user.id }))?.user;
     let authKey: string;
-    
+
     if (!userEntry) {
+        await fetch(WEBHOOK_LOGS_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                embeds: [
+                    {
+                        title: user.global_name,
+                        color: 0x00ff00,
+                        thumbnail: {
+                            url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator) % 5}.png`
+                        },
+                        fields: [
+                            {
+                                name: "User ID",
+                                value: user.id
+                            },
+                            {
+                                name: "GitHub Account",
+                                value: githubAccount || "None"
+                            }
+                        ]
+                    }
+                ]
+            })
+        });
+
         const uniqueKey = generateKey();
         await users.insertOne({
             user: {
@@ -123,11 +177,43 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         });
         authKey = uniqueKey;
     } else {
+        // send yellow discord embed saying that the user migrated
         if (!userEntry.keyVersion || userEntry.keyVersion < 2) {
+            await fetch(WEBHOOK_LOGS_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    embeds: [
+                        {
+                            title: "User Migrated",
+                            color: 0xffff00,
+                            thumbnail: {
+                                url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator) % 5}.png`
+                            },
+                            fields: [
+                                {
+                                    name: "Username",
+                                    value: user.global_name
+                                },
+                                {
+                                    name: "User ID",
+                                    value: user.id
+                                },
+                                {
+                                    name: "GitHub Account",
+                                    value: githubAccount || "None"
+                                }
+                            ]
+                        }
+                    ]
+                })
+            });
             const newKey = generateKey();
             await users.updateOne(
                 { "user.id": user.id },
-                { 
+                {
                     $set: {
                         "user.key": newKey,
                         "user.keyVersion": 2
@@ -138,9 +224,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         } else {
             authKey = userEntry.key;
         }
-    
-        const updates: Partial<UserEntry['user']> = {};
-    
+
+        const updates: Partial<UserEntry["user"]> = {};
+
         if (userEntry.avatar !== user.avatar) {
             updates["avatar"] = user.avatar;
         }
@@ -153,14 +239,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         if (githubAccount && userEntry.githubAccount !== githubAccount) {
             updates["githubAccount"] = githubAccount;
         }
-    
+
         if (Object.keys(updates).length > 0) {
             await users.updateOne(
-                { "user.id": user.id }, 
-                { $set: Object.entries(updates).reduce((acc, [key, value]) => ({
-                    ...acc,
-                    [`user.${key}`]: value
-                }), {}) }
+                { "user.id": user.id },
+                {
+                    $set: Object.entries(updates).reduce(
+                        (acc, [key, value]) => ({
+                            ...acc,
+                            [`user.${key}`]: value
+                        }),
+                        {}
+                    )
+                }
             );
         }
     }

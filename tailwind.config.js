@@ -55,6 +55,16 @@ export default {
                 }
             },
             keyframes: {
+                "confetti-fall": {
+                    "0%": { 
+                        transform: "translateY(-10px) rotate(0deg)",
+                        opacity: "1"
+                    },
+                    "100%": { 
+                        transform: "translateY(100vh) rotate(720deg)",
+                        opacity: "0"
+                    }
+                },
                 "accordion-down": {
                     from: {
                         height: "0"
@@ -74,7 +84,8 @@ export default {
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
-                "accordion-up": "accordion-up 0.2s ease-out"
+                "accordion-up": "accordion-up 0.2s ease-out",
+                "confetti-fall": "confetti-fall 4s linear forwards"
             }
         }
     },
