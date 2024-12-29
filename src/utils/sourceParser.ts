@@ -39,10 +39,10 @@ async function fetchRawContent(url: string): Promise<string> {
     return response.text();
 }
 
-async function fetchApiContent(parsed: ParsedSourceUrl): Promise<string> {
+async function fetchApiContent(parsed: ParsedSourceUrl): Promise<string | null> {
     const { owner, repo, branch, path } = parsed;
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
-    console.log(url);
+
     const headers = GITHUB_TOKEN
         ? {
               Accept: "application/vnd.github+json",
@@ -50,9 +50,15 @@ async function fetchApiContent(parsed: ParsedSourceUrl): Promise<string> {
           }
         : {};
 
-    const response = await fetch(url, { headers });
-    if (!response.ok) return null;
-    const content = await response.json();
-    console.log(content);
-    return response.text();
+    try {
+        const response = await fetch(url, { headers });
+        if (!response.ok) return null;
+
+        const data: any = await response.json();
+        if (!data.content) return null;
+
+        return data.content;
+    } catch {
+        return null;
+    }
 }

@@ -97,58 +97,6 @@ function ThemeList() {
                 </div>
 
                 <Card>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Author</TableHead>
-                                <TableHead>Submitted</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredThemes.map((theme) => (
-                                <TableRow key={theme._id}>
-                                <TableCell className="font-medium">{theme.title}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    {Object.values(theme.validatedUsers).map(user => (
-                                      <div key={user.id} className="flex items-center gap-2">
-                                        <img
-                                          src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
-                                          alt={user.username}
-                                          className="w-6 h-6 rounded-full"
-                                        />
-                                        {user.username}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {new Date(theme.submittedAt).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell>
-                                  <a 
-                                    href={`${SERVER}/submitted/view/${theme._id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 hover:underline"
-                                  >
-                                    View
-                                  </a>
-                                </TableCell>
-                              </TableRow>
-                              
-                            ))}
-                            {filteredThemes.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center py-8">
-                                        No themes found
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
                 </Card>
             </div>
         </div>
