@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { isAuthed } from "@utils/auth";
 import { DEV_SERVER, SERVER } from "@constants";
 import { UserData } from "@types";
+import { parseSourceUrl } from "@utils/sourceParser";
 
 const WEBHOOK_SUBMISSION_URL = process.env.WEBHOOK_SUBMISSIONS;
 const WEBHOOK_IMG_UPLOADER_URL = process.env.WEBHOOK_IMG_UPLOADER;
@@ -46,10 +47,31 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         const db = client.db("submittedThemesDatabase");
         const themesCollection = db.collection("pending");
 
+        let themeContent: string | undefined;
+        if (req.body.sourceLink) {
+            try {
+                themeContent = await parseSourceUrl(req.body.sourceLink);
+                if (!themeContent) {
+                    return res.status(400).json({
+                        status: 400,
+                        message: "Failed to fetch source link"
+                    });
+                }
+            } catch (error) {
+                console.error("Source parse error:", error);
+                return res.status(400).json({
+                    status: 400,
+                    message: "Failed to parse source link"
+                });
+            }
+        }
+
         const submission = {
             ...req.body,
+            themeContent,
             submittedAt: new Date(),
-            submittedBy: user.id
+            submittedBy: user.id,
+            state: "pending"
         };
 
         const item = await themesCollection.insertOne(submission);
