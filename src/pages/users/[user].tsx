@@ -13,6 +13,8 @@ import { Skeleton } from "@components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@components/ui/alert";
 import { Badge } from "@components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@components/ui/alert-dialog";
+import { toast } from "@hooks/use-toast";
+import { getCookie, deleteCookie } from "@utils/cookies";
 
 interface ThemesResponse {
     themes: Theme[];
@@ -135,6 +137,32 @@ export default function User() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    const handleDelete = async () => {
+        const response = await fetch("/api/user/delete", {
+            method: "DELETE",
+            body: JSON.stringify({
+                userId: user
+            }),
+            headers: {
+                Authorization: `Bearer ${getCookie("_dtoken")}`,
+                "Content-Type": "application/json"
+            }
+        });
+        if (!response.ok) {
+            toast({
+                title: "Error",
+                description: "Failed to delete their account & themes.",
+                variant: "destructive"
+            });
+            return;
+        }
+        toast({
+            title: "Account Deleted",
+            description: "Their account & themes have been permanently deleted."
+        });
+        window.location.reload();
+    };
+
     const loadMore = () => {
         const newCount = displayCount + THEMES_PER_PAGE;
         setDisplayCount(newCount);
@@ -230,7 +258,7 @@ export default function User() {
 
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button variant="destructive" disabled={userThemes.user.admin || invalid} className="flex items-center gap-2">
+                                                <Button variant="destructive" disabled={userThemes.user.admin || invalid || isLoading} className="flex items-center gap-2">
                                                     <Ban className="w-4 h-4" />
                                                     Delete User
                                                 </Button>
@@ -244,7 +272,7 @@ export default function User() {
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction className="hover:bg-destructive">Continue</AlertDialogAction>
+                                                    <AlertDialogAction onClick={handleDelete} className="hover:bg-destructive">Continue</AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>

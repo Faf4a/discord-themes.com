@@ -25,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         return res.status(400).json({ status: 400, message: "Invalid Request, unique user token is missing" });
     }
 
-    const requiredFields = ["title", "shortDescription", "longDescription", "sourceLink", "validatedUsers"];
+    const requiredFields = ["title", "description", "sourceLink", "validatedUsers"];
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {

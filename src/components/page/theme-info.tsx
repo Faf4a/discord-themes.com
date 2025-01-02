@@ -1,5 +1,5 @@
 import { Button } from "@components/ui/button";
-import { Calendar, Check, Code, Download, ExternalLink, Eye, Github, Heart, Book } from "lucide-react";
+import { Calendar, Check, Code, Download, ExternalLink, Eye, Github, Heart, Book, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import ReactMarkdown from "react-markdown";
@@ -11,6 +11,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@compo
 import { AccountBar } from "@components/account-bar";
 import { useToast } from "@hooks/use-toast";
 import { getCookie } from "@utils/cookies";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -22,6 +24,7 @@ export default function Component({ id }: { id?: string }) {
     const [isLikeDisabled, setIsLikeDisabled] = useState(false);
     const { authorizedUser, isAuthenticated, isLoading, themes, error } = useWebContext();
     const { toast } = useToast();
+    const [isCopied, setIsCopied] = useState(false);
 
     const previewUrl = `/api/preview?url=/api/${id}`;
 
@@ -124,14 +127,12 @@ export default function Component({ id }: { id?: string }) {
         // @ts-ignore
         const isCurrentlyLiked = likedThemes?.likes?.find((t) => t.themeId === themeId)?.hasLiked;
 
-        // Update liked themes state
         setLikedThemes((prev) => ({
             // @ts-ignore
             ...prev,
             likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: !isCurrentlyLiked } : like))
         }));
 
-        // Update theme likes count
         setTheme((prev) => ({
             ...prev,
             likes: prev.likes + (isCurrentlyLiked ? -1 : 1)
@@ -159,7 +160,6 @@ export default function Component({ id }: { id?: string }) {
             }
 
             if (!response.ok) {
-                // Revert both states on error
                 setLikedThemes((prev) => ({
                     // @ts-ignore
                     ...prev,
@@ -176,7 +176,6 @@ export default function Component({ id }: { id?: string }) {
                 });
             }
         } catch (error) {
-            // Revert both states on error
             setLikedThemes((prev) => ({
                 // @ts-ignore
                 ...prev,
@@ -208,6 +207,20 @@ export default function Component({ id }: { id?: string }) {
 
         setLikedThemes(response);
     }
+
+    const decodeThemeContent = (content: string) => {
+        try {
+            return atob(content);
+        } catch (e) {
+            return content;
+        }
+    };
+
+    const handleCopyCode = (content: string) => {
+        navigator.clipboard.writeText(content);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
 
     const statsItems = [
         {
@@ -301,13 +314,42 @@ export default function Component({ id }: { id?: string }) {
                                         </p>
                                     </div>
                                     <div className="rounded-lg border-b border-border/40 bg-card p-6">
-                                        {theme?.longDescription && (
-                                            <p className="description text-muted-foreground mb-4">
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{theme.longDescription}</ReactMarkdown>
-                                            </p>
-                                        )}
-                                        <div className="bg-muted rounded-lg flex justify-center items-center">
+                                        <div className="bg-muted rounded-lg flex justify-center items-center max-w-[900px] overflow-hidden">
                                             <Image draggable={false} src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
+                                        </div>
+                                    </div>
+                                    <div className="rounded-lg border-b border-border/40 bg-card p-6 mt-2">
+                                        <div className="mb-4">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h3 className="text-lg font-semibold">Theme Source</h3>
+                                                <Button variant="outline" size="sm" onClick={() => handleCopyCode(decodeThemeContent(theme.content))}>
+                                                    {isCopied ? (
+                                                        <>
+                                                            <Check className="h-4 w-4 mr-2" /> Copied
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Copy className="h-4 w-4 mr-2" /> Copy Code
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative rounded-lg overflow-hidden max-w-[900px]">
+                                            <SyntaxHighlighter
+                                                language="css"
+                                                style={vscDarkPlus}
+                                                wrapLines={true}
+                                                showLineNumbers={true}
+                                                customStyle={{
+                                                    margin: 0,
+                                                    borderRadius: "0.5rem",
+                                                    maxHeight: "400px"
+                                                }}
+                                            >
+                                                {decodeThemeContent(theme.content)}
+                                            </SyntaxHighlighter>
                                         </div>
                                     </div>
                                 </div>
@@ -369,17 +411,18 @@ export default function Component({ id }: { id?: string }) {
                                             </TooltipProvider>
                                         ))}
                                     {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
-                                        <>
-                                            <h2>Author Options</h2>
+                                        <div className="bg-card border border-muted rounded-lg p-4">
+                                            <p className="text-l text-muted-foreground">Author Options</p>
+                                            <p className="text-xs text-muted-foreground">Unavailable currently</p>
                                             <Button variant="outline" className="w-full" onClick={() => window.open(`/theme/edit/${theme.id}`, "_blank")} disabled>
                                                 <Code className="mr-2 h-4 w-4" />
                                                 Edit
                                             </Button>
-                                            <Button variant="outline" className="w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => window.open(`/theme/delete/${theme.id}`, "_blank")} disabled>
+                                            <Button variant="outline" className="mt-2 w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => window.open(`/theme/delete/${theme.id}`, "_blank")} disabled>
                                                 <Code className="mr-2 h-4 w-4" />
                                                 Delete
                                             </Button>
-                                        </>
+                                        </div>
                                     )}
                                 </div>
                                 {!loading && <ThemeStats />}

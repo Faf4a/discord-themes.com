@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@components/ui/alert-dialog";
 import { Settings, UserCircle, Eye, Copy, RefreshCw, User, Hash, Github } from "lucide-react";
 import { deleteCookie, getCookie, setCookie } from "@utils/cookies";
@@ -54,7 +53,7 @@ export default function SettingsPage() {
             <div className="container mx-auto py-10">
                 <h1 className="text-3xl font-bold mb-6">Settings</h1>
                 <Tabs defaultValue="account" className="space-y-4">
-                    <TabsList>
+                    <TabsList className="w-full grid grid-cols-2">
                         <TabsTrigger value="account">
                             <Settings className="w-4 h-4 mr-2" />
                             Account
@@ -201,7 +200,7 @@ function DeleteAccount() {
             )}
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button disabled={false} variant="destructive">
+                    <Button disabled={authorizedUser?.admin ?? false} variant="destructive">
                         Delete Account
                     </Button>
                 </AlertDialogTrigger>

@@ -32,10 +32,24 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
 
     const themes: Collection<Theme> = db.collection("themes");
 
-    const user = await users.findOne({ "user.id": userId, "user.key": token });
+    const requester = await users.findOne({ "user.key": token });
+
+    if (!requester) {
+        return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+
+    if (requester.user.id !== userId && !requester.user.admin) {
+        return res.status(403).json({ message: "Unauthorized - Insufficient permissions" });
+    }
+
+    const user = await users.findOne({ "user.id": userId });
 
     if (!user) {
         return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.user.admin) {
+        return res.status(403).json({ message: "Cannot delete admin user" });
     }
 
     const userThemes = await themes
@@ -58,7 +72,7 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
             }
         }
 
-        await users.deleteOne({ "user.id": userId, "user.key": token });
+        await users.deleteOne({ "user.id": userId });
 
         await fetch(WEBHOOK_LOGS_URL, {
             method: "POST",

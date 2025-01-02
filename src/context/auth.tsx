@@ -1,9 +1,12 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
 import useSWR from "swr";
 import { useRouter } from "next/router";
 import { getCookie } from "@utils/cookies";
 
 const WebContext = createContext(null);
+
+const protectedRoutes = ["/theme/submit", "/theme/submitted"];
+const adminRoutes = ["/theme/submitted/view"];
 
 export function AuthProvider({ children }) {
     const router = useRouter();
@@ -36,6 +39,20 @@ export function AuthProvider({ children }) {
 
     if (authData) console.log("%c[server/auth]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", authData);
 
+    useEffect(() => {
+        const isProtectedRoute = protectedRoutes.some((route) => router.pathname.startsWith(route));
+        const isAdminRoute = adminRoutes.some((route) => router.pathname.startsWith(route));
+
+        if (isAdminRoute && !authLoading && !authData?.user?.admin) {
+            console.log("%c[client/webcontext]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", "redirecting to /");
+            router.push("/");
+        }
+        if (isProtectedRoute && !authLoading && !authData?.authenticated) {
+            console.log("%c[client/webcontext]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", "redirecting to /auth/login");
+            router.push("/auth/login");
+        }
+    }, [router, authData, authLoading]);
+
     const {
         data: themes,
         error: themesError,
@@ -54,7 +71,7 @@ export function AuthProvider({ children }) {
     );
 
     if (themes) console.log("%c[client/fetch]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", "themes fetched");
-    
+
     return (
         <WebContext.Provider
             value={{

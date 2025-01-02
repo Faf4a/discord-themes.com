@@ -8,14 +8,15 @@ import { Card } from "@components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@components/ui/table";
 import { Input } from "@components/ui/input";
 import { SERVER } from "@constants";
+import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@components/ui/badge";
 
 interface Theme {
     _id: string;
     title: string;
-    shortDescription: string;
+    description: string;
     file: string;
     fileUrl: string;
-    longDescription: string;
     contributors: string[];
     sourceLink: string;
     validatedUsers: {
@@ -25,6 +26,7 @@ interface Theme {
             avatar: string;
         };
     };
+    state: "pending" | "approved" | "rejected";
     themeContent: string;
     submittedAt: Date;
     submittedBy: string;
@@ -38,7 +40,6 @@ function ThemeList() {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        console.log(authorizedUser);
         if (!isAuthenticated || !authorizedUser?.admin) {
             window.location.href = "/";
             return;
@@ -109,36 +110,33 @@ function ThemeList() {
                         <TableBody>
                             {filteredThemes.map((theme) => (
                                 <TableRow key={theme._id}>
-                                <TableCell className="font-medium">{theme.title}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    {Object.values(theme.validatedUsers).map(user => (
-                                      <div key={user.id} className="flex items-center gap-2">
-                                        <img
-                                          src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
-                                          alt={user.username}
-                                          className="w-6 h-6 rounded-full"
-                                        />
-                                        {user.username}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {new Date(theme.submittedAt).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell>
-                                  <a 
-                                    href={`${SERVER}/submitted/view/${theme._id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 hover:underline"
-                                  >
-                                    View
-                                  </a>
-                                </TableCell>
-                              </TableRow>
-                              
+                                    <TableCell className="font-medium">{theme.title}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-2">
+                                            {[...Object.values(theme.validatedUsers)].reverse().map((user, index) => (
+                                                <div key={user.id}>
+                                                    <div className="flex flex-row items-center gap-2">
+                                                        <img draggable={false} src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt={user.username} className="w-6 h-6 rounded-full select-none" />
+                                                        {user.username} <p className="text-muted-foreground text-xs">{user.id}</p>
+                                                        {index === 0 && (
+                                                            <Badge variant="default">
+                                                                Submitter
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {new Date(theme.submittedAt).toDateString()} ({formatDistanceToNow(new Date(theme.submittedAt))} ago)
+                                    </TableCell>
+                                    <TableCell>
+                                        <a href={`${SERVER}/theme/submitted/view/${theme._id}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                            {theme.state} (click to view)
+                                        </a>
+                                    </TableCell>
+                                </TableRow>
                             ))}
                             {filteredThemes.length === 0 && (
                                 <TableRow>

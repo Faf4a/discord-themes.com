@@ -27,10 +27,9 @@ export default function SubmitPage() {
     const [dragActive, setDragActive] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
-        shortDescription: "",
         file: null,
         fileUrl: "",
-        longDescription: "",
+        description: "",
         contributors: [""],
         sourceLink: "",
         validatedUsers: {} as Record<string, ValidatedUser>
@@ -72,7 +71,7 @@ export default function SubmitPage() {
         };
     }, [step]);
 
-    const totalSteps = 5;
+    const totalSteps = 4;
     const progress = (step / totalSteps) * 100;
 
     const updateFormData = (field: string, value: string) => {
@@ -82,10 +81,9 @@ export default function SubmitPage() {
     function validateStep(step: number, data: typeof formData) {
         const newErrors: Record<string, string> = {};
         if (step === 1 && data.title.trim().length < 3) newErrors.title = "Title must be longer than 3 characters.";
-        if (step === 2 && !data.shortDescription.trim()) newErrors.shortDescription = "Short description is required.";
-        if (step === 3 && !data.longDescription.trim()) newErrors.longDescription = "Long description is required.";
-        if (step === 4 && !data.file) newErrors.file = "Preview image is required.";
-        if (step === 5) {
+        if (step === 2 && !data.description.trim()) newErrors.description = "Description is required.";
+        if (step === 3 && !data.file) newErrors.file = "Preview image is required.";
+        if (step === 4) {
             if (!data.sourceLink.trim()) {
                 newErrors.sourceLink = "Source link is required.";
             } else if (!isValidSourceUrl(data.sourceLink.trim())) {
@@ -152,7 +150,8 @@ export default function SubmitPage() {
             [authorizedUser.id]: {
                 id: authorizedUser.id,
                 username: authorizedUser.global_name,
-                avatar: authorizedUser.avatar
+                avatar: authorizedUser.avatar,
+                github_name: authorizedUser.githubAccount
             }
         };
 
@@ -169,6 +168,7 @@ export default function SubmitPage() {
             const data = await response.json();
             router.push(`/theme/submitted/${data.id}`);
         } else {
+            setSubmitting(false);
             toast({
                 title: "Failed to submit",
                 description: "An error occurred while submitting your theme. Please try again later.",
@@ -357,7 +357,7 @@ export default function SubmitPage() {
                                         <h2 className="font-semibold mb-4">Progress</h2>
                                         <div className="space-y-4">
                                             <Progress value={progress} className="h-2" />
-                                            {["Title", "Short Description", "Long Description", "Cover Image", "Attribution"].map((label, index) => (
+                                            {["Title", "Description", "Cover Image", "Attribution"].map((label, index) => (
                                                 <div key={label} className={`flex items-center gap-3 ${step === index + 1 ? "text-primary font-medium" : "text-muted-foreground"}`}>
                                                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${step === index + 1 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>{index + 1}</div>
                                                     <span>{label}</span>
@@ -387,31 +387,18 @@ export default function SubmitPage() {
 
                                         {step === 2 && (
                                             <div className="space-y-4">
-                                                <h2 className="text-2xl font-semibold">Short Description</h2>
+                                                <h2 className="text-2xl font-semibold">Description</h2>
                                                 <p className="text-muted-foreground">Provide a brief description of your theme, this will be shown on the front-page cards.</p>
-                                                <MarkdownInput defaultContent={formData.shortDescription} onChange={(value) => updateFormData("shortDescription", value)} lines={3} />
-                                                {errors.shortDescription && (
+                                                <MarkdownInput defaultContent={formData.description} onChange={(value) => updateFormData("description", value)} lines={3} />
+                                                {errors.description && (
                                                     <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
-                                                        <AlertDescription className="text-sm">{errors.shortDescription}</AlertDescription>
+                                                        <AlertDescription className="text-sm">{errors.description}</AlertDescription>
                                                     </Alert>
                                                 )}
                                             </div>
                                         )}
 
                                         {step === 3 && (
-                                            <div className="space-y-4">
-                                                <h2 className="text-2xl font-semibold">Long Description</h2>
-                                                <p className="text-muted-foreground">Provide detailed information about your theme, this will be shown on the theme page.</p>
-                                                <MarkdownInput defaultContent={formData.longDescription} onChange={(value) => updateFormData("longDescription", value)} lines={10} />
-                                                {errors.longDescription && (
-                                                    <Alert className={`mt-2 border-red-600/20 bg-red-500/10 ${shakeError ? "shake" : ""}`}>
-                                                        <AlertDescription className="text-sm">{errors.longDescription}</AlertDescription>
-                                                    </Alert>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {step === 4 && (
                                             <div className="space-y-4">
                                                 <h2 className="text-2xl font-semibold">Theme Preview</h2>
                                                 <p className="text-muted-foreground">Upload a preview image of your theme. If you don't have one, generate a preview by using the "I don't have a Picture" button.</p>
@@ -496,7 +483,7 @@ export default function SubmitPage() {
                                             </div>
                                         )}
 
-                                        {step === 5 && (
+                                        {step === 4 && (
                                             <div className="space-y-4">
                                                 <section>
                                                     <h2 className="text-2xl font-semibold">Attribution</h2>
@@ -542,7 +529,7 @@ export default function SubmitPage() {
                                             <Button variant="outline" onClick={prevStep} disabled={step === 1 || submitting}>
                                                 Previous
                                             </Button>
-                                            <Button disabled={/*en*/false} onClick={nextStep}>
+                                            <Button disabled={submitting} onClick={nextStep}>
                                                 {step === totalSteps ? (
                                                     submitting ? (
                                                         <>
