@@ -6,6 +6,7 @@ async function purge() {
         content: ["../public/preview/index.html"],
         css: ["../public/preview/styles.css"],
         safelist: {
+            // eslint-disable-next-line no-useless-escape
             standard: [/^\:[-a-z]+$/]
         }
     });

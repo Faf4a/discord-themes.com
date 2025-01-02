@@ -14,6 +14,7 @@ type FilterOption = {
 
 type FilterDropdownProps = {
   options: FilterOption[]
+  // eslint-disable-next-line no-unused-vars
   onChange?: (selectedOptions: FilterOption[]) => void
   className?: string
 }
@@ -21,6 +22,7 @@ type FilterDropdownProps = {
 export function FilterDropdown({
   options,
   onChange,
+  // eslint-disable-next-line no-unused-vars
   className
 }: FilterDropdownProps) {
   const [open, setOpen] = React.useState(false)

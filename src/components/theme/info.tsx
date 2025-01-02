@@ -9,7 +9,7 @@ export function ThemePage({ theme }: { theme: Theme }) {
                 <h1 className="text-2xl font-bold mb-2">{theme.name}</h1>
                 <p className="text-sm text-gray-600 mb-4 description">{theme.description}</p>
                 <div className="border border-gray-300 bg-gray-100 rounded-lg h-64 flex items-center justify-center mb-6">
-                    {/*eslint-disable-next-line @next/next/no-img-element*/}
+                    { }
                     <Image priority width={854} height={480} src={theme.thumbnail_url} alt={`${theme.name} thumbnail`} className="object-cover w-full h-full rounded-lg" />
                 </div>
             </div>

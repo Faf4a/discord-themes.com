@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
-import { UserIcon, LogOutIcon, Shield, Settings } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
+import { LogOutIcon, Settings, Shield, UserIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
-import { getCookie, deleteCookie } from "@utils/cookies";
+import { deleteCookie, getCookie } from "@utils/cookies";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
 import { Button } from "./ui/button";

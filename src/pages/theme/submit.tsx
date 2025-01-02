@@ -12,7 +12,7 @@ import MarkdownInput from "@components/ui/markdown-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { useWebContext } from "@context/auth";
 import { Alert, AlertDescription } from "@components/ui/alert";
-import { getCookie, deleteCookie } from "@utils/cookies";
+import { deleteCookie, getCookie } from "@utils/cookies";
 import { toast } from "@hooks/use-toast";
 
 interface ValidatedUser {

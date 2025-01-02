@@ -19,6 +19,7 @@ export function DropdownFilter({
     onChange, 
     className 
 }: { 
+    // eslint-disable-next-line no-unused-vars
     onChange: (value: string) => void;
     className?: string;
 }) {

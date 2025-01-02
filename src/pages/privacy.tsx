@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@components/ui/card";
-import { Button } from "@components/ui/button";
-import { Check, FileDown, Shield } from "lucide-react";
+import { Check } from "lucide-react";
 import Head from "next/head";
 
 export default function PrivacyPolicy() {

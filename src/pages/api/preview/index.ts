@@ -3,7 +3,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import type { NextApiRequest, NextApiResponse } from "next";
-import DOMPurify from "dompurify";
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET") {

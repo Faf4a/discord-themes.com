@@ -1,20 +1,20 @@
-import { ReactNode, useEffect, useState, useMemo, useCallback } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import { ThemeCard } from "@components/theme/card";
 import Image from "next/image";
-import { SearchX, Book, Heart, Download, Shield, Ban, Flag, ArrowUp } from "lucide-react";
-import { type Theme, type Author } from "@types";
+import { ArrowUp, Ban, Book, Download, Flag, Heart, SearchX, Shield } from "lucide-react";
+import { type Author, type Theme } from "@types";
 import { Button } from "@components/ui/button";
 import { AccountBar } from "@components/account-bar";
 import { useWebContext } from "@context/auth";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { Card, CardContent } from "@components/ui/card";
 import { Skeleton } from "@components/ui/skeleton";
-import { Alert, AlertTitle, AlertDescription } from "@components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert";
 import { Badge } from "@components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@components/ui/alert-dialog";
 import { toast } from "@hooks/use-toast";
-import { getCookie, deleteCookie } from "@utils/cookies";
+import { getCookie } from "@utils/cookies";
 
 interface ThemesResponse {
     themes: Theme[];
@@ -102,7 +102,7 @@ export default function User() {
         } catch (error) {
             console.error("Error fetching liked themes:", error);
         }
-    }, [userToken, user, authorizedUser, loading, themes]);
+    }, [userToken, user, authorizedUser, loading, themes, isLoading]);
 
     useEffect(() => {
         if (!isAuthenticated && !isLoading && user === "@me") {
@@ -110,7 +110,7 @@ export default function User() {
         } else {
             fetchLikedThemes();
         }
-    }, [isLoading, fetchLikedThemes]);
+    }, [isLoading, fetchLikedThemes, isAuthenticated, user, router]);
 
     useEffect(() => {
         fetchThemes();
@@ -120,7 +120,7 @@ export default function User() {
     }, [fetchThemes]);
 
     const debounce = (func: Function, wait: number) => {
-        let timeout: NodeJS.Timeout;
+        let timeout: any;
         return (...args: any[]) => {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(null, args), wait);
@@ -272,7 +272,9 @@ export default function User() {
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={handleDelete} className="hover:bg-destructive">Continue</AlertDialogAction>
+                                                    <AlertDialogAction onClick={handleDelete} className="hover:bg-destructive">
+                                                        Continue
+                                                    </AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>

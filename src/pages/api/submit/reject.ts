@@ -2,7 +2,6 @@ import clientPromise from "@utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { isAuthed } from "@utils/auth";
 import { ObjectId } from "mongodb";
-import { validateInvite } from "@utils/extractInvite";
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "POST") {

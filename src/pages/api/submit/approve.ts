@@ -150,6 +150,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             id: totalThemes + 1,
             type: "theme",
             description: theme.description,
+            // eslint-disable-next-line no-unused-vars
             author: Object.entries(theme.validatedUsers).map(([id, user]: [string, any]) => ({
                 discord_snowflake: user.id,
                 discord_name: user.name || "",

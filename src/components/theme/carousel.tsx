@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Carousel, CarouselContent, CarouselItem } from "@components/ui/carousel";
 import { Card, CardContent } from "@components/ui/card";
 import Autoplay from "embla-carousel-autoplay";

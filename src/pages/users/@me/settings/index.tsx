@@ -1,17 +1,17 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@components/ui/alert-dialog";
-import { Settings, UserCircle, Eye, Copy, RefreshCw, User, Hash, Github } from "lucide-react";
+import { Copy, Eye, Github, Hash, RefreshCw, Settings, User, UserCircle } from "lucide-react";
 import { deleteCookie, getCookie, setCookie } from "@utils/cookies";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@hooks/use-toast";
 import { Skeleton } from "@components/ui/skeleton";
 import { useWebContext } from "@context/auth";
 import { useRouter } from "next/router";
 import { AccountBar } from "@components/account-bar";
-import { Alert, AlertTitle, AlertDescription } from "@components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert";
 
 export default function SettingsPage() {
     const { isAuthenticated, isLoading } = useWebContext();
@@ -278,7 +278,7 @@ function UserData() {
                 title: "Redirecting...",
                 description: "Redirecting you to discord for authentication."
             });
-        } catch (error) {
+        } catch {
             toast({
                 title: "Error",
                 description: "Failed to refresh user data.",
@@ -367,7 +367,7 @@ function APIKey() {
                 title: "Copied!",
                 description: "API key copied to clipboard"
             });
-        } catch (err) {
+        } catch {
             toast({
                 title: "Error",
                 description: "Failed to copy API key",
@@ -403,9 +403,13 @@ function APIKey() {
                     description: "API key has been refreshed"
                 });
             } else {
-                throw new Error(data.message);
+                toast({
+                    title: "Error",
+                    description: data.message,
+                    variant: "destructive"
+                });
             }
-        } catch (err) {
+        } catch {
             toast({
                 title: "Error",
                 description: "Failed to refresh API key",

@@ -6,7 +6,7 @@ import { ThemeGrid } from "@components/theme/grid";
 import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { Plus, SearchX, ArrowUp } from "lucide-react";
+import { ArrowUp, Plus, SearchX } from "lucide-react";
 import { getCookie } from "@utils/cookies";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
@@ -50,7 +50,6 @@ const NoResults = () => (
 
 function App() {
     const [searchQuery, setSearchQuery] = useState("");
-    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
     const [likedThemes, setLikedThemes] = useState([]);
@@ -123,7 +122,9 @@ function App() {
         ? []
         : themes
               .filter((t) => {
+                  // eslint-disable-next-line no-self-assign
                   t.downloads === undefined ? (t.downloads = 0) : (t.downloads = t.downloads);
+                  // eslint-disable-next-line no-self-assign
                   t.likes === undefined ? (t.likes = 0) : (t.likes = t.likes);
                   const match = t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase());
                   const tags = filters.length === 0 || filters.every((f) => t.tags.includes(f.value));

@@ -18,10 +18,10 @@ interface MarkdownInputProps {
     defaultContent?: string;
 }
 
+// eslint-disable-next-line no-unused-vars
 export default function MarkdownInput({ className, onChange, onBlur, lines = 5, disableToolbar, defaultContent = "" }: MarkdownInputProps) {
     const [content, setContent] = useState(defaultContent);
     const [isPreview, setIsPreview] = useState(false);
-    const [isFocused, setIsFocused] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -80,16 +80,9 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
         onChange && onChange(e.target.value);
     };
 
-    const handleFocus = () => {
-        setIsFocused(true);
-    };
-
     const handleBlur = () => {
         onBlur && onBlur(content);
-        if (!content) {
-            setIsFocused(false);
-        }
-    };
+};
 
     return (
         <div className={cn("description w-full space-y-4", className)}>
@@ -127,7 +120,6 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
                                     ref={textareaRef}
                                     value={DOMPurify.sanitize(content)}
                                     onChange={handleChange}
-                                    onFocus={handleFocus}
                                     onBlur={handleBlur}
                                     onScroll={() => {
                                         if (overlayRef.current && textareaRef.current) {

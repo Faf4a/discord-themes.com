@@ -88,12 +88,16 @@
         "zod": "^3.23.8"
     },
     "devDependencies": {
+        "@eslint/compat": "^1.2.4",
+        "@eslint/eslintrc": "^3.2.0",
+        "@eslint/js": "^9.17.0",
         "@types/node": "^22.9.3",
         "@types/react": "^18.3.12",
         "eslint": "^9.15.0",
         "eslint-config-next": "15.0.3",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.2.1",
+        "globals": "^15.14.0",
         "imagemin": "^9.0.0",
         "imagemin-giflossy": "^5.1.10",
         "imagemin-gifsicle": "^7.0.0",

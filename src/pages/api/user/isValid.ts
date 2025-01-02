@@ -74,7 +74,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         return res.status(200).json({ users: filteredUsers });
-    } catch (error) {
+    } catch {
         return res.status(500).json({ status: 500, message: "Internal server error" });
     }
 }

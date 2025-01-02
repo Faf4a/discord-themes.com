@@ -130,7 +130,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                     webhookBody.embeds[0].image = {
                         url: uploadData.attachments[0].url
                     };
-                } catch (error) {
+                } catch {
                     return res.status(500).json({
                         status: 500,
                         message: "Failed to process submission"
@@ -157,7 +157,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             return res.status(500).json({});
         }
         res.status(200).json({ status: 200, id });
-    } catch (error) {
+    } catch {
         res.status(500).json({
             status: 500,
             message: "Failed to process submission"

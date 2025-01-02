@@ -1,5 +1,5 @@
 import { Button } from "@components/ui/button";
-import { Calendar, Check, Code, Download, ExternalLink, Eye, Github, Heart, Book, Copy } from "lucide-react";
+import { Book, Calendar, Check, Code, Copy, Download, ExternalLink, Eye, Github, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import Head from "next/head";
 import ReactMarkdown from "react-markdown";
@@ -175,7 +175,7 @@ export default function Component({ id }: { id?: string }) {
                     description: "Failed to like theme, try again later."
                 });
             }
-        } catch (error) {
+        } catch {
             setLikedThemes((prev) => ({
                 // @ts-ignore
                 ...prev,
@@ -211,7 +211,7 @@ export default function Component({ id }: { id?: string }) {
     const decodeThemeContent = (content: string) => {
         try {
             return atob(content);
-        } catch (e) {
+        } catch {
             return content;
         }
     };

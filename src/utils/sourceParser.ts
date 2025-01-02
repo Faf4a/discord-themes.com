@@ -23,6 +23,7 @@ function isRawUrl(url: string): boolean {
 }
 
 function parseUrl(url: string): ParsedSourceUrl | null {
+    // eslint-disable-next-line no-useless-escape
     const pattern = /github\.com\/([^\/]+)\/([^\/]+)\/(?:blob|tree)\/([^\/]+)\/(.+)/;
     const match = url.match(pattern);
 
