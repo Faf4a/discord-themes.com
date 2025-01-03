@@ -14,6 +14,7 @@ import { useWebContext } from "@context/auth";
 import { Alert, AlertDescription } from "@components/ui/alert";
 import { deleteCookie, getCookie } from "@utils/cookies";
 import { toast } from "@hooks/use-toast";
+import Head from "next/head";
 
 interface ValidatedUser {
     id: string;
@@ -338,15 +339,19 @@ export default function SubmitPage() {
 
     return (
         <>
-            <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-semibold">
-                            <a href="/">Theme Library</a>
-                        </h1>
-                    </div>
-                </div>
-            </header>
+            <Head>
+                <meta name="viewport" content="initial-scale=1, width=device-width" />
+                <meta name="keywords" content="discord themes, custom discord themes, discord css, betterdiscord themes, vencord themes, discord customization, theme submission" />
+                <meta name="theme-color" content="#5865F2" />
+                <meta name="application-name" content="Theme Library" />
+                <meta name="description" content="Submit your custom Discord theme to our library. Share your creative Discord CSS themes with the community for BetterDiscord, Vencord and other Discord mods." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://discord-themes.com/" />
+                <meta property="og:title" content="Submit Your Discord Theme | Theme Library" />
+                <meta property="og:description" content="Share your custom Discord theme with our community. Submit your creative Discord CSS themes for BetterDiscord, Vencord and other Discord mods." />
+                <title>Submit Your Discord Theme | Theme Library</title>
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
             <div className="min-h-screen">
                 {!isLoading &&
                     (isAuthenticated ? (

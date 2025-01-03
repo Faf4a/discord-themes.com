@@ -113,7 +113,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         });
 
         if (!githubResponse.ok) {
-            console.log(githubResponse);
             return res.status(500).json({
                 status: 500,
                 message: "Failed to upload thumbnail to GitHub"

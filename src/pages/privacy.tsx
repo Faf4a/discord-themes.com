@@ -9,24 +9,20 @@ export default function PrivacyPolicy() {
     return (
         <>
             <Head>
-                <title>Privacy - Theme Library</title>
-                <meta name="description" content="Our privacy policy." />
-                <meta name="keywords" content="discord, theme, custom, discord themes" />
-                <meta name="author" content="discord-themes.com" />
+                <meta name="viewport" content="initial-scale=1, width=device-width" />
+                <meta name="keywords" content="discord themes privacy policy, theme library privacy, data protection, user privacy, discord customization privacy" />
+                <meta name="theme-color" content="#5865F2" />
+                <meta name="application-name" content="Theme Library" />
+                <meta name="description" content="Learn about Theme Library's privacy policy, data collection practices, and how we protect your information when using our Discord theme platform." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://discord-themes.com/" />
+                <meta property="og:title" content="Privacy Policy | Theme Library" />
+                <meta property="og:description" content="Read our privacy policy to understand how Theme Library handles your data and protects your privacy when using our Discord theme platform." />
+                <title>Privacy Policy | Theme Library</title>
+                <link rel="icon" href="/favicon.ico" />
             </Head>
-            <div className="min-h-screen bg-background">
-                <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <div className="container mx-auto px-4 py-4">
-                        <div className="flex items-center gap-4">
-                            <h1 className="text-xl font-bold">
-                                <a href="/" className="hover:opacity-80 transition-opacity">
-                                    Theme Library
-                                </a>
-                            </h1>
-                        </div>
-                    </div>
-                </header>
 
+            <div className="min-h-screen bg-background">
                 <main className="container mx-auto px-4 py-8 description">
                     <div className="max-w-3xl mx-auto">
                         <div className="flex items-center justify-between mb-6">

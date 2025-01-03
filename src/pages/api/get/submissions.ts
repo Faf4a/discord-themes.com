@@ -26,8 +26,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
     const user = await isAuthed(token as string);
 
-    console.log(user);
-
     if (!user) {
         return res.status(401).json({ status: 401, message: "Given token is not authorized" });
     }

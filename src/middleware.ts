@@ -7,15 +7,16 @@ const RATE_LIMIT_MAX_REQUESTS = 10;
 const SCREENSHOT_RATE_LIMIT_WINDOW = 15000;
 const SCREENSHOT_RATE_LIMIT_MAX_REQUESTS = 2;
 
-const EXCLUDED_FROM_RATE_LIMIT = [
-    "/api/user/isAuthed",
-    "/api/user/themes",
-];
+const EXCLUDED_FROM_RATE_LIMIT = ["/api/user/isAuthed", "/api/user/themes"];
 
 export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     const path = url.pathname;
     const ip = req.headers.get("x-forwarded-for") || "unknown";
+
+    if (req.method === "OPTIONS") {
+        return new NextResponse("", { status: 200 });
+    }
 
     if (path.startsWith("/api") && !EXCLUDED_FROM_RATE_LIMIT.includes(path)) {
         const now = Date.now();
@@ -49,11 +50,11 @@ export async function middleware(req: NextRequest) {
             } else {
                 const rateInfo = rateLimit.get(ip)!;
 
-                if ((now - rateInfo.lastRequest) < RATE_LIMIT_WINDOW) {
+                if (now - rateInfo.lastRequest < RATE_LIMIT_WINDOW) {
                     rateInfo.count += 1;
                     if (rateInfo.count > RATE_LIMIT_MAX_REQUESTS) {
                         rateInfo.hits += 1;
-                        const retryAfter = Math.ceil((RATE_LIMIT_WINDOW - (now - rateInfo.lastRequest)));
+                        const retryAfter = Math.ceil(RATE_LIMIT_WINDOW - (now - rateInfo.lastRequest));
                         return new NextResponse(JSON.stringify({ message: "Too many requests" }), {
                             status: 429,
                             headers: {

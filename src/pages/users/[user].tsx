@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ArrowUp, Ban, Book, Download, Flag, Heart, SearchX, Shield } from "lucide-react";
 import { type Author, type Theme } from "@types";
 import { Button } from "@components/ui/button";
-import { AccountBar } from "@components/account-bar";
 import { useWebContext } from "@context/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { Card, CardContent } from "@components/ui/card";
@@ -68,7 +67,6 @@ export default function User() {
             });
 
             const data = await response.json();
-            console.log(data);
             if (response.status === 200) {
                 setUserThemes(data);
             } else {
@@ -331,18 +329,6 @@ export default function User() {
 
     const Layout = ({ children }: { children: ReactNode }) => (
         <div className="min-h-screen bg-background">
-            <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold">
-                            <a href="/" className="hover:opacity-80 transition-opacity">
-                                Theme Library
-                            </a>
-                        </h1>
-                        {!isLoading && <AccountBar className="ml-auto" />}
-                    </div>
-                </div>
-            </header>
             <main className="container mx-auto px-4 py-8">
                 <div className="flex flex-col-reverse md:flex-row gap-8 min-h-[calc(100vh-5rem)] ">{children}</div>
             </main>

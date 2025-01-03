@@ -9,7 +9,6 @@ import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
 import { useRouter } from "next/router";
 import { formatDistanceToNow } from "date-fns";
-import { AccountBar } from "@components/account-bar";
 import { Input } from "@components/ui/input";
 import { Alert } from "@components/ui/alert";
 import { toast } from "@hooks/use-toast";
@@ -228,18 +227,6 @@ function ThemeList() {
 
     return (
         <div className="min-h-screen">
-            <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold">
-                            <a href="/" className="hover:opacity-80 transition-opacity">
-                                Theme Library
-                            </a>
-                        </h1>
-                        <AccountBar className="ml-auto" />
-                    </div>
-                </div>
-            </header>
             <div className="container mx-auto px-4 py-8">
                 <div className="space-y-6">
                     <Card className="w-full">

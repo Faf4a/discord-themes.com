@@ -10,7 +10,6 @@ import { useToast } from "@hooks/use-toast";
 import { Skeleton } from "@components/ui/skeleton";
 import { useWebContext } from "@context/auth";
 import { useRouter } from "next/router";
-import { AccountBar } from "@components/account-bar";
 import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert";
 
 export default function SettingsPage() {
@@ -38,18 +37,6 @@ export default function SettingsPage() {
 
     return (
         <>
-            <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold">
-                            <a href="/" className="hover:opacity-80 transition-opacity">
-                                Theme Library
-                            </a>
-                        </h1>
-                        <AccountBar className="ml-auto" />
-                    </div>
-                </div>
-            </header>
             <div className="container mx-auto py-10">
                 <h1 className="text-3xl font-bold mb-6">Settings</h1>
                 <Tabs defaultValue="account" className="space-y-4">

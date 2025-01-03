@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/router";
-import { AccountBar } from "@components/account-bar";
 import { useEffect, useState } from "react";
 
 const Confetti = () => {
@@ -45,19 +44,6 @@ export default function SuccessFullSubmitted() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold">
-                            <a href="/" className="hover:opacity-80 transition-opacity">
-                                Theme Library
-                            </a>
-                        </h1>
-                        <AccountBar className="ml-auto" />
-                    </div>
-                </div>
-            </header>
-
             <main className="flex-grow container mx-auto px-4 py-3 flex flex-col items-center justify-center">
                 <h1 className="text-3xl font-bold text-center">Submitted your Theme!</h1>
                 <p className="text-lg mt-2 text-center max-w-2xl">Your theme has been successfully submitted to the Theme Library.</p>

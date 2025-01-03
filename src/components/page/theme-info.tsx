@@ -8,7 +8,6 @@ import Image from "next/image";
 import { useWebContext } from "@context/auth";
 import { Card, CardContent } from "@components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@components/ui/tooltip";
-import { AccountBar } from "@components/account-bar";
 import { useToast } from "@hooks/use-toast";
 import { getCookie } from "@utils/cookies";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -282,20 +281,8 @@ export default function Component({ id }: { id?: string }) {
                     <meta name="twitter:site" content="discord-themes.com" />
                 </Head>
             )}
-            <div className="min-h-screen bg-background">
-                <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <div className="container mx-auto px-4 py-3">
-                        <div className="flex items-center justify-between">
-                            <h1 className="text-xl font-bold">
-                                <a href="/" className="hover:opacity-80 transition-opacity">
-                                    Theme Library
-                                </a>
-                            </h1>
-                            <AccountBar className="ml-auto" />
-                        </div>
-                    </div>
-                </header>
 
+            <div className="min-h-screen bg-background">
                 <div className="container mx-auto px-4 py-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_300px]">
                         <div className="space-y-6">

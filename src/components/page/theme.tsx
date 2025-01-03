@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { SearchBar } from "@components/search-bar";
 import { ThemeGrid } from "@components/theme/grid";
-import { AccountBar } from "@components/account-bar";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
 import { ArrowUp, Plus, SearchX } from "lucide-react";
@@ -155,21 +154,6 @@ function App() {
 
     return (
         <div className="min-h-screen bg-background">
-            <header className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center gap-4">
-                        <h1 className={"text-xl font-bold text-foreground transition-opacity flex-shrink-0"}>
-                            <a href="/" className="hover:opacity-80 transition-opacity">
-                                Theme Library
-                            </a>
-                        </h1>
-                        <div className="flex items-center gap-4 ml-auto">
-                            <AccountBar className="transition-opacity" />
-                        </div>
-                    </div>
-                </div>
-            </header>
-
             <div className="container mx-auto px-4 py-6">
                 <div className={`transform transition-all duration-300 ease-in-out overflow-hidden ${searchQuery === "" ? "opacity-100 translate-y-0 max-h-[500px]" : "opacity-0 -translate-y-10 max-h-0"} hidden md:block`}>
                     <div className="flex flex-col items-center">
