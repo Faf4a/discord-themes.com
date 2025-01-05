@@ -12,6 +12,8 @@ import { useToast } from "@hooks/use-toast";
 import { getCookie } from "@utils/cookies";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { EditThemeModal } from "@components/theme/edit-modal";
+import { ConfirmDialog } from "@components/ui/confirm-modal";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -24,6 +26,8 @@ export default function Component({ id }: { id?: string }) {
     const { authorizedUser, isAuthenticated, isLoading, themes, error } = useWebContext();
     const { toast } = useToast();
     const [isCopied, setIsCopied] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     const previewUrl = `/api/preview?url=/api/${id}`;
 
@@ -56,6 +60,46 @@ export default function Component({ id }: { id?: string }) {
 
     const handleAuthorClick = (author) => {
         window.open("/users/" + author.discord_snowflake);
+    };
+
+    // Add these handler functions
+    const handleEdit = async (updatedTheme) => {
+        try {
+            const response = await fetch(`/api/themes/${theme.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getCookie("_dtoken")}`
+                },
+                body: JSON.stringify(updatedTheme)
+            });
+
+            if (response.ok) {
+                toast({ description: "Theme updated successfully" });
+                // Reload theme data
+                window.location.reload();
+            }
+        } catch {
+            toast({ description: "Failed to update theme" });
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            const response = await fetch(`/api/themes/${theme.id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${getCookie("_dtoken")}`
+                }
+            });
+
+            if (response.ok) {
+                toast({ description: "Theme deleted successfully" });
+                window.location.href = "/";
+            }
+        } catch {
+            toast({ description: "Failed to delete theme" });
+        }
     };
 
     const renderAuthor = (author) => {
@@ -400,12 +444,11 @@ export default function Component({ id }: { id?: string }) {
                                     {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
                                         <div className="bg-card border border-muted rounded-lg p-4">
                                             <p className="text-l text-muted-foreground">Author Options</p>
-                                            <p className="text-xs text-muted-foreground">Unavailable currently</p>
-                                            <Button variant="outline" className="w-full" onClick={() => window.open(`/theme/edit/${theme.id}`, "_blank")} disabled>
+                                            <Button variant="outline" className="w-full" onClick={() => setEditModalOpen(true)}>
                                                 <Code className="mr-2 h-4 w-4" />
                                                 Edit
                                             </Button>
-                                            <Button variant="outline" className="mt-2 w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => window.open(`/theme/delete/${theme.id}`, "_blank")} disabled>
+                                            <Button variant="outline" className="mt-2 w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => setDeleteDialogOpen(true)}>
                                                 <Code className="mr-2 h-4 w-4" />
                                                 Delete
                                             </Button>
@@ -436,6 +479,13 @@ export default function Component({ id }: { id?: string }) {
                         </div>
                     </div>
                 </div>
+                {!isLoading && (
+                    <>
+                        <EditThemeModal open={editModalOpen} onOpenChange={setEditModalOpen} theme={theme} onSave={handleEdit} />
+
+                        <ConfirmDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} onConfirm={handleDelete} title="Delete Theme" description="Are you sure you want to delete this theme? This action cannot be undone." />
+                    </>
+                )}
             </div>
         </>
     );
