@@ -11,6 +11,8 @@
 
 # building
 /ignores/**/*
+public/robots.txt
+public/sitemap*.xml
 
 # next.js
 .next
