@@ -92,62 +92,89 @@ function ThemeList() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                {/* Make header stack on mobile */}
+                <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                     <h1 className="text-2xl font-bold">Theme Submissions</h1>
-                    <Input placeholder="Search themes..." className="max-w-xs" value={search} onChange={(e) => setSearch(e.target.value)} />
+                    <Input 
+                        placeholder="Search themes..." 
+                        className="w-full sm:max-w-xs" 
+                        value={search} 
+                        onChange={(e) => setSearch(e.target.value)} 
+                    />
                 </div>
 
-                <Card>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Author</TableHead>
-                                <TableHead>Submitted</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredThemes.map((theme) => (
-                                <TableRow key={theme._id}>
-                                    <TableCell className="font-medium">{theme.title}</TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col gap-2">
-                                            {[...Object.values(theme.validatedUsers)].reverse().map((user, index) => (
-                                                <div key={user.id}>
-                                                    <div className="flex flex-row items-center gap-2">
-                                                        <img draggable={false} src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt={user.username} className="w-6 h-6 rounded-full select-none" />
-                                                        {user.username} <p className="text-muted-foreground text-xs">{user.id}</p>
-                                                        {index === 0 && (
-                                                            <Badge variant="default">
-                                                                Submitter
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(theme.submittedAt).toDateString()} ({formatDistanceToNow(new Date(theme.submittedAt))} ago)
-                                    </TableCell>
-                                    <TableCell>
-                                        <a href={`${SERVER}/theme/submitted/view/${theme._id}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                                            {theme.state} (click to view)
-                                        </a>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {filteredThemes.length === 0 && (
+                {/* Add horizontal scroll for table on mobile */}
+                <div className="overflow-x-auto">
+                    <Card>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center py-8">
-                                        No themes found
-                                    </TableCell>
+                                    <TableHead className="min-w-[200px]">Title</TableHead>
+                                    <TableHead className="min-w-[250px]">Author</TableHead>
+                                    <TableHead className="min-w-[200px]">Submitted</TableHead>
+                                    <TableHead className="min-w-[150px]">Status</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredThemes.map((theme) => (
+                                    <TableRow key={theme._id}>
+                                        <TableCell className="font-medium">
+                                            {/* Add text wrapping for long titles */}
+                                            <div className="break-words">{theme.title}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col gap-2">
+                                                {[...Object.values(theme.validatedUsers)].reverse().map((user, index) => (
+                                                    <div key={user.id}>
+                                                        <div className="flex flex-row items-center gap-2 flex-wrap">
+                                                            <img 
+                                                                draggable={false} 
+                                                                src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} 
+                                                                alt={user.username} 
+                                                                className="w-6 h-6 rounded-full select-none flex-shrink-0" 
+                                                            />
+                                                            <span className="break-all">{user.username}</span>
+                                                            <p className="text-muted-foreground text-xs break-all">{user.id}</p>
+                                                            {index === 0 && (
+                                                                <Badge variant="default" className="whitespace-nowrap">
+                                                                    Submitter
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="whitespace-nowrap">
+                                            {new Date(theme.submittedAt).toDateString()}
+                                            <br className="sm:hidden" />
+                                            <span className="text-sm text-muted-foreground">
+                                                ({formatDistanceToNow(new Date(theme.submittedAt))} ago)
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <a 
+                                                href={`${SERVER}/theme/submitted/view/${theme._id}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="text-blue-500 hover:underline inline-block"
+                                            >
+                                                {theme.state} (click to view)
+                                            </a>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                                {filteredThemes.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-8">
+                                            No themes found
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Card>
+                </div>
             </div>
         </div>
     );

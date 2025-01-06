@@ -18,8 +18,6 @@ function App({ Component, pageProps }) {
                 <meta name="application-name" content="Theme Library" />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://discord-themes.com/" />
-                <meta property="og:title" content="ThemeLibrary" />
-                <meta property="og:description" content="Find your favourite themes all at one place." />
                 <title>Theme Library</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
