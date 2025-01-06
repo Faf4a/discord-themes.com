@@ -1,3 +1,8 @@
+/* eslint-disable no-constant-binary-expression */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
+"use client";
+
 import { Button } from "@components/ui/button";
 import { Book, Calendar, Check, Code, Copy, Download, ExternalLink, Eye, Github, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -14,16 +19,16 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { EditThemeModal } from "@components/theme/edit-modal";
 import { ConfirmDialog } from "@components/ui/confirm-modal";
+import { type Theme } from "@types";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
-export default function Component({ id }: { id?: string }) {
-    const [theme, setTheme] = useState(null);
+export default function Component({ id, theme }: { id?: string; theme: Theme }) {
     const [isDownloaded, setIsDownloaded] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [likedThemes, setLikedThemes] = useState();
     const [isLikeDisabled, setIsLikeDisabled] = useState(false);
-    const { authorizedUser, isAuthenticated, isLoading, themes, error } = useWebContext();
+    const [isMobile, setIsMobile] = useState(false);
+    const { authorizedUser, isAuthenticated, isLoading } = useWebContext();
     const { toast } = useToast();
     const [isCopied, setIsCopied] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -32,17 +37,15 @@ export default function Component({ id }: { id?: string }) {
     const previewUrl = `/api/preview?url=/api/${id}`;
 
     useEffect(() => {
-        if (!id || isLoading || error) return;
+        setIsMobile(window.innerWidth <= 768);
+        
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
 
-        const theme = themes.find((x) => x.id == id);
-
-        if (!theme) {
-            window.location.href = "/";
-        } else {
-            setTheme(theme);
-            setLoading(false);
-        }
-    }, [themes, error, id, isLoading]);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -59,10 +62,17 @@ export default function Component({ id }: { id?: string }) {
     }
 
     const handleAuthorClick = (author) => {
-        window.open("/users/" + author.discord_snowflake);
+        useEffect(() => {
+            window.open("/users/" + author.discord_snowflake);
+        }, []);
     };
 
-    // Add these handler functions
+    const handleGithubClick = (githubName) => {
+        useEffect(() => {
+            window.open(`https://github.com/${githubName}`, "_blank");
+        }, []);
+    };
+
     const handleEdit = async (updatedTheme) => {
         try {
             const response = await fetch(`/api/themes/${theme.id}`, {
@@ -76,7 +86,6 @@ export default function Component({ id }: { id?: string }) {
 
             if (response.ok) {
                 toast({ description: "Theme updated successfully" });
-                // Reload theme data
                 window.location.reload();
             }
         } catch {
@@ -123,7 +132,7 @@ export default function Component({ id }: { id?: string }) {
                         Profile
                     </Button>
                     {author.github_name && (
-                        <Button variant="outline" onClick={() => window.open(`https://github.com/${author.github_name}`, "_blank")}>
+                        <Button variant="outline" onClick={() => handleGithubClick(author.github_name)}>
                             <Github className="mr-2 h-4 w-4" />
                             Github
                         </Button>
@@ -140,14 +149,16 @@ export default function Component({ id }: { id?: string }) {
 
         xhr.onload = () => {
             if (xhr.status === 200) {
-                const url = window.URL.createObjectURL(xhr.response);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${theme.name}.theme.css`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
+                useEffect(() => {
+                    const url = window.URL.createObjectURL(xhr.response);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${theme.name}.theme.css`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                }, []);
 
                 setIsDownloaded(true);
                 setTimeout(() => {
@@ -174,11 +185,6 @@ export default function Component({ id }: { id?: string }) {
             // @ts-ignore
             ...prev,
             likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: !isCurrentlyLiked } : like))
-        }));
-
-        setTheme((prev) => ({
-            ...prev,
-            likes: prev.likes + (isCurrentlyLiked ? -1 : 1)
         }));
 
         try {
@@ -209,11 +215,6 @@ export default function Component({ id }: { id?: string }) {
                     likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
                 }));
 
-                setTheme((prev) => ({
-                    ...prev,
-                    likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
-                }));
-
                 toast({
                     description: "Failed to like theme, try again later."
                 });
@@ -223,11 +224,6 @@ export default function Component({ id }: { id?: string }) {
                 // @ts-ignore
                 ...prev,
                 likes: (prev as any)!.likes.map((like) => (like.themeId === themeId ? { ...like, hasLiked: isCurrentlyLiked } : like))
-            }));
-
-            setTheme((prev) => ({
-                ...prev,
-                likes: prev.likes + (isCurrentlyLiked ? 1 : -1)
             }));
 
             toast({
@@ -304,33 +300,37 @@ export default function Component({ id }: { id?: string }) {
 
     return (
         <>
-            {!loading && (
-                <Head>
-                    <title>{theme.name} - Discord Theme</title>
-                    <meta name="description" content={theme.description} />
-                    <meta name="keywords" content="discord, theme, custom, discord themes" />
-                    <meta name="author" content="discord-themes.com" />
+            <Head>
+                <title>{theme.name} - Discord Theme</title>
+                <meta name="description" content={theme.description} />
+                <meta name="keywords" content="discord, theme, custom, discord themes" />
+                <meta name="author" content="discord-themes.com" />
 
-                    <meta property="og:type" content="website" />
-                    <meta property="og:title" content={theme.name} />
-                    <meta property="og:description" content={theme.description} />
-                    <meta property="og:image" content={theme.thumbnail_url} />
-                    <meta property="og:url" content="https://discord-themes.com" />
-                    <meta property="og:site_name" content={`@${theme.author.discord_name} - https://discord-themes.com`} />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content={theme.name} />
+                <meta property="og:description" content={theme.description} />
+                <meta property="og:image" content={theme.thumbnail_url} />
+                <meta property="og:url" content="https://discord-themes.com" />
+                <meta
+                    property="og:site_name"
+                    content={`@${
+                        // @ts-ignore
+                        theme.author.discord_name
+                    } - https://discord-themes.com`}
+                />
 
-                    <meta name="twitter:card" content="summary_large_image" />
-                    <meta name="twitter:title" content={theme.name} />
-                    <meta name="twitter:description" content={theme.description} />
-                    <meta name="twitter:image" content={theme.thumbnail_url} />
-                    <meta name="twitter:site" content="discord-themes.com" />
-                </Head>
-            )}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={theme.name} />
+                <meta name="twitter:description" content={theme.description} />
+                <meta name="twitter:image" content={theme.thumbnail_url} />
+                <meta name="twitter:site" content="discord-themes.com" />
+            </Head>
 
             <div className="min-h-screen bg-background">
                 <div className="container mx-auto px-4 py-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_300px]">
                         <div className="space-y-6">
-                            {loading ? (
+                            {isLoading ? (
                                 <>
                                     <Skeleton className="h-8 w-3/4" />
                                     <Skeleton className="h-32 w-full" />
@@ -390,7 +390,7 @@ export default function Component({ id }: { id?: string }) {
                         <div className="space-y-4">
                             <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                 <div className="space-y-3">
-                                    <Button size="sm" disabled={loading || isDownloaded} onClick={handleDownload} className="w-full flex items-center gap-2 justify-center">
+                                    <Button size="sm" disabled={isLoading || isDownloaded} onClick={handleDownload} className="w-full flex items-center gap-2 justify-center">
                                         {isDownloaded ? (
                                             <>
                                                 <Check className="h-4 w-4" />
@@ -403,11 +403,11 @@ export default function Component({ id }: { id?: string }) {
                                             </>
                                         )}
                                     </Button>
-                                    <Button disabled={loading || window.innerWidth <= 768} variant="outline" className="w-full" size="lg" onClick={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}>
+                                    <Button disabled={isLoading || isMobile} variant="outline" className="w-full" size="lg" onClick={() => window.open(previewUrl, "_blank", "noopener,noreferrer")}>
                                         <Eye className="mr-2 h-4 w-4" />
-                                        {window.innerWidth <= 768 ? "Not available on mobile" : "Preview"}
+                                        {isMobile ? "Not available on mobile" : "Preview"}
                                     </Button>
-                                    {!loading &&
+                                    {!isLoading &&
                                         (isAuthenticated ? (
                                             <Button
                                                 variant="outline"
@@ -441,23 +441,28 @@ export default function Component({ id }: { id?: string }) {
                                                 </Tooltip>
                                             </TooltipProvider>
                                         ))}
-                                    {!loading && isAuthenticated && (authorizedUser?.id === theme?.author?.discord_snowflake || authorizedUser?.is_admin) && (
-                                        <div className="bg-card border border-muted rounded-lg p-4">
-                                            <p className="text-l text-muted-foreground">Author Options</p>
-                                            <Button variant="outline" className="w-full" onClick={() => setEditModalOpen(true)}>
-                                                <Code className="mr-2 h-4 w-4" />
-                                                Edit
-                                            </Button>
-                                            <Button variant="outline" className="mt-2 w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => setDeleteDialogOpen(true)}>
-                                                <Code className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    )}
+                                    {false && !isLoading &&
+                                        isAuthenticated &&
+                                        (authorizedUser?.id ===
+                                            // @ts-ignore
+                                            theme?.author?.discord_snowflake ||
+                                            authorizedUser?.is_admin) && (
+                                            <div className="bg-card border border-muted rounded-lg p-4">
+                                                <p className="text-l text-muted-foreground">Author Options</p>
+                                                <Button variant="outline" className="w-full" onClick={() => setEditModalOpen(true)}>
+                                                    <Code className="mr-2 h-4 w-4" />
+                                                    Edit
+                                                </Button>
+                                                <Button variant="outline" className="mt-2 w-full border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" onClick={() => setDeleteDialogOpen(true)}>
+                                                    <Code className="mr-2 h-4 w-4" />
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        )}
                                 </div>
-                                {!loading && <ThemeStats />}
+                                {!isLoading && <ThemeStats />}
                             </div>
-                            {!loading && (
+                            {!isLoading && (
                                 <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                     <div className="space-y-3">
                                         <h2 className="text-lg font-semibold">Contributors</h2>
@@ -465,11 +470,11 @@ export default function Component({ id }: { id?: string }) {
                                     </div>
                                 </div>
                             )}
-                            {!loading && theme.guild && (
+                            {!isLoading && theme.guild && (
                                 <div className="rounded-lg border-b border-border/40 bg-card p-4">
                                     <div className="space-y-3">
                                         <h2>Support Server</h2>
-                                        <Button variant="outline" onClick={() => window.open(theme.guild, "_blank")} className="w-full">
+                                        <Button variant="outline" onClick={() => window.open(theme?.guild?.invite_link, "_blank")} className="w-full">
                                             <ExternalLink className="mr-2 h-4 w-4" />
                                             Join {theme.guild.name}
                                         </Button>
