@@ -11,6 +11,7 @@ import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
 import ThemeCarousel from "@components/theme/carousel";
 import { DropdownFilter } from "@components/ui/dropdown-filter";
+import { type Theme } from "@types";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -47,13 +48,13 @@ const NoResults = () => (
     </div>
 );
 
-function App() {
+function App({ themes }: { themes: Theme[] }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [isValid, setUser] = useState<UserData | boolean>(false);
     const [filters, setFilters] = useState([]);
     const [likedThemes, setLikedThemes] = useState([]);
     const [sort, setSort] = useState("most-popular");
-    const { authorizedUser, isAuthenticated, isLoading, error, themes } = useWebContext();
+    const { authorizedUser, isAuthenticated, isLoading, error } = useWebContext();
     const [showScrollTop, setShowScrollTop] = useState(false);
 
     useEffect(() => {

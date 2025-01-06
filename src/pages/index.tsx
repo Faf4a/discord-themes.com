@@ -1,8 +1,18 @@
 import React from "react";
 import App from "@components/page/theme";
 import Head from "next/head";
+import type { GetStaticProps, InferGetStaticPropsType } from "next";
+import { type Theme } from "@types";
 
-export default function Page() {
+export const getStaticProps = (async () => {
+    const res = await fetch("https://raw.githubusercontent.com/Faf4a/stunning-spoon/refs/heads/main/themes.json");
+    const themes = await res.json();
+    return { props: { themes } };
+}) satisfies GetStaticProps<{
+    themes: Theme[];
+}>;
+
+export default function ThemePage({ themes }: InferGetStaticPropsType<typeof getStaticProps>) {
     return (
         <div>
             <Head>
@@ -17,7 +27,7 @@ export default function Page() {
                 <title>Theme Library</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <App />
+            <App themes={themes} />
         </div>
     );
 }
