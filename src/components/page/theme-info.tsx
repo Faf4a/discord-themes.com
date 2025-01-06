@@ -5,7 +5,7 @@
 
 import { Button } from "@components/ui/button";
 import { Book, Calendar, Check, Code, Copy, Download, ExternalLink, Eye, Github, Heart } from "lucide-react";
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import Head from "next/head";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -38,13 +38,13 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
 
     useEffect(() => {
         setIsMobile(window.innerWidth <= 768);
-        
+
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
         };
 
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
 
     useEffect(() => {
@@ -142,32 +142,17 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
         );
     };
 
-    const handleDownload = async () => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", `/api/download/${theme.id}`);
-        xhr.responseType = "blob";
+    const handleDownload = async (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                useEffect(() => {
-                    const url = window.URL.createObjectURL(xhr.response);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${theme.name}.theme.css`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                }, []);
+        setIsDownloaded(true);
 
-                setIsDownloaded(true);
-                setTimeout(() => {
-                    setIsDownloaded(false);
-                }, 5000);
-            }
-        };
+        window.location.href = `/api/download/${theme.id}`;
 
-        xhr.send();
+        setTimeout(() => {
+            setIsDownloaded(false);
+        }, 5000);
     };
 
     const handleLike = (themeId) => async () => {
@@ -313,9 +298,9 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
                 <meta property="og:url" content="https://discord-themes.com" />
                 <meta
                     property="og:site_name"
-                    content={`@${
+                    content={`${
                         // @ts-ignore
-                        theme.author.discord_name
+                        theme.author?.discord_name ? `@${theme.author.discord_name}` : theme.author.map((x) => `@${x.discord_name}`).join(", ")
                     } - https://discord-themes.com`}
                 />
 
@@ -441,7 +426,8 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
                                                 </Tooltip>
                                             </TooltipProvider>
                                         ))}
-                                    {false && !isLoading &&
+                                    {false &&
+                                        !isLoading &&
                                         isAuthenticated &&
                                         (authorizedUser?.id ===
                                             // @ts-ignore
