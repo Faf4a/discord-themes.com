@@ -23,8 +23,9 @@ export default function ThemePage({ themes }: InferGetStaticPropsType<typeof get
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://discord-themes.com/" />
                 <meta property="og:title" content="ThemeLibrary" />
-                <meta property="og:description" content="Find your favourite themes all at one place." />
+                <meta property="og:description" content="Find your favourite themes for Vencord or BetterDiscord all at one place." />
                 <title>Theme Library</title>
+                <meta name="description" content="Find your favourite themes for Vencord or BetterDiscord all at one place." />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <App themes={themes} />

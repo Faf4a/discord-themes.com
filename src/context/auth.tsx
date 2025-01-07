@@ -28,7 +28,6 @@ export function AuthProvider({ children }) {
                 method: "GET",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
             });
-            if (!res.ok) throw new Error("Failed to fetch user");
             return res.json();
         },
         {
