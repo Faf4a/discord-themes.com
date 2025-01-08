@@ -200,7 +200,6 @@ function ThemeList() {
                 }
 
                 const data = await response.json();
-                // Find theme directly in array
                 const theme = data.find((theme) => theme._id === id);
 
                 if (!theme) {
@@ -267,7 +266,6 @@ function ThemeList() {
 
                             <CardContent className="p-6">
                                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                                    {/* Left Column - Theme Details */}
                                     <div className="lg:col-span-3 space-y-8">
                                         <div className="prose dark:prose-invert max-w-none">
                                             <h3 className="text-xl font-semibold mb-4">Description</h3>
@@ -309,8 +307,6 @@ function ThemeList() {
                                             </a>
                                         </div>
                                     </div>
-
-                                    {/* Right Column - Review Actions */}
                                     <div className="lg:col-span-2 space-y-6">
                                         <div className="sticky top-16">
                                             <div className="rounded-lg border border-muted p-6 space-y-6">

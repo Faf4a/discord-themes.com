@@ -20,7 +20,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const css = Buffer.from(__theme__.content, "base64").toString("utf-8");
 
-    // we love cache
     res.setHeader("Content-Type", "text/css");
     res.setHeader("Cache-Control", "public, max-age=1200");
     res.status(200).end(css);

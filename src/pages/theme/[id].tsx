@@ -9,7 +9,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const res = await fetch("https://raw.githubusercontent.com/Faf4a/stunning-spoon/refs/heads/main/themes.json");
     const themes = await res.json();
 
-    // Create paths for each theme ID
     const paths = themes.map((theme: Theme) => ({
         params: { id: theme.id.toString() }
     }));
