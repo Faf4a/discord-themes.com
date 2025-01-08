@@ -2,10 +2,32 @@
 
 import clientPromise from "@utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { isAuthed } from "@utils/auth";
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET") {
         return res.status(405).json({ message: "Method not allowed", wants: "GET" });
+    }
+
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+        return res.status(400).json({ message: "Cannot check authorization without unique token" });
+    }
+
+    const token = authorization?.replace("Bearer ", "")?.trim() ?? null;
+
+    if (!token) {
+        return res.status(400).json({ message: "Invalid Request, unique user token is missing" });
+    }
+    const user = await isAuthed(token as string);
+
+    if (!user) {
+        return res.status(401).json({ status: 401, message: "Given token is not authorized" });
+    }
+
+    if (!user.admin) {
+        return res.status(401).json({ status: 401, message: "Missing permissions to access route" });
     }
 
     const currentDate = new Date();
@@ -15,10 +37,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         {
             $facet: {
                 totalUsers: [{ $count: "total" }],
-                monthlyUsers: [
-                    { $match: { createdAt: { $gte: firstDayOfMonth } } },
-                    { $count: "total" }
-                ],
+                monthlyUsers: [{ $match: { createdAt: { $gte: firstDayOfMonth } } }, { $count: "total" }],
                 totalThemes: [{ $count: "total" }]
             }
         }
@@ -114,7 +133,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             totalDownloads: totalDownloads,
             topAuthor: {
                 discord_snowflake: topAuthor._id,
-                themeCount: topAuthor.themeCount,
+                themeCount: topAuthor.themeCount
             },
             mostLiked: mostLikedTheme
         },

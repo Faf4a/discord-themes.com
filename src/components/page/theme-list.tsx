@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { useWebContext } from "@context/auth";
 import { getCookie } from "@utils/cookies";
-import { Loader2 } from "lucide-react";
+import { Search } from "lucide-react";
 import { Card } from "@components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@components/ui/table";
 import { Input } from "@components/ui/input";
 import { SERVER } from "@constants";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 interface Theme {
     _id: string;
@@ -38,6 +38,7 @@ function ThemeList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
+    const [filter, setFilter] = useState("all");
 
     useEffect(() => {
         if (!isAuthenticated || !authorizedUser?.admin) {
@@ -69,112 +70,104 @@ function ThemeList() {
         fetchThemes();
     }, [isAuthenticated, authorizedUser]);
 
-    const filteredThemes = themes.filter((theme) => theme.title.toLowerCase().includes(search.toLowerCase()) || Object.values(theme.validatedUsers).some((user) => user.username.toLowerCase().includes(search.toLowerCase())));
+    const filteredThemes = themes.filter((theme) => {
+        const matchesSearch = theme.title.toLowerCase().includes(search.toLowerCase()) || Object.values(theme.validatedUsers).some((user) => user.username.toLowerCase().includes(search.toLowerCase()));
+        const matchesFilter = filter === "all" || theme.state === filter;
+        return matchesSearch && matchesFilter;
+    });
 
     if (isLoading || loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="min-h-screen p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                        <Card key={i} className="p-6 animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                            <div className="h-4 bg-gray-200 rounded w-1/2" />
+                        </Card>
+                    ))}
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Card className="p-6">
-                    <p className="text-red-500">Error: {error}</p>
+            <div className="min-h-screen p-4 flex items-center justify-center">
+                <Card className="p-6 max-w-md w-full">
+                    <p className="text-red-500 text-center">Error: {error}</p>
                 </Card>
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container">
             <div className="space-y-6">
-                {/* Make header stack on mobile */}
-                <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
-                    <h1 className="text-2xl font-bold">Theme Submissions</h1>
-                    <Input 
-                        placeholder="Search themes..." 
-                        className="w-full sm:max-w-xs" 
-                        value={search} 
-                        onChange={(e) => setSearch(e.target.value)} 
-                    />
+                <div className="flex flex-col gap-4">
+                    <h1 className="text-3xl font-bold">Theme Submissions</h1>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Input placeholder="Search themes or authors..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
+                        </div>
+                        <Select value={filter} onValueChange={setFilter}>
+                            <SelectTrigger className="w-full sm:w-40">
+                                <SelectValue placeholder="All Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="approved">Approved</SelectItem>
+                                <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
-                {/* Add horizontal scroll for table on mobile */}
-                <div className="overflow-x-auto">
-                    <Card>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="min-w-[200px]">Title</TableHead>
-                                    <TableHead className="min-w-[250px]">Author</TableHead>
-                                    <TableHead className="min-w-[200px]">Submitted</TableHead>
-                                    <TableHead className="min-w-[150px]">Status</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredThemes.map((theme) => (
-                                    <TableRow key={theme._id}>
-                                        <TableCell className="font-medium">
-                                            {/* Add text wrapping for long titles */}
-                                            <div className="break-words">{theme.title}</div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col gap-2">
-                                                {[...Object.values(theme.validatedUsers)].reverse().map((user, index) => (
-                                                    <div key={user.id}>
-                                                        <div className="flex flex-row items-center gap-2 flex-wrap">
-                                                            <img 
-                                                                draggable={false} 
-                                                                src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} 
-                                                                alt={user.username} 
-                                                                className="w-6 h-6 rounded-full select-none flex-shrink-0" 
-                                                            />
-                                                            <span className="break-all">{user.username}</span>
-                                                            <p className="text-muted-foreground text-xs break-all">{user.id}</p>
-                                                            {index === 0 && (
-                                                                <Badge variant="default" className="whitespace-nowrap">
-                                                                    Submitter
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="whitespace-nowrap">
-                                            {new Date(theme.submittedAt).toDateString()}
-                                            <br className="sm:hidden" />
-                                            <span className="text-sm text-muted-foreground">
-                                                ({formatDistanceToNow(new Date(theme.submittedAt))} ago)
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <a 
-                                                href={`${SERVER}/theme/submitted/view/${theme._id}`} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer" 
-                                                className="text-blue-500 hover:underline inline-block"
-                                            >
-                                                {theme.state} (click to view)
-                                            </a>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                {filteredThemes.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-8">
-                                            No themes found
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                {filteredThemes.length === 0 ? (
+                    <Card className="p-8 text-center">
+                        <p className="text-gray-500">No themes found matching your criteria</p>
                     </Card>
-                </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredThemes.map((theme) => (
+                            <Card key={theme._id} className="p-6 hover:shadow-lg transition-shadow">
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <h3 className="font-semibold text-lg break-words">{theme.title}</h3>
+                                        <Badge variant={theme.state === "approved" ? "default" : theme.state === "rejected" ? "destructive" : "default"}>{theme.state}</Badge>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {Object.values(theme.validatedUsers).reverse().map((user, index) => (
+                                            <div key={user.id} className="flex items-center gap-2">
+                                                <img draggable={false} src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt={user.username} className="w-8 h-8 rounded-full" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium truncate">{user.username}</p>
+                                                    <p className="text-sm text-gray-500 truncate">{user.id}</p>
+                                                </div>
+                                                {index === 0 && (
+                                                    <Badge variant="outline" className="flex-shrink-0">
+                                                        Submitter
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="pt-2 border-t border-muted">
+                                        <p className="text-sm text-gray-500">Submitted {formatDistanceToNow(new Date(theme.submittedAt))} ago</p>
+                                        <a href={`${SERVER}/theme/submitted/view/${theme._id}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-sm mt-2 inline-block">
+                                            View Details →
+                                        </a>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

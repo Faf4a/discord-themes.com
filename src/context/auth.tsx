@@ -6,7 +6,7 @@ import { getCookie } from "@utils/cookies";
 const WebContext = createContext(null);
 
 const protectedRoutes = ["/theme/submit", "/theme/submitted"];
-const adminRoutes = ["/theme/submitted/view"];
+const adminRoutes = ["/theme/submitted/view", "/admin"];
 
 export function AuthProvider({ children }) {
     const router = useRouter();

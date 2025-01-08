@@ -6,7 +6,7 @@ export default function ThemeSubmittedList() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <main className="flex-grow container mx-auto px-4 py-3 flex flex-col items-center justify-center">
+            <main className="flex-grow container mx-auto flex flex-col mt-6">
                 {isLoading ? (
                     <div className="text-center text-lg text-foreground">Loading...</div>
                 ) : !authorizedUser?.admin ? (

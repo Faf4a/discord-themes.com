@@ -1,10 +1,11 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useWebContext } from "@context/auth";
 import { getCookie } from "@utils/cookies";
 import { Check, ExternalLink, Loader2, X } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
 import { useRouter } from "next/router";
@@ -14,6 +15,7 @@ import { Alert } from "@components/ui/alert";
 import { toast } from "@hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { cn } from "@lib/utils";
 
 interface Theme {
     _id: string;
@@ -227,150 +229,204 @@ function ThemeList() {
 
     return (
         <div className="min-h-screen">
-            <div className="container mx-auto px-4 py-8">
-                <div className="space-y-6">
-                    <Card className="w-full">
-                        <CardHeader>
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <CardTitle className="text-2xl font-bold">{themes?.title}</CardTitle>
-                                    <CardDescription className="mt-2">
-                                        {" "}
-                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{themes?.description}</ReactMarkdown>
-                                    </CardDescription>
-                                </div>
-                                {themes?.state === "approved" ? (
-                                    <Badge variant="outline" className="ml-2 bg-green-400/70 border-green-400 text-white">
-                                        Approved
-                                    </Badge>
-                                ) : themes?.state === "rejected" ? (
-                                    <Badge variant="outline" className="ml-2 bg-red-400/70 border-red-400 text-white">
-                                        Rejected
-                                    </Badge>
-                                ) : (
-                                    <Badge variant="outline" className="ml-2 bg-yellow-400/70 border-yellow-400 text-white">
-                                        Pending Review
-                                    </Badge>
-                                )}
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Description</h3>
-                                        <p className="text-gray-600 dark:text-gray-300">{themes?.description}</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Contributors</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            {Object.values(themes.validatedUsers).map((user: any) => (
-                                                <div key={user.id} className="flex items-center gap-2">
-                                                    <img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt={user.username} className="w-6 h-6 rounded-full" draggable={false} />
-                                                    {user.username} ({user.id})
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Submission Details</h3>
-                                        <p className="text-sm text-gray-500">
-                                            Submitted {themes?.submittedAt && formatDistanceToNow(new Date(themes.submittedAt))} ago by{" "}
-                                            {Object.values(themes.validatedUsers)
-                                                .map((user: any) => user.username)
-                                                .join(", ")}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Theme Content</h3>
-                                        <p className="text-xs text-muted-foreground mb-2">Taken via GitHub API, if invalid reject</p>
-                                        <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 h-[200px] overflow-auto">
-                                            <pre className="text-sm">
-                                                <code>{Buffer.from(themes?.themeContent, "base64").toString()}</code>
-                                            </pre>
-                                        </div>
-                                        <a href={themes.sourceLink} className="text-xs text-muted-foreground mb-2">
-                                            {themes.sourceLink}
-                                        </a>
-                                    </div>
-                                </div>
-                                <div>
-                                    {themes?.file && (
-                                        <>
-                                            <h3 className="font-semibold mb-2">Theme Preview</h3>
-                                            <img src={themes.file} alt={themes.title} className="rounded-lg" />
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                            {themes.state !== "pending" ? (
-                                <Alert variant={themes.state === "approved" ? "default" : "destructive"} className="text-sm">
-                                    This theme has already been {themes.state === "approved" ? "approved" : "rejected"} and cannot be modified.
-                                </Alert>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="p-4 bg-card rounded-lg border border-muted">
-                                        <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                            Selected Tags
-                                            <span className="text-xs text-muted-foreground font-normal">({selectedTags.length}/5)</span>
-                                        </h3>
-                                        {suggestedTags.length > 0 && (
-                                            <div className="mb-6 p-4 bg-card rounded-lg border border-blue-700">
-                                                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                                                    Suggested Tags
-                                                    <span className="text-xs text-muted-foreground font-normal">(click to add)</span>
-                                                    <span className="text-xs text-muted-foreground font-normal">based on theme content and image</span>
-                                                </h3>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {suggestedTags.map((tag) => (
-                                                        <Badge key={tag} variant="suggested" className="transition-all" onClick={() => handleSuggestedTagClick(tag)}>
-                                                            {tag}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
+            <div className="container mx-auto px-4 py-12 rounded-lg">
+                {isLoading || loading ? (
+                    <div className="flex items-center justify-center min-h-[60vh]">
+                        <div className="flex flex-col items-center gap-4">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            <p className="text-muted-foreground">Loading theme details...</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="max-w-6xl mx-auto rounded-lg">
+                        <Card className="shadow-lg border-0 border-muted rounded-lg">
+                            <CardHeader className="border-b border-muted backdrop-blur">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="space-y-1">
+                                            <CardTitle className="text-3xl font-bold">{themes?.title}</CardTitle>
+                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                <span>Submitted {themes?.submittedAt && formatDistanceToNow(new Date(themes.submittedAt))} ago</span>
                                             </div>
-                                        )}
-
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            {selectedTags.map((tag) => (
-                                                <Badge key={tag} variant="secondary" className="px-3 py-1 pr-2">
-                                                    {tag}
-                                                    <button onClick={() => handleRemoveTag(tag)} className="ml-2 hover:text-destructive">
-                                                        ×
-                                                    </button>
-                                                </Badge>
-                                            ))}
-                                            {selectedTags.length === 0 && <span className="text-sm text-muted-foreground">No tags selected</span>}
                                         </div>
-                                        <div className="flex gap-2">
-                                            <Input type="text" value={newTag} onChange={(e) => setNewTag(e.target.value)} placeholder="Add a custom tag" disabled={selectedTags.length >= 5} onKeyPress={(e) => e.key === "Enter" && handleAddTag()} className="flex-1" />
-                                            <Button variant="outline" onClick={handleAddTag} disabled={selectedTags.length >= 5 || !newTag}>
-                                                Add Tag
-                                            </Button>
+                                        <Badge 
+                                            variant="outline" 
+                                            className={cn(
+                                                "text-sm px-3 py-1",
+                                                themes?.state === "approved" && "bg-green-500/10 text-green-600 border-green-500/20",
+                                                themes?.state === "rejected" && "bg-red-500/10 text-red-600 border-red-500/20",
+                                                themes?.state === "pending" && "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                                            )}
+                                        >
+                                            {themes?.state === "approved" ? "Approved" : 
+                                             themes?.state === "rejected" ? "Rejected" : "Pending Review"}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </CardHeader>
+
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                                    {/* Left Column - Theme Details */}
+                                    <div className="lg:col-span-3 space-y-8">
+                                        <div className="prose dark:prose-invert max-w-none">
+                                            <h3 className="text-xl font-semibold mb-4">Description</h3>
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]} className="text-muted-foreground">
+                                                {themes?.description}
+                                            </ReactMarkdown>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-xl font-semibold mb-4">Theme Preview</h3>
+                                            {themes?.fileUrl ? (
+                                                <img 
+                                                    src={themes.fileUrl} 
+                                                    alt={themes.title} 
+                                                    className="rounded-lg border border-muted shadow-sm w-full hover:shadow-md transition-shadow"
+                                                />
+                                            ) : (
+                                                <div className="rounded-lg border border-muted bg-muted/30 h-48 flex items-center justify-center">
+                                                    <p className="text-muted-foreground">No preview available</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-xl font-semibold mb-4">Theme Content</h3>
+                                            <div className="rounded-lg border border-muted bg-muted/30 p-4 relative">
+                                                <pre className="text-sm overflow-auto max-h-[400px]">
+                                                    <code>{Buffer.from(themes?.themeContent || "", "base64").toString()}</code>
+                                                </pre>
+                                            </div>
+                                            <a 
+                                                href={themes?.sourceLink} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 mt-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                                View source code
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Column - Review Actions */}
+                                    <div className="lg:col-span-2 space-y-6">
+                                        <div className="sticky top-16">
+                                            <div className="rounded-lg border border-muted p-6 space-y-6">
+                                                <div>
+                                                    <h3 className="text-xl font-semibold mb-4">Contributors</h3>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {Object.values(themes?.validatedUsers || {}).map((user: any) => (
+                                                            <div key={user.id} className="inline-flex items-center gap-2 bg-muted/30 rounded-full px-3 py-1">
+                                                                <img 
+                                                                    src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} 
+                                                                    alt={user.username}
+                                                                    className="w-6 h-6 rounded-full"
+                                                                />
+                                                                <span className="text-sm">{user.username}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {themes?.state === "pending" && (
+                                                    <>
+                                                        <div>
+                                                            <h3 className="text-xl font-semibold mb-4">Theme Tags</h3>
+                                                            <div className="space-y-4">
+                                                                {suggestedTags.length > 0 && (
+                                                                    <div className="space-y-2">
+                                                                        <label className="text-sm font-medium">Suggested Tags</label>
+                                                                        <div className="flex flex-wrap gap-2">
+                                                                            {suggestedTags.map((tag) => (
+                                                                                <Badge 
+                                                                                    key={tag}
+                                                                                    variant="outline"
+                                                                                    className="cursor-pointer hover:bg-primary/10"
+                                                                                    onClick={() => handleSuggestedTagClick(tag)}
+                                                                                >
+                                                                                    {tag}
+                                                                                </Badge>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="space-y-2">
+                                                                    <label className="text-sm font-medium">Selected Tags ({selectedTags.length}/5)</label>
+                                                                    <div className="flex flex-wrap gap-2 min-h-[2rem]">
+                                                                        {selectedTags.map((tag) => (
+                                                                            <Badge key={tag} variant="secondary">
+                                                                                {tag}
+                                                                                <button 
+                                                                                    onClick={() => handleRemoveTag(tag)}
+                                                                                    className="ml-2 hover:text-destructive"
+                                                                                >
+                                                                                    ×
+                                                                                </button>
+                                                                            </Badge>
+                                                                        ))}
+                                                                        {selectedTags.length === 0 && (
+                                                                            <p className="text-sm text-muted-foreground">No tags selected</p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex gap-2">
+                                                                    <Input
+                                                                        type="text"
+                                                                        value={newTag}
+                                                                        onChange={(e) => setNewTag(e.target.value)}
+                                                                        placeholder="Add custom tag..."
+                                                                        disabled={selectedTags.length >= 5}
+                                                                        onKeyPress={(e) => e.key === "Enter" && handleAddTag()}
+                                                                    />
+                                                                    <Button 
+                                                                        variant="outline"
+                                                                        onClick={handleAddTag}
+                                                                        disabled={selectedTags.length >= 5 || !newTag}
+                                                                    >
+                                                                        Add
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="pt-4 border-t border-muted space-y-4">
+                                                            <Button 
+                                                                variant="default"
+                                                                className="w-full bg-green-600 hover:bg-green-700"
+                                                                onClick={handleApprove}
+                                                            >
+                                                                <Check className="w-4 h-4 mr-2" />
+                                                                Approve Theme
+                                                            </Button>
+                                                            <Button 
+                                                                variant="destructive"
+                                                                className="w-full"
+                                                                onClick={handleReject}
+                                                            >
+                                                                <X className="w-4 h-4 mr-2" />
+                                                                Reject Theme
+                                                            </Button>
+                                                        </div>
+                                                    </>
+                                                )}
+
+                                                {themes?.state !== "pending" && (
+                                                    <Alert variant={themes.state === "approved" ? "default" : "destructive"}>
+                                                        <p>This theme has been {themes.state === "approved" ? "approved" : "rejected"} and cannot be modified.</p>
+                                                    </Alert>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            )}
-                        </CardContent>
-                        <CardFooter className="flex justify-between items-center">
-                            <div className="flex gap-4">
-                                <Button variant="outline" onClick={() => window.open(themes?.sourceLink, "_blank")}>
-                                    Source <ExternalLink className="w-4 h-4 ml-2" />
-                                </Button>
-                            </div>
-                            <div className="flex gap-4">
-                                <Button disabled={themes.state !== "pending"} variant="destructive" onClick={handleReject}>
-                                    Reject <X className="w-4 h-4 ml-2" />
-                                </Button>
-                                <Button disabled={themes.state !== "pending"} variant="default" className="bg-green-600 hover:bg-green-700" onClick={handleApprove}>
-                                    Approve <Check className="w-4 h-4 ml-2" />
-                                </Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
             </div>
         </div>
     );

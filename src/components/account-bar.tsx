@@ -74,8 +74,8 @@ export function AccountBar({ className }: AccountBarProps) {
                             My Profile
                         </DropdownMenuItem>
                         {(user as UserData).admin && (
-                            <DropdownMenuItem onClick={() => (window.location.href = "/theme/submitted")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
-                                Submissions
+                            <DropdownMenuItem onClick={() => (window.location.href = "/admin")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                                Admin Panel
                             </DropdownMenuItem>
                         )}
                         <DropdownMenuItem onClick={() => (window.location.href = "/users/@me/settings")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
