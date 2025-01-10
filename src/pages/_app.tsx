@@ -12,6 +12,7 @@ function App({ Component, pageProps }) {
     return (
         <AuthProvider>
             <Head>
+                <meta http-equiv="content-language" content="en" />
                 <meta name="viewport" content="initial-scale=1, width=device-width" />
                 <meta name="keywords" content="discord, theme, custom, discord themes, betterdiscord, vencord" />
                 <meta name="theme-color" content="#5865F2" />
@@ -20,6 +21,7 @@ function App({ Component, pageProps }) {
                 <meta property="og:url" content="https://discord-themes.com/" />
                 <title>Theme Library</title>
                 <link rel="icon" href="/favicon.ico" />
+                <link rel="apple-touch-icon" href="/favicon.ico" />
             </Head>
             <ThemeProvider attribute="class" defaultTheme="dark">
                 <div className="min-h-screen flex flex-col">

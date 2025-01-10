@@ -288,7 +288,7 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
             <Head>
                 <title>{theme.name} - Discord Theme</title>
                 <meta name="description" content={theme.description} />
-                <meta name="keywords" content="discord, theme, custom, discord themes" />
+                <meta name="keywords" content={theme.tags.join(", ")} />
                 <meta name="author" content="discord-themes.com" />
 
                 <meta property="og:type" content="website" />
