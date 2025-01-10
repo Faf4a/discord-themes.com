@@ -89,7 +89,7 @@ export function ThemeCard({ theme, likedThemes, className, noFooter = false, dis
                     <div className="flex">
                         <div className="w-1/2 relative" onMouseLeave={handleMouseLeave}>
                             <div className="aspect-[16/9] overflow-hidden bg-muted relative">
-                                <Image draggable={false} priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover select-none" />
+                                <Image unoptimized draggable={false} priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover select-none" />
                             </div>
                             <div className="absolute top-2 left-2 z-2 flex flex-wrap gap-1.5">
                                 {theme.tags?.slice(0, 3).map((tag) => (
@@ -182,7 +182,7 @@ export function ThemeCard({ theme, likedThemes, className, noFooter = false, dis
                     <>
                         <CardHeader className="p-0 relative" onMouseLeave={handleMouseLeave}>
                             <div className="aspect-[16/9] overflow-hidden bg-muted relative">
-                                <Image draggable={false} priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 select-none" />
+                                <Image unoptimized draggable={false} priority width={854} height={480} src={theme.thumbnail_url} alt={theme.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 select-none" />
                             </div>
                             <div className="absolute bottom-2 left-2 z-2 flex flex-wrap gap-1.5">
                                 {theme.tags?.slice(0, 3).map((tag) => (

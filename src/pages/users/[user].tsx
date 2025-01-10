@@ -221,7 +221,7 @@ export default function User() {
             <div className="w-full h-32 rounded-t-lg" style={{ backgroundColor: userThemes.user?.preferredColor || "" }} />
             <div className="p-6 -mt-16">
                 <div className="flex flex-col items-center">
-                    <Image draggable={false} priority height={128} width={128} className="w-24 h-24 rounded-full ring-4 ring-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Math.floor(Number(userThemes.user.id) / Math.pow(2, 22)) % 6}.png`} alt="Avatar" />{" "}
+                    <Image unoptimized draggable={false} priority height={128} width={128} className="w-24 h-24 rounded-full ring-4 ring-background" src={userThemes.user.avatar ? `https://cdn.discordapp.com/avatars/${userThemes.user.id}/${userThemes.user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Math.floor(Number(userThemes.user.id) / Math.pow(2, 22)) % 6}.png`} alt="Avatar" />{" "}
                     <div className="flex items-center gap-2 mt-4">
                         <h1 className="text-2xl font-bold">{userThemes.user.global_name ? userThemes.user.global_name : userThemes.themes.length ? authorName : "Unknown User"}</h1>
                         {userThemes.user.admin && (

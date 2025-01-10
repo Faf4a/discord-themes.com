@@ -166,6 +166,9 @@ function App({ themes }: { themes: Theme[] }) {
                 </div>
                 <div className="mb-3 mt-8">
                     <div className="flex justify-end mb-3">
+                        <Button variant="outline" className="mr-4" onClick={() => window.open("/plugin")}>
+                            Install ThemeLibrary for Vencord
+                        </Button>
                         <Button disabled={isLoading} onClick={handleSubmit} className="rounded-lg font-medium bg-primary hover:bg-primary/90">
                             {isValid ? (
                                 <>

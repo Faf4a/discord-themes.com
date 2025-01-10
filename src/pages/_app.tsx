@@ -27,7 +27,7 @@ function App({ Component, pageProps }) {
                 <div className="min-h-screen flex flex-col">
                     <Toaster />
 
-                    <Image id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />
+                    <Image unoptimized id="favicon" src={blob} alt="Blob" width={100} height={100} className="border-sm absolute mx-auto w-[80px] sm:w-[100px] h-auto rounded-lg select-none hidden pointer-events-none" />
 
                     <main className="flex-1">
                         <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

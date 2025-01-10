@@ -331,7 +331,7 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
                                     </div>
                                     <div className="rounded-lg border-b border-border/40 bg-card p-6">
                                         <div className="bg-muted rounded-lg flex justify-center items-center max-w-[900px] overflow-hidden">
-                                            <Image draggable={false} src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
+                                            <Image unoptimized draggable={false} src={theme.thumbnail_url} alt={theme.name} width={1920} height={1080} className="rounded-lg object-contain" priority />
                                         </div>
                                     </div>
                                     <div className="rounded-lg border-b border-border/40 bg-card p-6 mt-2">
