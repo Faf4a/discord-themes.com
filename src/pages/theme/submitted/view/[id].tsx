@@ -276,7 +276,7 @@ function ThemeList() {
 
                                         <div>
                                             <h3 className="text-xl font-semibold mb-4">Theme Preview</h3>
-                                            {themes?.fileUrl ? (
+                                            {themes?.file ? (
                                                 <img 
                                                     src={themes.fileUrl} 
                                                     alt={themes.title} 

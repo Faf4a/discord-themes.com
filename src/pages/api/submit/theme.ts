@@ -94,7 +94,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                             },
                             {
                                 name: "Dashboard",
-                                value: `[Approve](${SERVER}/admin/theme/${id}/approve) | [Reject](${SERVER}/admin/theme/${id}/reject)\n[View](${SERVER}/theme/${id})`
+                                value: `[Approve](${SERVER}/admin) | [Reject](${SERVER}/admin)\n[View](${SERVER}/submission/${id})`
                             }
                         ],
                         footer: {

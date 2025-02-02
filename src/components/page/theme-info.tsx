@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { Button } from "@components/ui/button";
 import { Book, Calendar, Check, Code, Copy, Download, ExternalLink, Eye, Github, Heart } from "lucide-react";
 import { MouseEvent, useEffect, useState } from "react";
@@ -33,7 +34,8 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
     const [isCopied, setIsCopied] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
+    
+    const router = useRouter();
     const previewUrl = `/api/preview?url=/api/${id}`;
 
     useEffect(() => {
@@ -62,15 +64,11 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
     }
 
     const handleAuthorClick = (author) => {
-        useEffect(() => {
-            window.open("/users/" + author.discord_snowflake);
-        }, []);
+      router.push(`/users/${author.discord_snowflake}`);
     };
 
     const handleGithubClick = (githubName) => {
-        useEffect(() => {
-            window.open(`https://github.com/${githubName}`, "_blank");
-        }, []);
+      window.open(`https://github.com/${githubName}`, "_blank");
     };
 
     const handleEdit = async (updatedTheme) => {

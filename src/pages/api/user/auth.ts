@@ -9,7 +9,8 @@ interface UserEntry {
     user: {
         id: string;
         avatar: string;
-        global_name: string;
+        global_name?: string;
+        username: string;
         preferredColor: string;
         key: string;
         keyVersion?: number;
@@ -142,7 +143,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             body: JSON.stringify({
                 embeds: [
                     {
-                        title: user.global_name,
+                        title: user.username,
                         color: 0x00ff00,
                         thumbnail: {
                             url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator) % 5}.png`
@@ -167,7 +168,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             user: {
                 id: user.id,
                 avatar: user.avatar,
-                global_name: user.global_name,
+                global_name: user.username,
                 preferredColor: user.banner_color,
                 key: uniqueKey,
                 keyVersion: 2,
@@ -195,7 +196,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                             fields: [
                                 {
                                     name: "Username",
-                                    value: user.global_name
+                                    value: user.username
                                 },
                                 {
                                     name: "User ID",
@@ -233,8 +234,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         if (userEntry.preferredColor !== user.banner_color) {
             updates["preferredColor"] = user.banner_color;
         }
-        if (userEntry.global_name !== user.global_name) {
-            updates["global_name"] = user.global_name;
+        if (userEntry.username !== user.username) {
+            updates["username"] = user.username;
         }
         if (githubAccount && userEntry.githubAccount !== githubAccount) {
             updates["githubAccount"] = githubAccount;
@@ -259,7 +260,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     res.setHeader("Content-Type", "application/json");
 
     if (!authKey) {
-        res.status(500).json({ status: 500, message: "Failed to generate a user token, if you think that this is a bug feel free to open an issue at https://github.com/faf4a/themesApi" });
+        res.status(500).json({ status: 500, message: "Failed to generate a user token, if you think that this is a bug feel free to open an issue at https://github.com/faf4a/themesApi", error: "MISSING OAUTH2 TOKEN" });
     } else {
         if (callback) res.redirect((callback as string) + `?token=${authKey}`);
         else res.status(200).json({ status: 200, token: authKey, user: { id: user.id, avatar: user.avatar, preferredColor: user.banner_color, githubAccount } });
