@@ -23,7 +23,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps = (async (context) => {
     const res = await fetch("https://raw.githubusercontent.com/Faf4a/stunning-spoon/refs/heads/main/themes.json");
     const themes = await res.json();
-    return { props: { themes } };
+    return { props: { themes }, revalidate: 3600 };
 }) satisfies GetStaticProps<{
     themes: Theme[];
 }>;
