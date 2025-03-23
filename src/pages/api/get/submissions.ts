@@ -1,5 +1,3 @@
-"use cache";
-
 import clientPromise from "@utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { isAuthed } from "@utils/auth";
@@ -24,6 +22,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (!token) {
         return res.status(400).json({ message: "Invalid Request, unique user token is missing" });
     }
+
     const user = await isAuthed(token as string);
 
     if (!user) {
@@ -37,6 +36,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const themes = await themesCollection.find({}).toArray();
 
     res.setHeader("Content-Type", "application/json");
-    res.setHeader("Cache-Control", "public, max-age=1200");
+    res.setHeader("Cache-Control", "no-store");
     res.status(200).json(themes);
 }
