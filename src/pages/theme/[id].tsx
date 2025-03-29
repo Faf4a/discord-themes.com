@@ -21,7 +21,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 // eslint-disable-next-line no-unused-vars
 export const getStaticProps = (async (context) => {
-    const res = await fetch("https://discord-themes.com/themes");
+    const res = await fetch("https://raw.githubusercontent.com/Faf4a/stunning-spoon/refs/heads/main/themes.json");
     const themes = await res.json();
     return { props: { themes }, revalidate: 60 };
 }) satisfies GetStaticProps<{
