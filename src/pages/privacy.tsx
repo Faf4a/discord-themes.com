@@ -99,7 +99,7 @@ export default function PrivacyPolicy() {
                                 <p className="text-muted-foreground">
                                     You have the right to request access to, correction of, or deletion of your personal information. To exercise these rights, please head to the Settings page accessible via the Account Settings on the top right. If you do not have access to your account but can prove ownership we can assist you in the process by contacting us via E-Mail,{" "}
                                     <a href="mailto:privacy@discord-themes.com" className="text-primary-foreground">
-                                        privacy@discord-themescom
+                                        privacy@discord-themes.com
                                     </a>
                                     .
                                 </p>
