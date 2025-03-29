@@ -7,7 +7,7 @@ import { type Theme } from "@types";
 export const getStaticProps = (async () => {
     const res = await fetch("https://raw.githubusercontent.com/Faf4a/stunning-spoon/refs/heads/main/themes.json");
     const themes = await res.json();
-    return { props: { themes }, revalidate: 3600 };
+    return { props: { themes }, revalidate: 60 };
 }) satisfies GetStaticProps<{
     themes: Theme[];
 }>;

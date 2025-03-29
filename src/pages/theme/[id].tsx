@@ -10,7 +10,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     const themes = await res.json();
 
     const paths = themes.map((theme: Theme) => ({
-        params: { id: theme.id.toString() }
+        params: { id: String(theme.id) }
     }));
 
     return {
@@ -21,9 +21,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 // eslint-disable-next-line no-unused-vars
 export const getStaticProps = (async (context) => {
-    const res = await fetch("https://raw.githubusercontent.com/Faf4a/stunning-spoon/refs/heads/main/themes.json");
+    const res = await fetch("https://discord-themes.com/themes");
     const themes = await res.json();
-    return { props: { themes }, revalidate: 3600 };
+    return { props: { themes }, revalidate: 60 };
 }) satisfies GetStaticProps<{
     themes: Theme[];
 }>;

@@ -35,8 +35,6 @@ export function AuthProvider({ children }) {
             dedupingInterval: Infinity
         }
     );
-    
-    console.log("%cTHEME LIBRARY", "color: #FFA07A; background-color: #483D8B; padding: 5px; border-radius: 3px; font-weight: bold;");
 
     if (authData) console.log("%c[server/auth]", "color: #5865F2; background: #E5E5E5; padding: 4px 8px; border-radius: 4px;", authData);
 
