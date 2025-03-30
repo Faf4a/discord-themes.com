@@ -180,15 +180,15 @@ function App({ themes }: { themes: Theme[] }) {
                             )}
                         </Button>
                     </div>
-                    <div className="flex flex-col gap-3 w-full md:grid-cols-none md:flex md:flex-row md:space-x-4 md:items-center">
-                        <div className="w-full md:w-2/3">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                        <div className="md:col-span-2">
                             <SearchBar onSearch={setSearchQuery} />
                         </div>
-                        <div className="w-full md:flex-1">
-                            <FilterDropdown options={allFilters} onChange={setFilters} className="w-full" />
+                        <div className="md:col-span-1">
+                            <FilterDropdown options={allFilters} onChange={setFilters} />
                         </div>
-                        <div className="w-full md:flex-1">
-                            <DropdownFilter onChange={setSort} className="w-full" />
+                        <div className="md:col-span-1">
+                            <DropdownFilter onChange={setSort} />
                         </div>
                     </div>
                 </div>
