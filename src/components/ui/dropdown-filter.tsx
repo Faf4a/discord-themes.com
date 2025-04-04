@@ -129,14 +129,9 @@ export function DropdownFilter({ onChange, className, defaultValue = "", label =
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-full sm:w-[240px] p-0 max-w-[90vw]"
+          className="w-full sm:w-[240px] p-0 max-w-[90vw] max-h-[80vh]"
           align="start"
           sideOffset={4}
-          onOpenAutoFocus={(e) => {
-            // Focus the search input when opened
-            e.preventDefault()
-            commandRef.current?.querySelector("input")?.focus()
-          }}
         >
           <Command ref={commandRef}>
             <CommandInput

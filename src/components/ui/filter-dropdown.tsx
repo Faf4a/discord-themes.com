@@ -49,7 +49,7 @@ export function FilterDropdown({ options, onChange, className, label = "Filter" 
           role="combobox"
           aria-expanded={open}
           aria-label={`Select ${label.toLowerCase()}`}
-          className={cn("justify-between", className)}
+          className={cn("w-full sm:w-[240px] justify-between min-h-[44px]", className)}
         >
           <span className="flex items-center gap-2 max-w-full overflow-hidden text-ellipsis">
             {selectedValues.length > 0 ? (
@@ -84,9 +84,9 @@ export function FilterDropdown({ options, onChange, className, label = "Filter" 
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full sm:w-[240px] p-0 max-w-[90vw]">
+      <PopoverContent className="w-full sm:w-[240px] p-0 max-w-[90vw] max-h-[80vh]">
         <Command>
-          <CommandInput placeholder={`Search ${label.toLowerCase()}...`} className="h-9" autoFocus={false} />
+          <CommandInput placeholder={`Search ${label.toLowerCase()}...`} className="h-9" />
           <CommandList>
             <CommandEmpty className="p-2 text-sm text-gray-500">No {label.toLowerCase()} found.</CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-y-auto">
