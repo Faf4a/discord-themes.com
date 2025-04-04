@@ -84,7 +84,7 @@ export function FilterDropdown({ options, onChange, className, label = "Filter" 
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn("p-0", className)}>
+      <PopoverContent className="w-full sm:w-[240px] p-0 max-w-[90vw]">
         <Command>
           <CommandInput placeholder={`Search ${label.toLowerCase()}...`} className="h-9" autoFocus={false} />
           <CommandList>

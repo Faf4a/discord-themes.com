@@ -129,7 +129,7 @@ export function DropdownFilter({ onChange, className, defaultValue = "", label =
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-full sm:w-[240px] p-0"
+          className="w-full sm:w-[240px] p-0 max-w-[90vw]"
           align="start"
           sideOffset={4}
           onOpenAutoFocus={(e) => {
