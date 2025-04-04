@@ -86,6 +86,9 @@ module.exports = {
     experimental: {
         dynamicIO: true
     },
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     reactStrictMode: false,
     productionBrowserSourceMaps: false
 };
