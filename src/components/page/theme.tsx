@@ -176,7 +176,7 @@ function App({ themes }: { themes: Theme[] }) {
                                     Submit Theme
                                 </>
                             ) : (
-                                "Login with Discord"
+                                "Connect via Discord"
                             )}
                         </Button>
                     </div>
