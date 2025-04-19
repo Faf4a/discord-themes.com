@@ -41,6 +41,13 @@ export default function VencordPluginPage() {
             command: "cd ..\npnpm build\npnpm inject"
         }
     ];
+    
+    // Helper function to consistently render command lines
+    const renderCommandLines = (commandText) => {
+        return commandText.split("\n").map((line, i) => (
+            <div key={i} className="font-mono">{line}</div>
+        ));
+    };
 
     return (
         <>
@@ -102,18 +109,20 @@ export default function VencordPluginPage() {
                                             <div className="space-y-4">
                                                 <div>
                                                     <p className="text-sm text-muted-foreground mb-1">Linux/macOS:</p>
-                                                    <code className="block bg-secondary p-3 rounded font-mono text-sm">{platformCommands.linux}</code>
+                                                    <code className="block bg-secondary p-3 rounded font-mono text-sm">
+                                                        {renderCommandLines(platformCommands.linux)}
+                                                    </code>
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-muted-foreground mb-1">Windows:</p>
-                                                    <code className="block bg-secondary p-3 rounded font-mono text-sm">{platformCommands.windows}</code>
+                                                    <code className="block bg-secondary p-3 rounded font-mono text-sm">
+                                                        {renderCommandLines(platformCommands.windows)}
+                                                    </code>
                                                 </div>
                                             </div>
                                         ) : (
                                             <code className="block bg-secondary p-3 rounded font-mono text-sm">
-                                                {command.split("\n").map((line, i) => (
-                                                    <div key={i}>{line}</div>
-                                                ))}
+                                                {renderCommandLines(command)}
                                             </code>
                                         )}
                                     </div>

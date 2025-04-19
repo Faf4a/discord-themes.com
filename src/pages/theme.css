@@ -262,3 +262,9 @@ body {
 .description li:hover {
     @apply divide-gray-200;
 }
+
+code,
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: monospace;
+}
