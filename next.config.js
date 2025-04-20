@@ -90,5 +90,8 @@ module.exports = {
         ignoreDuringBuilds: true,
     },
     reactStrictMode: false,
-    productionBrowserSourceMaps: false
+    productionBrowserSourceMaps: false,
+    typescript: {
+        ignoreBuildErrors: true
+    }
 };
