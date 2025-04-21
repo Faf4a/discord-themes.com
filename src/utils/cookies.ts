@@ -9,6 +9,6 @@ export function deleteCookie(name: string) {
 }
 
 export function setCookie(name: string, value: string, days?: number) {
-    const expires = days ? `expires=${new Date(Date.now() + days * 864e5).toUTCString()};` : '';
+    const expires = days ? `expires=${new Date(Date.now() + days * 864e5).toUTCString()};` : "";
     document.cookie = `${name}=${encodeURIComponent(value)}; ${expires} path=/`;
 }

@@ -1,6 +1,5 @@
 import { APIUser as User } from "discord-api-types/v10";
 
-
 export interface UserData {
     id: User["id"];
     avatar?: User["avatar"];
@@ -40,4 +39,3 @@ export interface Theme {
     };
     source?: string;
 }
-

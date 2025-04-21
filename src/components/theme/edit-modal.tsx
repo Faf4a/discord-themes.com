@@ -36,28 +36,16 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
     const hasChanges = useMemo(() => {
         // Decode theme content only once
         const decodedThemeContent = theme?.content ? Buffer.from(theme.content, "base64").toString() : "";
-        
+
         // Compare trimmed values to ignore whitespace differences
-        return formData.name.trim() !== theme?.name?.trim() || 
-               formData.description.trim() !== theme?.description?.trim() || 
-               formData.version.trim() !== theme?.version?.trim() || 
-               formData.content.trim() !== decodedThemeContent.trim();
+        return formData.name.trim() !== theme?.name?.trim() || formData.description.trim() !== theme?.description?.trim() || formData.version.trim() !== theme?.version?.trim() || formData.content.trim() !== decodedThemeContent.trim();
     }, [formData, theme]);
 
     const isValid = useMemo(() => {
-        return formData.name.trim() !== "" && 
-               formData.description.trim() !== "" && 
-               formData.version.trim() !== "" &&
-               formData.content.trim() !== "";
+        return formData.name.trim() !== "" && formData.description.trim() !== "" && formData.version.trim() !== "" && formData.content.trim() !== "";
     }, [formData]);
 
-    const options = [
-        { id: "name", label: "Name", icon: Edit2, current: theme?.name },
-        { id: "description", label: "Description", icon: Edit2, current: theme?.description },
-        { id: "version", label: "Version", icon: Tag, current: theme?.version },
-        { id: "content", label: "CSS Content", icon: Code, current: Buffer.from(theme?.content || "", "base64").toString() },
-        ...(hasChanges && isValid ? [{ id: "preview", label: "Preview Changes", icon: Eye }] : [])
-    ];
+    const options = [{ id: "name", label: "Name", icon: Edit2, current: theme?.name }, { id: "description", label: "Description", icon: Edit2, current: theme?.description }, { id: "version", label: "Version", icon: Tag, current: theme?.version }, { id: "content", label: "CSS Content", icon: Code, current: Buffer.from(theme?.content || "", "base64").toString() }, ...(hasChanges && isValid ? [{ id: "preview", label: "Preview Changes", icon: Eye }] : [])];
 
     const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setError(null);
@@ -97,12 +85,7 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
 
         return (
             <AnimatePresence mode="wait">
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    exit={{ opacity: 0, y: -20 }} 
-                    transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.2 }}>
                     {selectedOption ? (
                         <div className="space-y-4">
                             <div className={commonHeaderClasses}>
@@ -117,9 +100,7 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
                                     <div className="space-y-2">
                                         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                                         <label className="text-sm font-medium">Current Value:</label>
-                                        <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
-                                            {options.find(opt => opt.id === selectedOption)?.current || 'None'}
-                                        </div>
+                                        <div className="text-sm text-muted-foreground bg-muted p-2 rounded">{options.find((opt) => opt.id === selectedOption)?.current || "None"}</div>
                                     </div>
                                 )}
 
@@ -128,37 +109,14 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
                                         // eslint-disable-next-line jsx-a11y/label-has-associated-control
                                         <label className="text-sm font-medium">New Value:</label>
                                     )}
-                                    {selectedOption === "name" && (
-                                        <Input 
-                                            value={formData.name} 
-                                            onChange={handleChange("name")} 
-                                            placeholder="Enter theme name" 
-                                            className="text-lg"
-                                            required 
-                                        />
-                                    )}
-                                    {selectedOption === "description" && (
-                                        <Textarea 
-                                            value={formData.description} 
-                                            onChange={handleChange("description")} 
-                                            placeholder="Describe your theme..." 
-                                            className={inputClasses}
-                                            required
-                                        />
-                                    )}
-                                    {selectedOption === "version" && (
-                                        <Input 
-                                            value={formData.version} 
-                                            onChange={handleChange("version")} 
-                                            placeholder="e.g. 1.0.0" 
-                                            required
-                                        />
-                                    )}
+                                    {selectedOption === "name" && <Input value={formData.name} onChange={handleChange("name")} placeholder="Enter theme name" className="text-lg" required />}
+                                    {selectedOption === "description" && <Textarea value={formData.description} onChange={handleChange("description")} placeholder="Describe your theme..." className={inputClasses} required />}
+                                    {selectedOption === "version" && <Input value={formData.version} onChange={handleChange("version")} placeholder="e.g. 1.0.0" required />}
                                     {selectedOption === "content" && (
-                                        <Textarea 
+                                        <Textarea
                                             value={formData.content} // Remove Buffer.from here
-                                            onChange={handleChange("content")} 
-                                            placeholder="Paste your CSS here..." 
+                                            onChange={handleChange("content")}
+                                            placeholder="Paste your CSS here..."
                                             className={cn(inputClasses, "font-mono")}
                                             required
                                         />
@@ -175,15 +133,11 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
                                                     content: formData.content,
                                                     last_updated: new Date().toISOString(),
                                                     id: "preview",
-                                                    type: "preview",
+                                                    type: "preview"
                                                 }}
                                                 disableDownloads
                                             />
-                                            <Button 
-                                                onClick={handleSave} 
-                                                disabled={isLoading || !hasChanges || !isValid} 
-                                                className="w-full"
-                                            >
+                                            <Button onClick={handleSave} disabled={isLoading || !hasChanges || !isValid} className="w-full">
                                                 {isLoading ? (
                                                     <>
                                                         <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
@@ -202,28 +156,22 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
                         <div className="grid gap-4 sm:grid-cols-2">
                             {options.map((option) => {
                                 const Icon = option.icon;
-                                const hasFieldChange = option.id === "content" 
-                                    ? formData.content.trim() !== Buffer.from(theme?.content || "", "base64").toString().trim()
-                                    : typeof formData[option.id as keyof typeof formData] === 'string' && typeof theme?.[option.id as keyof typeof theme] === 'string'
-                                        ? (formData[option.id as keyof typeof formData] as string).trim() !== (theme?.[option.id as keyof typeof theme] as string).trim()
-                                        : formData[option.id as keyof typeof formData] !== theme?.[option.id as keyof typeof theme];
-                                
+                                const hasFieldChange =
+                                    option.id === "content"
+                                        ? formData.content.trim() !==
+                                          Buffer.from(theme?.content || "", "base64")
+                                              .toString()
+                                              .trim()
+                                        : typeof formData[option.id as keyof typeof formData] === "string" && typeof theme?.[option.id as keyof typeof theme] === "string"
+                                          ? (formData[option.id as keyof typeof formData] as string).trim() !== (theme?.[option.id as keyof typeof theme] as string).trim()
+                                          : formData[option.id as keyof typeof formData] !== theme?.[option.id as keyof typeof theme];
+
                                 return (
-                                    <Button
-                                        key={option.id}
-                                        variant="outline"
-                                        className={cn(
-                                            "h-auto p-4 justify-start space-x-4",
-                                            !hasFieldChange && "border-primary"
-                                        )}
-                                        onClick={() => setSelectedOption(option.id)}
-                                    >
+                                    <Button key={option.id} variant="outline" className={cn("h-auto p-4 justify-start space-x-4", !hasFieldChange && "border-primary")} onClick={() => setSelectedOption(option.id)}>
                                         <Icon className={cn("h-5 w-5", !hasFieldChange && "text-primary")} />
                                         <div className="text-left">
                                             <span>{option.label}</span>
-                                            {!hasFieldChange && (
-                                                <span className="block text-xs text-primary">Modified</span>
-                                            )}
+                                            {!hasFieldChange && <span className="block text-xs text-primary">Modified</span>}
                                         </div>
                                     </Button>
                                 );
@@ -244,20 +192,12 @@ export function EditThemeModal({ open, onOpenChange, theme, onSave }: EditThemeM
 
                 <div className="py-4">
                     {renderEditView()}
-                    {error && (
-                        <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-md text-sm">
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-md text-sm">{error}</div>}
                 </div>
 
                 {selectedOption && selectedOption !== "preview" && (
                     <div className="flex justify-end pt-4 border-muted border-t">
-                        <Button 
-                            onClick={() => setSelectedOption("preview")} 
-                            disabled={!hasChanges || !isValid}
-                            className="space-x-2"
-                        >
+                        <Button onClick={() => setSelectedOption("preview")} disabled={!hasChanges || !isValid} className="space-x-2">
                             <Eye className="h-4 w-4" />
                             <span>Preview Changes</span>
                         </Button>

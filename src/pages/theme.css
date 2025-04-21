@@ -6,39 +6,39 @@
 @import url("https://fonts.googleapis.com/css2?family=Fira+Code&display=swap");
 
 :root {
-	--background: 0 0% 13%; /* #202020 - main bg */
-	--foreground: 0 0% 92%; /* text */
+    --background: 0 0% 13%; /* #202020 - main bg */
+    --foreground: 0 0% 92%; /* text */
 
-	--card: 0 0% 17%; /* #2b2f30 - card bg */
-	--card-foreground: 0 0% 95%;
+    --card: 0 0% 17%; /* #2b2f30 - card bg */
+    --card-foreground: 0 0% 95%;
 
-	--popover: 0 0% 15%;
-	--popover-foreground: 0 0% 92%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 92%;
 
-	--primary: 225 43% 56%; /* #202020 */
-	--primary-foreground: 0 0% 100%;
+    --primary: 225 43% 56%; /* #202020 */
+    --primary-foreground: 0 0% 100%;
 
-	--secondary: 200 4% 18%; /* #2b2f30 */
-	--secondary-foreground: 0 0% 90%;
+    --secondary: 200 4% 18%; /* #2b2f30 */
+    --secondary-foreground: 0 0% 90%;
 
-	--muted: 28 5% 30%; /* #494542 */
-	--muted-foreground: 0 0% 70%;
+    --muted: 28 5% 30%; /* #494542 */
+    --muted-foreground: 0 0% 70%;
 
-	--accent: 28 5% 30%; /* #494542 */
-	--accent-foreground: 0 0% 95%;
+    --accent: 28 5% 30%; /* #494542 */
+    --accent-foreground: 0 0% 95%;
 
-	--destructive: 0 72% 51%;
-	--destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
 
-	--border: 0 0% 20%;
-	--input: 0 0% 18%;
-	--ring: 217 89% 61%; /* Discord blue */
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 217 89% 61%; /* Discord blue */
 
-	--radius: 0.5rem;
+    --radius: 0.5rem;
 
-	--context-menu-bg: 0 0% 17%;
-	--context-menu-hover: 0 0% 22%;
-	--context-menu-border: 0 0% 20%;
+    --context-menu-bg: 0 0% 17%;
+    --context-menu-hover: 0 0% 22%;
+    --context-menu-border: 0 0% 20%;
 }
 
 /*
@@ -48,124 +48,124 @@ It matches the Discord style BUT somehow I like Montserrat more.
 */
 
 * {
-	font-family:
-		"Poppins",
-		-apple-system,
-		BlinkMacSystemFont,
-		"SF Pro",
-		"Segoe UI",
-		Roboto,
-		Oxygen,
-		Ubuntu,
-		Cantarell,
-		"Open Sans",
-		"Helvetica Neue",
-		system-ui,
-		sans-serif;
+    font-family:
+        "Poppins",
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro",
+        "Segoe UI",
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        "Open Sans",
+        "Helvetica Neue",
+        system-ui,
+        sans-serif;
 }
 body {
-	@apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased;
 }
 
 /* Discord-style Context Menu */
 [data-radix-popper-content-wrapper] {
-	position: fixed !important;
+    position: fixed !important;
 }
 
 .no-select {
-	user-select: none;
-	cursor: pointer;
+    user-select: none;
+    cursor: pointer;
 }
 
 .not-allowed {
-	cursor: not-allowed;
-	background-color: var(--muted);
+    cursor: not-allowed;
+    background-color: var(--muted);
 }
 
 .description h1 {
-	@apply text-4xl font-bold text-foreground mb-4 mt-3;
+    @apply text-4xl font-bold text-foreground mb-4 mt-3;
 }
 
 .description h2 {
-	@apply text-3xl font-semibold text-foreground mb-3 mt-3;
+    @apply text-3xl font-semibold text-foreground mb-3 mt-3;
 }
 
 .description h3 {
-	@apply text-2xl font-medium text-foreground mb-2 mt-2;
+    @apply text-2xl font-medium text-foreground mb-2 mt-2;
 }
 
 .description h4 {
-	@apply text-xl font-medium text-foreground mb-2 mt-2;
+    @apply text-xl font-medium text-foreground mb-2 mt-2;
 }
 
 .description h5 {
-	@apply text-lg font-medium text-foreground mb-1 mt-1;
+    @apply text-lg font-medium text-foreground mb-1 mt-1;
 }
 
 .link a,
 .description a {
-	@apply text-primary;
+    @apply text-primary;
 }
 
 .link a:hover,
 .description a:hover {
-	@apply underline text-primary text-opacity-75;
+    @apply underline text-primary text-opacity-75;
 }
 
 .description hr {
-	@apply border-t border-muted my-4;
+    @apply border-t border-muted my-4;
 }
 
 .description .table-container {
-	@apply overflow-x-auto;
+    @apply overflow-x-auto;
 }
 
 .description table {
-	@apply min-w-full divide-y divide-gray-200;
+    @apply min-w-full divide-y divide-gray-200;
 }
 
 .description th {
-	@apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
 }
 
 .description td {
-	@apply px-6 py-4 whitespace-nowrap text-sm text-muted;
+    @apply px-6 py-4 whitespace-nowrap text-sm text-muted;
 }
 
 .description tr:nth-child(even) {
-	@apply bg-gray-50;
+    @apply bg-gray-50;
 }
 
 .description tr:hover {
-	@apply bg-gray-100;
+    @apply bg-gray-100;
 }
 
 .description thead {
-	@apply bg-gray-50;
+    @apply bg-gray-50;
 }
 
 .description tbody tr {
-	@apply bg-white;
+    @apply bg-white;
 }
 
 .description tbody tr:hover {
-	@apply bg-gray-100;
+    @apply bg-gray-100;
 }
 
 .description ul {
-	@apply list-disc list-inside;
+    @apply list-disc list-inside;
 }
 
 .description li {
-	@apply mb-2 text-foreground break-words;
+    @apply mb-2 text-foreground break-words;
 }
 
 .description li::marker {
-	@apply text-primary;
+    @apply text-primary;
 }
 
 .description li:hover {
-	@apply divide-gray-200;
+    @apply divide-gray-200;
 }
 
 code,
@@ -175,5 +175,5 @@ pre,
 .codeFont,
 code[class*="language-"],
 pre[class*="language-"] {
-	font-family: "Fira Code", monospace !important;
+    font-family: "Fira Code", monospace !important;
 }

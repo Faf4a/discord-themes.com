@@ -20,11 +20,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             message: `Couldn't find the theme with the id '${id}'`
         });
 
-    themesCollection.updateOne(
-        { id: Number(id) },
-        { $inc: { downloads: 1 } },
-        { upsert: true }
-    ).catch(console.error);
+    themesCollection.updateOne({ id: Number(id) }, { $inc: { downloads: 1 } }, { upsert: true }).catch(console.error);
 
     const fileContent = Buffer.from(theme.content, "base64");
 

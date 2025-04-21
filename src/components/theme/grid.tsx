@@ -19,7 +19,7 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
             setHasMoreThemes(newThemes.length < themes.length);
         }
     }, [themes, currentPage]);
-    
+
     useEffect(() => {
         const handleScroll = () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && hasMoreThemes) {
@@ -38,7 +38,7 @@ export function ThemeGrid({ themes = [], likedThemes = [], disableDownloads = fa
                     <ThemeCard key={theme.id} theme={theme} likedThemes={likedThemes} disableDownloads={disableDownloads} />
                 ))}
             </div>
-            {!hasMoreThemes && (<End />)}
+            {!hasMoreThemes && <End />}
         </div>
     );
 }

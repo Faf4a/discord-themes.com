@@ -174,7 +174,7 @@ export default function SubmitPage() {
                 title: "Failed to submit",
                 description: "An error occurred while submitting your theme. Please try again later.",
                 variant: "destructive"
-            })
+            });
         }
     };
 
@@ -503,7 +503,9 @@ export default function SubmitPage() {
                                                         Please use the <b>direct link</b> to your theme which contains the full source, this later will be served as a download link for the users.
                                                     </p>
                                                     <Alert className="border-yellow-600/20 bg-yellow-500/10">
-                                                        <AlertDescription className="text-sm">Ensure your .css file/snippet has <b>metadata</b> at the top of it</AlertDescription>
+                                                        <AlertDescription className="text-sm">
+                                                            Ensure your .css file/snippet has <b>metadata</b> at the top of it
+                                                        </AlertDescription>
                                                     </Alert>
                                                     <Input
                                                         className={`${!validSource ? "border-red-500" : ""}`}

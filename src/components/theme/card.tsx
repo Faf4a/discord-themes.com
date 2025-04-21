@@ -1,4 +1,3 @@
- 
 import { Check, Clock, Download, Heart } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { Card, CardContent, CardFooter, CardHeader } from "@components/ui/card";

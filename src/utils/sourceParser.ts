@@ -11,9 +11,9 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 export async function parseSourceUrl(url: string): Promise<string> {
     if (isRawUrl(url)) {
-      const result = await fetchRawContent(url);
-      const rawContent = Buffer.from(result, "utf-8").toString("base64");
-      return rawContent;
+        const result = await fetchRawContent(url);
+        const rawContent = Buffer.from(result, "utf-8").toString("base64");
+        return rawContent;
     }
 
     const parsed = parseUrl(url);

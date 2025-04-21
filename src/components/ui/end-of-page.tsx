@@ -11,7 +11,9 @@ export default function End() {
             <h3 className="text-lg font-semibold text-foreground mb-2">so uhh..</h3>
             <p className="text-sm text-muted-foreground max-w-md">you've explored all available themes.. check back later for more!</p>
             <motion.div whileHover={{ y: -5 }}>
-                <Link href="#top" className="text-primary mt-4">bring me back up!</Link>
+                <Link href="#top" className="text-primary mt-4">
+                    bring me back up!
+                </Link>
             </motion.div>
         </motion.div>
     );

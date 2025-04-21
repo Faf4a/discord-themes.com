@@ -100,7 +100,7 @@ export default async function DELETE(req: NextApiRequest, res: NextApiResponse) 
                             {
                                 name: "Themes Remaining",
                                 value: await themes.countDocuments()
-                            },
+                            }
                         ]
                     }
                 ]

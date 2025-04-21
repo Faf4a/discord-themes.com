@@ -248,17 +248,8 @@ function ThemeList() {
                                                 <span>Submitted {themes?.submittedAt && formatDistanceToNow(new Date(themes.submittedAt))} ago</span>
                                             </div>
                                         </div>
-                                        <Badge 
-                                            variant="outline" 
-                                            className={cn(
-                                                "text-sm px-3 py-1",
-                                                themes?.state === "approved" && "bg-green-500/10 text-green-600 border-green-500/20",
-                                                themes?.state === "rejected" && "bg-red-500/10 text-red-600 border-red-500/20",
-                                                themes?.state === "pending" && "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
-                                            )}
-                                        >
-                                            {themes?.state === "approved" ? "Approved" : 
-                                             themes?.state === "rejected" ? "Rejected" : "Pending Review"}
+                                        <Badge variant="outline" className={cn("text-sm px-3 py-1", themes?.state === "approved" && "bg-green-500/10 text-green-600 border-green-500/20", themes?.state === "rejected" && "bg-red-500/10 text-red-600 border-red-500/20", themes?.state === "pending" && "bg-yellow-500/10 text-yellow-600 border-yellow-500/20")}>
+                                            {themes?.state === "approved" ? "Approved" : themes?.state === "rejected" ? "Rejected" : "Pending Review"}
                                         </Badge>
                                     </div>
                                 </div>
@@ -277,11 +268,7 @@ function ThemeList() {
                                         <div>
                                             <h3 className="text-xl font-semibold mb-4">Theme Preview</h3>
                                             {themes?.file ? (
-                                                <img 
-                                                    src={themes.fileUrl} 
-                                                    alt={themes.title} 
-                                                    className="rounded-lg border border-muted shadow-sm w-full hover:shadow-md transition-shadow"
-                                                />
+                                                <img src={themes.fileUrl} alt={themes.title} className="rounded-lg border border-muted shadow-sm w-full hover:shadow-md transition-shadow" />
                                             ) : (
                                                 <div className="rounded-lg border border-muted bg-muted/30 h-48 flex items-center justify-center">
                                                     <p className="text-muted-foreground">No preview available</p>
@@ -296,12 +283,7 @@ function ThemeList() {
                                                     <code>{Buffer.from(themes?.themeContent || "", "base64").toString()}</code>
                                                 </pre>
                                             </div>
-                                            <a 
-                                                href={themes?.sourceLink} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-2 mt-2 text-sm text-muted-foreground hover:text-primary transition-colors"
-                                            >
+                                            <a href={themes?.sourceLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-2 text-sm text-muted-foreground hover:text-primary transition-colors">
                                                 <ExternalLink className="w-4 h-4" />
                                                 View source code
                                             </a>
@@ -315,11 +297,7 @@ function ThemeList() {
                                                     <div className="flex flex-wrap gap-2">
                                                         {Object.values(themes?.validatedUsers || {}).map((user: any) => (
                                                             <div key={user.id} className="inline-flex items-center gap-2 bg-muted/30 rounded-full px-3 py-1">
-                                                                <img 
-                                                                    src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} 
-                                                                    alt={user.username}
-                                                                    className="w-6 h-6 rounded-full"
-                                                                />
+                                                                <img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} alt={user.username} className="w-6 h-6 rounded-full" />
                                                                 <span className="text-sm">{user.username}</span>
                                                             </div>
                                                         ))}
@@ -336,12 +314,7 @@ function ThemeList() {
                                                                         <label className="text-sm font-medium">Suggested Tags</label>
                                                                         <div className="flex flex-wrap gap-2">
                                                                             {suggestedTags.map((tag) => (
-                                                                                <Badge 
-                                                                                    key={tag}
-                                                                                    variant="outline"
-                                                                                    className="cursor-pointer hover:bg-primary/10"
-                                                                                    onClick={() => handleSuggestedTagClick(tag)}
-                                                                                >
+                                                                                <Badge key={tag} variant="outline" className="cursor-pointer hover:bg-primary/10" onClick={() => handleSuggestedTagClick(tag)}>
                                                                                     {tag}
                                                                                 </Badge>
                                                                             ))}
@@ -355,34 +328,18 @@ function ThemeList() {
                                                                         {selectedTags.map((tag) => (
                                                                             <Badge key={tag} variant="secondary">
                                                                                 {tag}
-                                                                                <button 
-                                                                                    onClick={() => handleRemoveTag(tag)}
-                                                                                    className="ml-2 hover:text-destructive"
-                                                                                >
+                                                                                <button onClick={() => handleRemoveTag(tag)} className="ml-2 hover:text-destructive">
                                                                                     ×
                                                                                 </button>
                                                                             </Badge>
                                                                         ))}
-                                                                        {selectedTags.length === 0 && (
-                                                                            <p className="text-sm text-muted-foreground">No tags selected</p>
-                                                                        )}
+                                                                        {selectedTags.length === 0 && <p className="text-sm text-muted-foreground">No tags selected</p>}
                                                                     </div>
                                                                 </div>
 
                                                                 <div className="flex gap-2">
-                                                                    <Input
-                                                                        type="text"
-                                                                        value={newTag}
-                                                                        onChange={(e) => setNewTag(e.target.value)}
-                                                                        placeholder="Add custom tag..."
-                                                                        disabled={selectedTags.length >= 5}
-                                                                        onKeyPress={(e) => e.key === "Enter" && handleAddTag()}
-                                                                    />
-                                                                    <Button 
-                                                                        variant="outline"
-                                                                        onClick={handleAddTag}
-                                                                        disabled={selectedTags.length >= 5 || !newTag}
-                                                                    >
+                                                                    <Input type="text" value={newTag} onChange={(e) => setNewTag(e.target.value)} placeholder="Add custom tag..." disabled={selectedTags.length >= 5} onKeyPress={(e) => e.key === "Enter" && handleAddTag()} />
+                                                                    <Button variant="outline" onClick={handleAddTag} disabled={selectedTags.length >= 5 || !newTag}>
                                                                         Add
                                                                     </Button>
                                                                 </div>
@@ -390,19 +347,11 @@ function ThemeList() {
                                                         </div>
 
                                                         <div className="pt-4 border-t border-muted space-y-4">
-                                                            <Button 
-                                                                variant="default"
-                                                                className="w-full bg-green-600 hover:bg-green-700"
-                                                                onClick={handleApprove}
-                                                            >
+                                                            <Button variant="default" className="w-full bg-green-600 hover:bg-green-700" onClick={handleApprove}>
                                                                 <Check className="w-4 h-4 mr-2" />
                                                                 Approve Theme
                                                             </Button>
-                                                            <Button 
-                                                                variant="destructive"
-                                                                className="w-full"
-                                                                onClick={handleReject}
-                                                            >
+                                                            <Button variant="destructive" className="w-full" onClick={handleReject}>
                                                                 <X className="w-4 h-4 mr-2" />
                                                                 Reject Theme
                                                             </Button>

@@ -21,16 +21,11 @@ export default function ThemeCarousel({ themes = [] }: ThemeCarouselProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const sortedThemes = useMemo(() => {
-        return [...themes]
-            .sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime())
-            .slice(0, 10);
+        return [...themes].sort((a, b) => new Date(b.release_date).getTime() - new Date(a.release_date).getTime()).slice(0, 10);
     }, [themes]);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => setIsVisible(entry.isIntersecting),
-            { threshold: 0.1 }
-        );
+        const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), { threshold: 0.1 });
 
         if (containerRef.current) {
             observer.observe(containerRef.current);

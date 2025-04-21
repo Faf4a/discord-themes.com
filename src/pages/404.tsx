@@ -9,7 +9,7 @@ const ScreamsOfTheDoomed = () => {
         let dx = 2;
         let dy = 2;
         const faviconSize = 100;
-        favicon.classList.remove('hidden');
+        favicon.classList.remove("hidden");
         const moveFavicon = () => {
             x += dx;
             y += dy;

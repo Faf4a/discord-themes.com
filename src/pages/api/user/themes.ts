@@ -48,7 +48,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     userThemes.forEach((theme) => {
         delete theme._id;
     });
-    
+
     res.setHeader("Content-Type", "application/json");
 
     if (!userThemes) {

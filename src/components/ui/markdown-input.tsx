@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { ChangeEvent, useEffect, useRef, useState  } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Button } from "@components/ui/button";
@@ -82,7 +82,7 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
 
     const handleBlur = () => {
         onBlur && onBlur(content);
-};
+    };
 
     return (
         <div className={cn("description w-full space-y-4", className)}>
@@ -112,7 +112,9 @@ export default function MarkdownInput({ className, onChange, onBlur, lines = 5, 
                     <div className="h-[200px] bg-zinc-900 transition-all duration-200 rounded-b-lg">
                         {isPreview ? (
                             <div className="p-4 prose prose-invert max-w-none h-full overflow-auto">
-                                <ReactMarkdown className="whitespace-pre-wrap" remarkPlugins={[remarkGfm]} skipHtml>{content}</ReactMarkdown>
+                                <ReactMarkdown className="whitespace-pre-wrap" remarkPlugins={[remarkGfm]} skipHtml>
+                                    {content}
+                                </ReactMarkdown>
                             </div>
                         ) : (
                             <>
