@@ -13,6 +13,5 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     res.setHeader("Content-Disposition", "inline");
     res.setHeader("Cache-Control", "public, max-age=1200");
 
-    // redirect to https://cdn.discord-themes.com/theme/NAME (status code permanent)
     res.redirect(301, `https://cdn.discord-themes.com/theme/${decodedName}`);
 }

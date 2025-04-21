@@ -83,7 +83,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return res.status(400).json({ message: "Cannot authorize without token, check if the token is missing" });
     }
 
-    // turn access code into something useful
     const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
         method: "POST",
         headers: {
@@ -101,7 +100,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const oauthResponse = await tokenResponse.json();
 
-    // get le discord account info
     const response = await fetch("https://discord.com/api/users/@me", {
         headers: {
             authorization: `${oauthResponse.token_type} ${oauthResponse.access_token}`
@@ -178,7 +176,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         });
         authKey = uniqueKey;
     } else {
-        // send yellow discord embed saying that the user migrated
         if (!userEntry.keyVersion || userEntry.keyVersion < 2) {
             await fetch(WEBHOOK_LOGS_URL, {
                 method: "POST",
