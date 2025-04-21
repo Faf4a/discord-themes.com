@@ -1,14 +1,24 @@
-## ThemeAPI
+## discord-themes.com
 
-This API is used to retrieve themes used for the [Theme Library](https://github.com/faf4a/ThemeLibrary).
+This API is used to retrieve themes used for the [Theme Library](https://github.com/faf4a/ThemeLibrary) and [this website](https://discord-themes.com).
+
+This website is built with React.
 
 ---
 
 # Endpoints
 
+> [!NOTE]
+> Not all endpoints are listed here, either they're internal/admin endpoints or something else. You're free to read the source code yourself! :)
+
 ## Theme Related
 
-Base: https://themes-delta.vercel.app/api
+Base: https://api.discord-themes.com/
+(you can also request via https://discord-themes.com/api)
+
+Base CDN: https://cdn.discord-themes.com/
+
+---
 
 ### `GET` **`/[theme]`**
 Wants `theme` as `query`
@@ -18,7 +28,7 @@ Wants `theme` as `query`
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/Monocord")
+fetch("https://api.discord-themes.com/Monocord")
 ```
 
 #### Returns
@@ -43,10 +53,13 @@ Wants `theme` as `query`
 
 - Returns thumbnail from a theme.
 
+> [!NOTE]
+> Redirects permanently to a cloudflare worker, you can directly access it via https://cdn.discord-themes.com/theme/{name}
+
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/thumbnail/Monocord")
+fetch("https://api.discord-themes.com/thumbnail/Cyan")
 ```
 
 #### Returns
@@ -54,7 +67,65 @@ fetch("https://themes-delta.vercel.app/api/thumbnail/Monocord")
 - Content-Type: `image/png`, `image/gif` or `image/webp`
 - Returns 200, 404 or 405
 
-![preview](https://themes-delta.vercel.app/api/thumbnail/Monocord)
+![preview](https://cdn.discord-themes.com/theme/Cyan)
+
+### `GET` **`/download/[themeId]`**
+Wants `themeId` as `query`
+
+- Returns theme content and attempts to download, also increases download count.
+
+#### Example
+
+```js
+fetch("https://api.discord-themes.com/thumbnail/Cyan")
+```
+
+#### Returns
+
+- Content-Type: `text/css`
+- Returns 200, 404 or 405
+- 
+### `GET` **`/get/[themeId]`**
+Wants `themeId` as `query`
+
+- Returns data of a theme.
+
+#### Example
+
+```js
+fetch("https://api.discord-themes.com/thumbnail/Cyan")
+```
+
+#### Returns
+
+- Content-Type: `application/json`
+- Returns 200, 404 or 405
+
+```json
+ {
+  "id": Number,
+  "name": String,
+  "type": "theme" | "snippet",
+  "description": String,
+  "author": {
+   "discord_snowflake": String | null,
+   "discord_name": String | null,
+   "github_name": String | null,
+  },
+  "tags": Array,
+  "thumbnail_url": String,
+  "release_date": Date,
+  "last_updated?": Date,
+  "guild": {
+   "name": String | null,
+   "invite_link": String | null,
+   "snowflake": String | null,
+  },
+  "content": String,
+  "source": String,
+  "likes": Number
+ }
+ ```
 
 ### `GET` **`/themes`**
 
@@ -63,7 +134,7 @@ fetch("https://themes-delta.vercel.app/api/thumbnail/Monocord")
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/themes")
+fetch("https://api.discord-themes.com/themes")
 ```
 
 #### Returns
@@ -90,6 +161,7 @@ fetch("https://themes-delta.vercel.app/api/themes")
   "tags": Array,
   "thumbnail_url": String,
   "release_date": Date,
+  "last_updated?": Date,
   "guild": {
    "name": String | null,
    "invite_link": String | null,
@@ -109,13 +181,17 @@ fetch("https://themes-delta.vercel.app/api/themes")
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/likes/get")
+fetch("https://api.discord-themes.com/likes/get")
 ```
 
 #### Returns
 
 - Content-Type: `application/json`
 - Returns 200 or 405
+- Wants `Authorization` in `headers`
+
+> [!NOTE]
+> `hasLiked` is not included if no Authorization header is provided with valid credentials!
 
 ```js
 {
@@ -123,18 +199,15 @@ fetch("https://themes-delta.vercel.app/api/likes/get")
   "likes": [
     {
       "themeId": Number,
-      "userIds": []
-    },
-    {
-      "themeId": Number,
-      "userIds": []
+      "likes": Number,
+      "hasLiked": Boolean
     },
     {...}
 }
 ```
 
 ### `POST` **`/likes/add`**
-Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `themeId` in `body`.
+Wants `Authorization` in `headers` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `themeId` in `body`.
 
 - Adds likes to a given theme.
 - Requires to be authorized.
@@ -142,12 +215,13 @@ Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/likes/add", {
+fetch("https://api.discord-themes.com/likes/add", {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": "Bearer API_KEY"
     },
-    body: JSON.stringify({ token: "", themeId: 0 })
+    body: JSON.stringify({ themeId: 0 })
 })
 ```
 
@@ -163,7 +237,7 @@ fetch("https://themes-delta.vercel.app/api/likes/add", {
 ```
 
 ### `POST` **`/likes/remove`**
-Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `themeId` in `body`.
+Wants `Authorization` in `headers` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `themeId` in `body`.
 
 - Removes likes from a given theme.
 - Requires to be authorized.
@@ -171,12 +245,13 @@ Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/likes/remove", {
+fetch("https://api.discord-themes.com/likes/remove", {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": "Bearer API_KEY"
     },
-    body: JSON.stringify({ token: "", themeId: 0 })
+    body: JSON.stringify({ themeId: 0 })
 })
 ```
 
@@ -192,21 +267,22 @@ fetch("https://themes-delta.vercel.app/api/likes/remove", {
 ```
 
 ### `POST` **`/submit/theme`**
-Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `content` in `body`.
+Wants `Authorization` in `headers` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `content` in `body`.
 
 - Removes likes from a given theme.
 - Requires to be authorized.
-- Content **must** be encoded in Base64, content must include metadata (name, author, description), can include others.
+- Content **must** be encoded in Base64, content must include metadata (name, author, description), can include others otherwise the request will be rejected with 405
 
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/submit/theme", {
+fetch("https://api.discord-themes.com/submit/theme", {
     method: "POST",
     headers: {
         "Content-Type": "application/json"
+        "Authorization": "Bearer API_KEY"
     },
-    body: JSON.stringify({ token: "", content: "" })
+    body: JSON.stringify({ content: "" })
 })
 ```
 
@@ -223,7 +299,7 @@ fetch("https://themes-delta.vercel.app/api/submit/theme", {
 
 ## Auth Related
 
-Base: https://themes-delta.vercel.app/api/user
+Base: https://api.discord-themes.com/user
 
 ### `GET` **`/auth`**
 Wants `code` as `query`
@@ -232,12 +308,12 @@ Wants `code` as `query`
 
 Don't call the endpoint directly, it will return 401, use discord.
 
-`https://discord.com/oauth2/authorize?client_id=1257819493422465235&response_type=code&redirect_uri=https://themes-delta.vercel.app/api/user/auth&scope=identify`
+`https://discord.com/oauth2/authorize?client_id=1257819493422465235&response_type=code&redirect_uri=https://api.discord-themes.com/user/auth&scope=identify`
 
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/user/auth?code=ACCESS_TOKEN")
+fetch("https://api.discord-themes.com/user/auth?code=ACCESS_TOKEN")
 ```
 
 #### Returns
@@ -248,24 +324,24 @@ fetch("https://themes-delta.vercel.app/api/user/auth?code=ACCESS_TOKEN")
 ```js
 {
   "status": 200,
-  "token": "UNIQUE_USER_TOKEN"
+  "token": "UNIQUE_USER_TOKEN" // hashed token
 }
 ```
 
 ### `POST` **`/findUserByToken`**
-Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) in `body`.
+Wants `Authorization` in `headers` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**).
 
 - Returns the user data based on the unique user token.
 
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/user/findUserByToken", {
+fetch("https://api.discord-themes.com/user/findUserByToken", {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ token: "" })
+        "Content-Type": "application/json",
+        "Authorization": "Bearer API_KEY"
+    }
 })
 ```
 
@@ -285,19 +361,20 @@ fetch("https://themes-delta.vercel.app/api/user/findUserByToken", {
 ```
 
 ### `DELETE` **`/revoke`**
-Wants `token` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `userId` in `body`.
+Wants `Authorization` in `headers` (unique user token, **__DO NOT PASS YOUR DISCORD ACCOUNT TOKEN__**) and `userId` in `body`.
 
 - Deletes user data associated with the token.
 
 #### Example
 
 ```js
-fetch("https://themes-delta.vercel.app/api/user/revoke", {
+fetch("https://api.discord-themes.com/user/revoke", {
     method: "POST",
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": "Bearer API_KEY"
     },
-    body: JSON.stringify({ token: "", userId: "" })
+    body: JSON.stringify({ userId: "" })
 })
 ```
 
