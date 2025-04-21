@@ -1,5 +1,21 @@
 ## discord-themes.com
 
+This is the repository for the ThemeLibrary website including it's API.
+
+### Want to show where to find your theme?
+
+Use our new badge in your README to show people where to find your theme!
+<a href="https://discord-themes.com">
+<img src="https://discord-themes.com/badge.png" alt="Description" width="125" />
+</a>
+
+```html
+<a href="https://discord-themes.com/theme/1">
+  <img src="https://discord-themes.com/badge.png" alt="Description" width="125" />
+</a>
+```
+---
+
 This API is used to retrieve themes used for the [Theme Library](https://github.com/faf4a/ThemeLibrary) and [this website](https://discord-themes.com).
 
 This website is built with React.
