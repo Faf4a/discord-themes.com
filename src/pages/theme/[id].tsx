@@ -54,11 +54,11 @@ export default function ThemePage({
 		if (!id) return;
 
 		if (validTheme) {
-			router.replace(`/${validTheme.id}`);
+			router.replace(`/theme/${validTheme.id}`);
 		} else if (!theme) {
 			router.replace("/");
 		}
-	}, [id, theme, themeByName, router]);
+	}, [id, theme, validTheme, router]);
 
   // prevent site crashing during redirect
 	if (!theme) {
