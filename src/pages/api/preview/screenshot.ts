@@ -50,7 +50,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         page = await browser.newPage();
 
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.goto(`${SERVER}/api/preview?hideToolbar=true&url=${decodeURIComponent(url)}`, { waitUntil: "load", timeout: 30000 });
+        await page.goto(`https://worker-name.fafakitty.workers.dev/?css=${decodeURIComponent(url)}`, { waitUntil: "load", timeout: 30000 });
 
         const screenshot = await page.screenshot({ type: "png" });
 
