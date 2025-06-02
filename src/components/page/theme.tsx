@@ -213,7 +213,7 @@ function App({ themes }: { themes: Theme[] }) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
                         <div className="md:col-span-2">
-                            <SearchBar onSearch={setSearchQuery} className="h-[280px]" />
+                            <SearchBar onSearch={setSearchQuery} />
                         </div>
                         <div className="md:col-span-1">
                             <FilterDropdown options={allFilters} onChange={setFilters} />
