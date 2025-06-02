@@ -69,6 +69,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         const submission = {
             ...req.body,
             themeContent,
+            fileUrl: req.body.file ? req.body.file.replace(/^data:image\/\w+;base64,/, "") : "https://cdn.discord-themes.com/not-found.png",
+            file: req.body.file ? req.body.file : "https://cdn.discord-themes.com/not-found.png",
             submittedAt: new Date(),
             submittedBy: user.id,
             state: "pending"
