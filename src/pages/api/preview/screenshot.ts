@@ -28,7 +28,9 @@ async function getBrowser() {
     } else {
         const { default: puppeteer } = await import("puppeteer");
         cachedBrowser = await puppeteer.launch({
-            args: PUPPETEER_LAUNCH_ARGS
+            args: PUPPETEER_LAUNCH_ARGS,
+            headless: false,
+            devtools: true
         });
     }
 
@@ -49,8 +51,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         browser = await getBrowser();
         page = await browser.newPage();
 
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
+        await page.setCookie({
+            name: "consent",
+            value: "true",
+            domain: ".fafakitty.workers.dev",
+            path: "/"
+        });
+
         await page.setViewport({ width: 1920, height: 1080 });
-        await page.goto(`https://worker-name.fafakitty.workers.dev/?css=${decodeURIComponent(url)}`, { waitUntil: "load", timeout: 30000 });
+        await page.goto(`https://worker-name.fafakitty.workers.dev/?css=${encodeURIComponent(url)}`, {
+            waitUntil: "networkidle0",
+            timeout: 30000
+        });
+
+        await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 21500)));
 
         const screenshot = await page.screenshot({ type: "png" });
 
