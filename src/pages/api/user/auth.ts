@@ -93,7 +93,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             client_secret: process.env.AUTH_DISCORD_SECRET,
             code: code as string,
             grant_type: "authorization_code",
-            redirect_uri: process.env.NODE_ENV === "production" ? (!callback ? "https://discord-themes.com/api/user/auth" : "https://discord-themes.com/api/user/auth?callback=/auth/callback") : "https://literate-engine-rv7579wprjq2px77-4321.app.github.dev/api/user/auth?callback=/auth/callback",
+            redirect_uri: process.env.NODE_ENV === "production" ? (!callback ? "https://discord-themes.com/api/user/auth" : "https://discord-themes.com/api/user/auth?callback=/auth/callback") : "http://localhost:4321/api/user/auth?callback=/auth/callback",
             scope: "identify,connections"
         }).toString()
     });

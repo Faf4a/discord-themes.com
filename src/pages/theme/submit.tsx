@@ -95,6 +95,12 @@ export default function SubmitPage() {
     }
 
     const nextStep = () => {
+        if (errors.file) {
+            setShakeError(true);
+            setTimeout(() => setShakeError(false), 500);
+            return;
+        }
+
         const stepErrors = validateStep(step, formData);
         if (Object.keys(stepErrors).length > 0) {
             setErrors(stepErrors);
@@ -191,6 +197,7 @@ export default function SubmitPage() {
             setShowPreviewModal(false);
         } catch (error) {
             console.error("Failed to fetch preview:", error);
+            setErrors((prevErrors) => ({ ...prevErrors, file: "Failed to generate preview. Please try again." }));
         } finally {
             setIsLoadingPreview(false);
         }

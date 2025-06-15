@@ -44,7 +44,7 @@ export function FilterDropdown({ options, onChange, className, label = "Filter" 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline" role="combobox" aria-expanded={open} aria-label={`Select ${label.toLowerCase()}`} className={cn("w-full sm:w-[240px] justify-between min-h-[44px]", className)}>
+                <Button variant="outline" role="combobox" aria-expanded={open} aria-label={`Select ${label.toLowerCase()}`} className={cn("w-full justify-between min-h-[44px]", className)}>
                     <span className="flex items-center gap-2 max-w-full overflow-hidden text-ellipsis">
                         {selectedValues.length > 0 ? (
                             <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">

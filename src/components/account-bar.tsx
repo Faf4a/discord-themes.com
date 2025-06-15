@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
-import { LogOutIcon, Settings, Shield, UserIcon } from "lucide-react";
+import { LogOutIcon, Settings, Shield, UserIcon, Lock } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
 import { deleteCookie, getCookie } from "@utils/cookies";
@@ -75,6 +75,7 @@ export function AccountBar({ className }: AccountBarProps) {
                         </DropdownMenuItem>
                         {(user as UserData).admin && (
                             <DropdownMenuItem onClick={() => (window.location.href = "/admin")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                                <Lock className="h-4 w-4" />
                                 Admin Panel
                             </DropdownMenuItem>
                         )}

@@ -44,12 +44,10 @@ export function DropdownFilter({ onChange, className, defaultValue = "", label =
         setValue("");
         onChange("");
         setSearchQuery("");
-        // Announce to screen readers that the selection has been cleared
         const announcement = document.getElementById(`${filterId}-announcement`);
         if (announcement) {
             announcement.textContent = "Selection cleared";
         }
-        // Return focus to trigger button
         triggerRef.current?.focus();
     };
 
@@ -60,7 +58,6 @@ export function DropdownFilter({ onChange, className, defaultValue = "", label =
         onChange(newValue);
         setSearchQuery("");
 
-        // Announce selection change to screen readers
         const selectedLabel = filterOptions.find((option) => option.value === newValue)?.label || "No selection";
         const announcement = document.getElementById(`${filterId}-announcement`);
         if (announcement) {
@@ -68,7 +65,6 @@ export function DropdownFilter({ onChange, className, defaultValue = "", label =
         }
     };
 
-    // Handle keyboard navigation
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (open && e.key === "Escape") {
@@ -83,12 +79,11 @@ export function DropdownFilter({ onChange, className, defaultValue = "", label =
 
     return (
         <div className={cn("flex flex-col gap-1.5", className)}>
-            {/* Visually hidden live region for screen reader announcements */}
             <div id={`${filterId}-announcement`} aria-live="polite" className="sr-only" />
 
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <Button ref={triggerRef} id={`${filterId}-trigger`} variant="outline" role="combobox" aria-expanded={open} aria-haspopup="listbox" aria-controls={`${filterId}-listbox`} aria-label={label} aria-describedby={`${filterId}-description`} className="w-full sm:w-[240px] justify-between hover:bg-muted focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px] touch-manipulation">
+                    <Button ref={triggerRef} id={`${filterId}-trigger`} variant="outline" role="combobox" aria-expanded={open} aria-haspopup="listbox" aria-controls={`${filterId}-listbox`} aria-label={label} aria-describedby={`${filterId}-description`} className="w-full justify-between hover:bg-muted focus-visible:ring-2 focus-visible:ring-offset-2 min-h-[44px] touch-manipulation">
                         <span className="flex items-center gap-2 truncate">
                             {value ? (
                                 <>

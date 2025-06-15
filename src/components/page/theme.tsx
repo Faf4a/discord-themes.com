@@ -5,7 +5,7 @@ import { SearchBar } from "@components/search-bar";
 import { ThemeGrid } from "@components/theme/grid";
 import { Button } from "@components/ui/button";
 import { FilterDropdown } from "@components/ui/filter-dropdown";
-import { ArrowUp, Plus, SearchX, Info } from "lucide-react";
+import { ArrowUp, Plus, SearchX, Info, ExternalLinkIcon } from "lucide-react";
 import { getCookie } from "@utils/cookies";
 import { type UserData } from "@types";
 import { useWebContext } from "@context/auth";
@@ -14,6 +14,7 @@ import { DropdownFilter } from "@components/ui/dropdown-filter";
 import { Alert, AlertDescription, AlertTitle } from "@components/ui/alert";
 import { type Theme } from "@types";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs";
+import { DiscordIcon } from "@utils/icons";
 
 const Skeleton = ({ className = "", ...props }) => <div className={`animate-pulse bg-muted/30 rounded ${className}`} {...props} />;
 
@@ -197,8 +198,9 @@ function App({ themes }: { themes: Theme[] }) {
                 </div>
                 <div className="mb-3 mt-8">
                     <div className="flex justify-end mb-3">
-                        <Button variant="outline" className="mr-4 hidden md:block" onClick={() => window.open("/plugin")}>
+                        <Button variant="outline" className="mr-4 hidden md:flex md:items-center" onClick={() => window.open("https://docs.vencord.dev/installing/", "_blank")}>
                             Install ThemeLibrary for Vencord
+                            <ExternalLinkIcon className="ml-2 h-4 w-4" />
                         </Button>
                         <Button disabled={isLoading} onClick={handleSubmit} className="rounded-lg font-medium bg-[#4a63b4] hover:bg-[#3f58a3] text-white">
                             {isValid ? (
@@ -207,11 +209,14 @@ function App({ themes }: { themes: Theme[] }) {
                                     Submit Theme
                                 </>
                             ) : (
-                                "Connect via Discord"
+                                <>
+                                    Connect via Discord
+                                    <DiscordIcon className="ml-2 h-4 w-4 fill-white" />
+                                </>
                             )}
                         </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 items-start">
                         <div className="md:col-span-2">
                             <SearchBar onSearch={setSearchQuery} />
                         </div>
@@ -225,7 +230,7 @@ function App({ themes }: { themes: Theme[] }) {
                 </div>
 
                 <Tabs defaultValue="themes" className="w-full mt-6">
-                    <div className="w-full border-b border-border mb-4">
+                    <div className="w-full h-4 border-b border-border mb-8">
                         <TabsList className="w-full flex justify-start gap-2">
                             <TabsTrigger value="themes" className="flex-1">
                                 Themes
