@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
-import { LogOutIcon, Settings, Shield, UserIcon, Lock } from "lucide-react";
+import { LogOutIcon, Settings, Shield, UserIcon, Lock, Columns3Icon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@components/ui/dropdown-menu";
 import { cn } from "@lib/utils";
 import { deleteCookie, getCookie } from "@utils/cookies";
@@ -79,11 +79,16 @@ export function AccountBar({ className }: AccountBarProps) {
                                 Admin Panel
                             </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem onClick={() => (window.location.href = "/users/@me/submissions")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
+                            <Columns3Icon className="h-4 w-4" />
+                            My Submissions
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem onClick={() => (window.location.href = "/users/@me/settings")} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-md transition-colors">
                             <Settings className="h-4 w-4" />
                             Settings
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-destructive hover:bg-destructive/10 rounded-md transition-colors">
+                        <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-red-700 hover:bg-red-600 rounded-md transition-colors">
                             <LogOutIcon className="h-4 w-4" />
                             Logout
                         </DropdownMenuItem>

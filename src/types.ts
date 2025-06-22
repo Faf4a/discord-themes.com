@@ -7,6 +7,9 @@ export interface UserData {
     username: User["username"];
     preferredColor?: User["accent_color"];
     admin?: boolean;
+    socials?: { github?: string; }
+    donationLink?: string;
+    websiteLink?: string;
 }
 
 export interface Author {

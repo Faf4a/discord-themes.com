@@ -9,7 +9,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { authorization } = req.headers;
-    const { id } = req.query;
+    const { id, reason } = req.query;
 
     if (!authorization) {
         return res.status(400).json({ message: "Cannot check authorization without unique token" });
@@ -65,6 +65,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             {
                 $set: {
                     state: "rejected",
+                    reason: reason || "No reason provided",
                     moderator: {
                         discord_snowflake: user.id,
                         discord_name: user.global_name || "",
@@ -72,8 +73,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                     }
                 },
                 $unset: {
-                    file: "",
-                    fileUrl: "",
                     contributors: "",
                     submittedBy: ""
                 }

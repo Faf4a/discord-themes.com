@@ -1,6 +1,33 @@
 import clientPromise from "@utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { isAuthed } from "@utils/auth";
+export interface ValidatedUser {
+	id: string;
+	username: string;
+	avatar: string;
+}
+
+export interface SubmittedAt {
+	$date: string;
+}
+
+export interface Moderator {
+	discord_snowflake: string;
+	discord_name: string;
+	avatar_url: string;
+}
+
+export interface RootObject {
+	title: string;
+	description: string;
+	sourceLink: string;
+	validatedUsers: { [key: string]: ValidatedUser };
+	themeContent: string;
+	submittedAt: SubmittedAt;
+    reason: string;
+	state: string;
+	moderator: Moderator;
+}
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== "GET") {
@@ -29,11 +56,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return res.status(401).json({ status: 401, message: "Given token is not authorized" });
     }
 
-    if (!user.admin) {
-        return res.status(401).json({ status: 401, message: "Given token is not permitted to access this resource" });
-    }
+    let themes = await themesCollection.find({}).toArray();
 
-    const themes = await themesCollection.find({}).toArray();
+    if (!user.admin) {
+        themes = themes.filter((theme) => theme.user === user.username);
+    }
 
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Cache-Control", "no-store");

@@ -354,36 +354,26 @@ export default function Component({ id, theme }: { id?: string; theme: Theme }) 
                                             </div>
                                         </div>
 
-                                        <div className={`relative rounded-lg overflow-hidden max-w-[900px] codeFont font-mono transition-all duration-500 ${isMobile && !isExpanded ? "max-h-[200px] fade-out" : "max-h-full"}`}>
+                                        <div className="codeblock rounded-lg border border-muted bg-muted/30 p-4 relative">
                                             <SyntaxHighlighter
                                                 language="css"
                                                 style={vscDarkPlus}
-                                                wrapLines={true}
-                                                showLineNumbers={true}
                                                 customStyle={{
-                                                    margin: 0,
+                                                    maxWidth: 900,
+                                                    maxHeight: 400,
                                                     borderRadius: "0.5rem",
-                                                    maxHeight: isMobile && !isExpanded ? "200px" : "none",
-                                                    fontFamily: "'Fira Code', monospace !important"
+                                                    fontSize: "1.05em",
+                                                    background: "transparent",
+                                                    margin: 0,
+                                                    padding: 0,
+                                                    fontFamily: '"Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
                                                 }}
-                                                codeTagProps={{
-                                                    style: {
-                                                        fontFamily: "monospace"
-                                                    }
-                                                }}
+                                                codeTagProps={{ style: { fontFamily: "inherit" } }}
+                                                wrapLongLines={true}
                                             >
                                                 {decodeThemeContent(theme.content)}
                                             </SyntaxHighlighter>
-                                            {isMobile && !isExpanded && <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-card to-transparent"></div>}
                                         </div>
-
-                                        {isMobile && (
-                                            <div className="rounded-lg border-b border-border/40 p-4">
-                                                <Button variant="outline" className="w-full" size="sm" onClick={() => setIsExpanded(!isExpanded)}>
-                                                    {isExpanded ? "Collapse" : "Expand"}
-                                                </Button>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             )}

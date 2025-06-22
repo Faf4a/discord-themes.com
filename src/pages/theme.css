@@ -41,7 +41,7 @@
     --context-menu-border: 220 7% 30%;
 }
 
-* {
+*:not(code, pre, .codeblock *) {
     font-family:
         "Poppins",
         -apple-system,
@@ -166,20 +166,7 @@ body {
     @apply divide-border;
 }
 
-code,
-kbd,
-samp,
-pre,
-.codeFont,
-code[class*="language-"],
-pre[class*="language-"] {
-    font-family: "Fira Code", monospace !important;
-    background-color: hsl(var(--secondary));
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.3rem;
-}
-
-pre {
-    padding: 1rem;
-    overflow-x: auto;
+.language-css * {
+    font-size: 0.8rem !important;
+    line-height: 1.5 !important;
 }

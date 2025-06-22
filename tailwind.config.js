@@ -2,9 +2,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
     darkMode: ["class"],
-    content: [
-        "./src/**/*.{js,ts,jsx,tsx}" // Adjust the paths according to your project structure
-    ],
+    content: ["./src/**/*.{js,ts,jsx,tsx}"],
+    safelist: ["bg-destructive", "hover:bg-destructive", "text-destructive", "hover:text-destructive", "bg-destructive/10", "hover:bg-destructive/10"],
     theme: {
         extend: {
             borderRadius: {
@@ -56,11 +55,11 @@ export default {
             },
             keyframes: {
                 "confetti-fall": {
-                    "0%": { 
+                    "0%": {
                         transform: "translateY(-10px) rotate(0deg)",
                         opacity: "1"
                     },
-                    "100%": { 
+                    "100%": {
                         transform: "translateY(100vh) rotate(720deg)",
                         opacity: "0"
                     }

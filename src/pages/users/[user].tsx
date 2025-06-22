@@ -31,7 +31,6 @@ interface ThemesResponse {
 }
 
 interface UserActivity {
-    joinDate: Date;
     popularThemes: Theme[];
 }
 
@@ -63,7 +62,7 @@ export default function User() {
     }, []);
 
     const fetchThemes = useCallback(async () => {
-        if (!user || loading) return;
+        if (!user) return;
         try {
             const headers: Record<string, string> = { "Content-Type": "application/json" };
             if (userToken) {
@@ -88,7 +87,7 @@ export default function User() {
         } finally {
             setLoading(false);
         }
-    }, [user, userToken, loading]);
+    }, [user, userToken]);
 
     const fetchLikedThemes = useCallback(async () => {
         if (!userToken || !(user === "@me" || user === authorizedUser?.id) || loading || isLoading) return;
@@ -125,7 +124,7 @@ export default function User() {
         setDisplayCount(THEMES_PER_PAGE);
         setHasMore(true);
         setLoading(false);
-    }, [fetchThemes]);
+    }, [user, userToken, fetchThemes]);
 
     const debounce = (func: Function, wait: number) => {
         let timeout: any;
@@ -193,12 +192,9 @@ export default function User() {
 
     const generateUserActivity = useCallback(() => {
         if (!userThemes.themes.length) return null;
-
-        const joinDate = new Date(userThemes.user.joinedAt) || null;
         const popularThemes = [...userThemes.themes].sort((a, b) => (b.downloads || 0) - (a.downloads || 0)).slice(0, 3);
 
         return {
-            joinDate,
             popularThemes
         };
     }, [userThemes]);
@@ -214,25 +210,6 @@ export default function User() {
         <div className="space-y-6 w-full mt-6">
             {userActivity && (
                 <div className="space-y-4">
-                    <div className="space-y-3">
-                        <div className="grid grid-cols-1 gap-3">
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm">Member since</span>
-                                </div>
-                                <span className="text-sm font-medium">
-                                    {userActivity.joinDate.toLocaleDateString("en-US", {
-                                        month: "long",
-                                        year: "numeric"
-                                    })}
-                                </span>
-                            </div>
-
-
-                        </div>
-                    </div>
-
                     {userActivity.popularThemes.length > 0 && (
                         <>
                             <Separator />

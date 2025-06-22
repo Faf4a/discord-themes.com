@@ -221,7 +221,7 @@ function App({ themes }: { themes: Theme[] }) {
                             <SearchBar onSearch={setSearchQuery} />
                         </div>
                         <div className="md:col-span-1">
-                            <FilterDropdown options={allFilters} onChange={setFilters} />
+                            <FilterDropdown className={"hover:bg-muted"} options={allFilters} onChange={setFilters} />
                         </div>
                         <div className="md:col-span-1">
                             <DropdownFilter onChange={setSort} />
@@ -230,8 +230,8 @@ function App({ themes }: { themes: Theme[] }) {
                 </div>
 
                 <Tabs defaultValue="themes" className="w-full mt-6">
-                    <div className="w-full h-4 border-b border-border mb-8">
-                        <TabsList className="w-full flex justify-start gap-2">
+                    <div className="w-full min-h-[44px] h-4 mb-8">
+                        <TabsList className="bg-card w-full min-h-[44px] flex justify-start gap-2">
                             <TabsTrigger value="themes" className="flex-1">
                                 Themes
                             </TabsTrigger>
@@ -257,12 +257,12 @@ function App({ themes }: { themes: Theme[] }) {
                     <TabsContent value="snippets">
                         <div className="mb-4 text-sm text-muted-foreground"></div>
 
-                        <Alert className="bg-muted text-muted-foreground border border-border rounded-2xl shadow-sm mb-4">
+                        <Alert className="bg-card text-muted-foreground border border-border rounded-2xl shadow-sm mb-4">
                             <div className="flex items-start gap-3">
-                                <Info className="mt-1 h-5 w-5 text-white" />
-                                <div>
+                                <Info className="mt-4 h-5 w-5 text-white" />
+                                <div className="description mb-2">
                                     <AlertTitle className="font-semibold text-foreground">Heads up!</AlertTitle>
-                                    <AlertDescription>Most snippets are made specifically for Vencord and may not work with other client mods.</AlertDescription>
+                                    <AlertDescription>Most snippets are made specifically for <a href="https://vencord.dev">Vencord</a> and may not work with other client mods.</AlertDescription>
                                 </div>
                             </div>
                         </Alert>

@@ -69,8 +69,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         const submission = {
             ...req.body,
             themeContent,
-            fileUrl: req.body.file ? req.body.file.replace(/^data:image\/\w+;base64,/, "") : "https://cdn.discord-themes.com/not-found.png",
-            file: req.body.file ? req.body.file : "https://cdn.discord-themes.com/not-found.png",
+            fileUrl: req.body.file && req.body.file.startsWith('data:image') ? req.body.file : (req.body.fileUrl || "https://cdn.discord-themes.com/not-found.png"),
+            file: req.body.file && req.body.file.startsWith('data:image') ? req.body.file : (req.body.fileUrl || "https://cdn.discord-themes.com/not-found.png"),
             submittedAt: new Date(),
             submittedBy: user.id,
             state: "pending"
@@ -78,6 +78,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         const item = await themesCollection.insertOne(submission);
         const id = item.insertedId;
+
+        console.log(item);
+        console.log(req.body);
 
         try {
             const webhookBody = {

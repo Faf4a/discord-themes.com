@@ -220,7 +220,7 @@ export function ThemeCard({ theme, likedThemes, className, noFooter = false, dis
                         {!noFooter && (
                             <CardFooter className="p-4 pt-0 mt-auto">
                                 <div className="flex justify-between items-center w-full">
-                                    <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
+                                    <Button variant="ghost" size="sm" className="gap-1.5 hover:bg-muted text-muted-foreground">
                                         <div className={cn("flex items-center", isLiked && "text-primary")}>
                                             <Heart className={cn("h-4 w-4 mr-2", isLiked && "fill-current")} />
                                             <span>{theme.likes}</span>

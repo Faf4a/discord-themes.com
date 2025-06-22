@@ -22,6 +22,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     res.setHeader("Content-Type", "application/json");
 
+    console.log("User:", user);
+
     if (!user) {
         res.status(500).json({ status: 401, authenticated: false });
     } else {

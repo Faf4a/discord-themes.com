@@ -47,7 +47,7 @@
     "**/*.ts",
     "**/*.tsx",
     "next.config.js"
-  ],
+, "src/pages/_document.tsx"  ],
   "exclude": [
     "node_modules"
   ]

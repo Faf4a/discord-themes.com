@@ -76,8 +76,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
                     }
                 },
                 $unset: {
-                    file: "",
-                    fileUrl: "",
                     contributors: "",
                     submittedBy: ""
                 }

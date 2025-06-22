@@ -29,8 +29,7 @@ async function getBrowser() {
         const { default: puppeteer } = await import("puppeteer");
         cachedBrowser = await puppeteer.launch({
             args: PUPPETEER_LAUNCH_ARGS,
-            headless: false,
-            devtools: true
+            headless: true,
         });
     }
 

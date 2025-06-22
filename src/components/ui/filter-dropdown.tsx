@@ -51,13 +51,13 @@ export function FilterDropdown({ options, onChange, className, label = "Filter" 
                                 {selectedValues.slice(0, 2).map((value) => {
                                     const option = options.find((opt) => opt.value === value);
                                     return (
-                                        <Badge key={value} variant="secondary" className="font-normal truncate text-ellipsis">
+                                        <Badge key={value} className="font-normal truncate text-ellipsis">
                                             {option?.label || value}
                                         </Badge>
                                     );
                                 })}
                                 {selectedValues.length > 2 && (
-                                    <Badge variant="secondary" className="font-normal">
+                                    <Badge className="font-normal">
                                         +{selectedValues.length - 2}
                                     </Badge>
                                 )}
@@ -81,7 +81,7 @@ export function FilterDropdown({ options, onChange, className, label = "Filter" 
                             {options.map((option) => (
                                 <CommandItem key={option.value} value={option.value} onSelect={() => toggleOption(option.value)} className="flex items-center gap-2 px-2 py-2 cursor-pointer">
                                     <div className="flex items-center gap-2 flex-1">
-                                        <div className={`flex h-5 w-5 items-center justify-center rounded-md border ${selectedValues.includes(option.value) ? "bg-primary border-primary" : "border-muted"}`}>{selectedValues.includes(option.value) && <Check className="h-3.5 w-3.5 text-primary-foreground" />}</div>
+                                        <div className={`flex h-5 w-5 items-center justify-center rounded-md border ${selectedValues.includes(option.value) ? "border-gray-600 bg-gray-100" : "border-muted"}`}>{selectedValues.includes(option.value) && <Check className="h-3.5 w-3.5 text-gray-600" />}</div>
                                         <div className="flex items-center justify-between w-full">
                                             <span className="font-medium">{option.label}</span>
                                             {option.count !== undefined && <span className="text-xs text-muted-foreground ml-2">{option.count}</span>}
